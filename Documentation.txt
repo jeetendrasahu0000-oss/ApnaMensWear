@@ -1,0 +1,189 @@
+src/
+│
+├── app.jsx
+│
+├── api/
+│   └── axios.js
+│   └── intercepter.js.js
+│
+├── layouts/
+│   ├── MainLayout.jsx
+│   └── AdminLayout.jsx
+│
+├── pages/
+│   ├── Home
+│        └── Header
+│              └── Header.jsx
+│              └── Header.module.css
+│        └── Footer
+│        └── Banner
+│        └── Ads
+│   ├── Auth
+│         ├── Login.jsx
+│         ├── Signup.jsx
+├── Admin
+│        └── AddProduct
+│              └── Header.jsx
+│              └── Header.module.css
+│        └── Footer
+│        └── Banner
+│        └── Ads
+│   
+│
+├── components/
+│        └── NotFound.jsx
+│        └── AddTOCart.jsx
+│        └── EditProduct.jsx
+
+
+
+
+
+
+=================================================================
+=================================================================
+=================================================================
+
+
+
+
+
+
+
+src/
+│
+├── app/
+│   ├── App.jsx
+│   ├── router.jsx
+│   └── providers.jsx
+│
+├── api/
+│   ├── axios.js
+│   ├── auth.api.js
+│   ├── product.api.js
+│   ├── order.api.js
+│   └── user.api.js
+│
+├── assets/
+│   ├── images/
+│   ├── icons/
+│   └── fonts/
+│
+├── shared/
+│   │
+│   ├── components/
+│   │   ├── Navbar/
+│   │   ├── Footer/
+│   │   ├── Loader/
+│   │   ├── Button/
+│   │   ├── Modal/
+│   │   ├── Input/
+│   │   ├── Pagination/
+│   │   └── SearchBar/
+│   │
+│   ├── layouts/
+│   │   ├── MainLayout.jsx
+│   │   └── AdminLayout.jsx
+│   │
+│   ├── hooks/
+│   │   ├── useDebounce.js
+│   │   └── usePagination.js
+│   │
+│   ├── utils/
+│   │   ├── formatPrice.js
+│   │   ├── generateSlug.js
+│   │   └── validators.js
+│   │
+│   └── constants/
+│       ├── routes.js
+│       └── roles.js
+│
+├── features/
+│
+│   ├── auth/
+│   │   │
+│   │   ├── pages/
+│   │   │   ├── Login.jsx
+│   │   │   ├── Signup.jsx
+│   │   │   └── ForgotPassword.jsx
+│   │   │
+│   │   ├── components/
+│   │   │   ├── LoginForm.jsx
+│   │   │   └── SignupForm.jsx
+│   │   │
+│   │   ├── hooks/
+│   │   │   └── useAuth.js
+│   │   │
+│   │   ├── services/
+│   │   │   └── auth.service.js
+│   │   │
+│   │   ├── context/
+│   │   │   └── AuthContext.jsx
+│   │   │
+│   │   └── routes/
+│   │       ├── ProtectedRoute.jsx
+│   │       └── GuestRoute.jsx
+│   │
+│   ├── product/
+│   │   │
+│   │   ├── pages/
+│   │   │   ├── Products.jsx
+│   │   │   └── ProductDetails.jsx
+│   │   │
+│   │   ├── components/
+│   │   │   ├── ProductCard.jsx
+│   │   │   ├── ProductGrid.jsx
+│   │   │   ├── ProductFilter.jsx
+│   │   │   └── ProductSearch.jsx
+│   │   │
+│   │   ├── hooks/
+│   │   │   └── useProducts.js
+│   │   │
+│   │   └── services/
+│   │       └── product.service.js
+│   │
+│   ├── admin/
+│   │   │
+│   │   ├── pages/
+│   │   │   ├── Dashboard.jsx
+│   │   │   ├── Products.jsx
+│   │   │   ├── AddProduct.jsx
+│   │   │   └── EditProduct.jsx
+│   │   │
+│   │   ├── components/
+│   │   │   ├── Sidebar.jsx
+│   │   │   ├── Topbar.jsx
+│   │   │   ├── ProductTable.jsx
+│   │   │   └── ProductForm.jsx
+│   │   │
+│   │   ├── hooks/
+│   │   │   └── useAdminProducts.js
+│   │   │
+│   │   └── services/
+│   │       └── admin.service.js
+│   │
+│   ├── cart/
+│   │   ├── pages/
+│   │   ├── components/
+│   │   ├── hooks/
+│   │   └── services/
+│   │
+│   ├── order/
+│   │   ├── pages/
+│   │   ├── components/
+│   │   ├── hooks/
+│   │   └── services/
+│   │
+│   ├── payment/
+│   │   ├── pages/
+│   │   ├── components/
+│   │   └── services/
+│   │
+│   └── profile/
+│       ├── pages/
+│       ├── components/
+│       └── services/
+│
+└── styles/
+    ├── globals.css
+    └── variables.css
