@@ -1,0 +1,557 @@
+// import styles from "./SignupLogin.module.css";
+
+// function Signup() {
+//   return (
+//     <div></div>
+//   );
+// }
+
+// export default Signup;
+
+
+
+import { useState } from "react";
+import api from '../../Api/Axios'
+import styles from "./SignupLogin.module.css";
+import { Eye, EyeOff, X } from "lucide-react";
+import { FaFacebookF } from "react-icons/fa";
+
+console.log('api =>',api)
+console.log(api.defaults.baseURL);
+function SignupLogin({ close }) {
+
+
+  const [mode, setMode] = useState("login");
+  const [showPassword, setShowPassword] = useState(false);
+  const [errors, setErrors] = useState({});
+
+  const [form, setForm] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    password: "",
+    country: "",
+    state: "",
+    city: "",
+    pinCode: "",
+    addressLine1: "",
+    addressLine2: "",
+  });
+
+  const [login, setLogin] = useState({
+    identifier: "",
+    password: "",
+  });
+
+  
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    if (mode === "signup") {
+      setForm({ ...form, [name]: value });
+    } 
+    else {
+      setLogin({ ...login, [name]: value });
+    }
+
+  };
+
+  const submit = async () => {
+    try {
+
+      if (mode === "signup") {
+        const payload = {
+          firstName: form.firstName,
+          lastName: form.lastName,
+          email: form.email,
+          phone: Number(form.phone),
+          password: form.password,
+
+          address: {
+            country: form.country,
+            state: form.state,
+            city: form.city,
+            pinCode: Number(form.pinCode),
+            addressLine1: form.addressLine1,
+            addressLine2: form.addressLine2,
+          },
+
+          profileImage:
+            "https://images.unsplash.com/photo-1483985988355-763728e1935b",
+        };
+
+        console.log('call api')
+        const response = await api.post("/v1/user/signup", payload);
+        console.log('response => ',response)
+
+      } 
+      else {
+        await api.post("/v1/user/login", {
+          identifier: login.identifier,
+          password: login.password,
+        });
+      }
+
+      alert("Success");
+
+      close?.();
+    } 
+    catch (error) {
+      console.log(error.response);
+    }
+  };
+
+
+
+  return (
+    <div className={styles.overlay}>
+      <div className={styles.modal}>
+        <button className={styles.close} onClick={close}>
+          <X />
+        </button>
+
+         
+
+        <div className={styles.imageBox}>
+          <img
+            src="https://i.pinimg.com/736x/20/1e/7c/201e7cefd94fd8cf912ff4b3acefa5db.jpg"
+            alt="fashion"
+          />
+        </div>
+
+        <div className={styles.formSection}>
+          <div className={styles.toggle}>
+            <button
+              className={mode === "login" ? styles.active : ""}
+              onClick={() => setMode("login")}
+            >
+              Login
+            </button>
+
+            <button
+              className={mode === "signup" ? styles.active : ""}
+              onClick={() => setMode("signup")}
+            >
+              Signup
+            </button>
+          </div>
+
+          <h1>{mode === "signup" ? "Create account" : "Welcome back"}</h1>
+
+          
+
+          {mode === "signup" ? (
+            <div className={styles.grid}>
+              <Field
+                name="firstName"
+                label="First name"
+                value={form.firstName}
+                onChange={handleChange}
+              />
+
+              <Field
+                name="lastName"
+                label="Last name"
+                value={form.lastName}
+                onChange={handleChange}
+              />
+
+              <Field
+                name="email"
+                label="Email"
+                value={form.email}
+                onChange={handleChange}
+              />
+
+              <Field
+                name="phone"
+                label="Phone"
+                value={form.phone}
+                onChange={handleChange}
+              />
+
+              <PasswordField
+                value={form.password}
+                name="password"
+                label="Password"
+                onChange={handleChange}
+                show={showPassword}
+                setShow={setShowPassword}
+              />
+
+              <Field
+                name="country"
+                label="Country"
+                value={form.country}
+                onChange={handleChange}
+              />
+
+              <Field
+                name="state"
+                label="State"
+                value={form.state}
+                onChange={handleChange}
+              />
+
+              <Field
+                name="city"
+                label="City"
+                value={form.city}
+                onChange={handleChange}
+              />
+
+              <Field
+                name="pinCode"
+                label="Pin Code"
+                value={form.pinCode}
+                onChange={handleChange}
+              />
+
+              <Field
+                name="addressLine1"
+                label="Address Line 1"
+                value={form.addressLine1}
+                onChange={handleChange}
+              />
+
+              <Field
+                name="addressLine2"
+                label="Address Line 2"
+                value={form.addressLine2}
+                onChange={handleChange}
+              />
+            </div>
+          ) : (
+            <>
+              <Field
+                name="identifier"
+                label="Email or Phone"
+                value={login.identifier}
+                onChange={handleChange}
+              />
+
+              <PasswordField
+                value={login.password}
+                name="password"
+                label="Password"
+                onChange={handleChange}
+                show={showPassword}
+                setShow={setShowPassword}
+              />
+            </>
+          )}
+
+
+
+
+          <button className={styles.submit} onClick={submit}>
+            {mode === "signup" ? "Create account" : "Login"}
+          </button>
+
+          <div className={styles.social}>
+            <button>🌈 Continue with Google</button>
+            <button> <FaFacebookF /> Continue with Facebook</button>
+          </div>
+
+         
+
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Field({ name, label, value, onChange }) {
+  return (
+    <div className={styles.field}>
+      <input name={name} value={value} onChange={onChange} placeholder=" " />
+      <label>{label}</label>
+    </div>
+  );
+}
+
+function PasswordField({ name, label, value, onChange, show, setShow }) {
+  return (
+    <div className={styles.password}>
+      <Field name={name} label={label} value={value} onChange={onChange} />
+
+      <span onClick={() => setShow(!show)}>{show ? <EyeOff /> : <Eye />}</span>
+    </div>
+  );
+}
+
+export default SignupLogin;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.overlay {
+  position: fixed;
+  inset: 0;
+
+  background: rgba(0, 0, 0, 0.45);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  z-index: 2000;
+
+  backdrop-filter: blur(5px);
+}
+
+.modal {
+  width: 1000px;
+  max-height: 80vh;
+  background: #f8f4ef;
+  border-radius: 15px;
+  display: flex;
+
+  overflow: hidden;
+
+  position: relative;
+
+  animation: popup 0.35s ease;
+}
+
+@keyframes popup {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.close {
+  position: absolute;
+
+  right: 10px;
+  top: 10px;
+
+  border: 0;
+  background:transparent;
+
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+
+  cursor: pointer;
+
+  z-index: 5;
+}
+
+.imageBox {
+  width: 50%;
+  /* display: flex;
+  justify-content: center;
+  align-items: center; */
+
+}
+
+.imageBox img {
+  /* width: 80%;
+  height: 80%; */
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.formSection {
+  width: 50%;
+
+  padding: 45px;
+
+  overflow-y: auto;
+}
+
+.toggle {
+  display: flex;
+
+  background: #ddd;
+
+  border-radius: 30px;
+
+  padding: 5px;
+}
+
+.toggle button {
+  flex: 1;
+
+  padding: 12px;
+
+  border: 0;
+
+  border-radius: 25px;
+
+  background: none;
+}
+
+.active {
+  background: #111 !important;
+  color: white;
+}
+
+h1 {
+  font-size: 40px;
+
+  margin: 30px 0;
+}
+
+.grid {
+  display: grid;
+
+  grid-template-columns: 1fr 1fr;
+
+  gap: 15px;
+}
+
+.field {
+  position: relative;
+
+  margin-bottom: 20px;
+}
+
+.field input {
+  width: 100%;
+
+  padding: 17px;
+
+  border-radius: 15px;
+
+  border: 1px solid #ddd;
+}
+
+.field label {
+  position: absolute;
+
+  left: 15px;
+
+  top: 17px;
+
+  color: #777;
+
+  transition: 0.2s;
+}
+
+.field input:focus + label,
+.field input:not(:placeholder-shown) + label {
+  top: -9px;
+
+  font-size: 12px;
+
+  background: white;
+
+  padding: 0 5px;
+}
+
+.password {
+  position: relative;
+}
+
+.password span {
+  position: absolute;
+
+  right: 15px;
+
+  top: 17px;
+
+  cursor: pointer;
+}
+
+.submit {
+  width: 100%;
+
+  padding: 16px;
+
+  border-radius: 30px;
+
+  border: 0;
+
+  background: #111;
+
+  color: white;
+
+  margin-top: 10px;
+}
+
+.social {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 12px;
+
+  margin-top: 20px;
+}
+
+.social button {
+  padding: 15px;
+
+  border-radius: 30px;
+
+  background: white;
+
+  border: 1px solid #ddd;
+}
+
+@media (max-width: 800px) {
+  .modal {
+    width: 95%;
+  }
+
+  .imageBox {
+    display: none;
+  }
+
+  .formSection {
+    width: 100%;
+
+    padding: 25px;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+
+
+
+
+
+
+
+// import styles from "./SignupLogin.module.css";
+
+// function Signup() {
+//   return (
+//     <div></div>
+//   );
+// }
+
+// export default Signup;
+
+
+
+
+
+

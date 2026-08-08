@@ -1,0 +1,180 @@
+/* Overlay */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 16px;
+  z-index: 9999;
+  animation: fadeIn 0.25s ease;
+}
+
+/* Dialog Box */
+.dialog {
+  width: 100%;
+  max-width: 420px;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.15);
+  animation: scaleIn 0.25s ease;
+}
+
+.dialog h3 {
+  margin: 0 0 12px;
+  font-size: 1.4rem;
+  color: #222;
+  font-weight: 600;
+}
+
+.dialog p {
+  margin: 0;
+  line-height: 1.6;
+  color: #555;
+  font-size: 0.95rem;
+}
+
+/* Error Message */
+.error {
+  margin-top: 14px;
+  padding: 10px;
+  border-radius: 8px;
+  background: #ffeaea;
+  color: #d93025;
+  font-size: 0.9rem;
+}
+
+/* Buttons */
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.cancelBtn,
+.confirmBtn {
+  border: none;
+  padding: 11px 20px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: all 0.25s ease;
+}
+
+.cancelBtn {
+  background: #f1f3f5;
+  color: #333;
+}
+
+.cancelBtn:hover:not(:disabled) {
+  background: #e2e6ea;
+}
+
+.confirmBtn {
+  background: #dc3545;
+  color: white;
+}
+
+.confirmBtn:hover:not(:disabled) {
+  background: #bb2d3b;
+}
+
+.confirmBtn:disabled,
+.cancelBtn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Success Popup */
+.successPopup {
+  text-align: center;
+  padding: 30px 20px;
+}
+
+.successIcon {
+  width: 70px;
+  height: 70px;
+  margin: 0 auto 16px;
+  border-radius: 50%;
+  background: #22c55e;
+  color: white;
+  font-size: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.successTitle {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #222;
+  margin-bottom: 8px;
+}
+
+.successText {
+  color: #666;
+  font-size: 0.95rem;
+}
+
+/* Tablet */
+@media (max-width: 768px) {
+  .dialog {
+    max-width: 380px;
+    padding: 20px;
+  }
+
+  .dialog h3 {
+    font-size: 1.25rem;
+  }
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+  .dialog {
+    max-width: 100%;
+    padding: 18px;
+    border-radius: 14px;
+  }
+
+  .actions {
+    flex-direction: column;
+  }
+
+  .cancelBtn,
+  .confirmBtn {
+    width: 100%;
+  }
+
+  .dialog h3 {
+    font-size: 1.1rem;
+  }
+
+  .dialog p {
+    font-size: 0.9rem;
+  }
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}

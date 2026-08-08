@@ -1,0 +1,1448 @@
+// ---- submit ----
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    const validationErrors = validate();
+    if (Object.keys(validationErrors).length > 0) {
+      // scroll to top to show errors
+      document.querySelector(`.${styles.form}`)?.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+
+    const payload = {
+      productName: form.productName.trim(),
+      shortDescription: form.shortDescription.trim(),
+      description: form.description.trim(),
+      category: form.category.trim(),
+      subCategory: form.subCategory.trim(),
+      brand: form.brand.trim(),
+      price: Number(form.price),
+      salePrice: form.salePrice === "" ? undefined : Number(form.salePrice),
+      weight: form.weight.trim(),
+      dimensions: {
+        length: Number(form.length) || 0,
+        width: Number(form.width) || 0,
+        height: Number(form.height) || 0,
+      },
+      variants: variants.map((v) => ({
+        color: v.color.trim(),
+        size: v.size.trim(),
+        stock: Number(v.stock),
+      })),
+      tags,
+      coverImage: form.coverImage.trim(),
+      images: form.images,
+    };
+
+    setApiError("");
+    setSubmitting(true);
+    setBanner({ type: null, messages: [] });
+
+    try {
+      const response = await api.post("/v1/products/regester", payload);
+
+      if (!response.data?.success) {
+        const errData = response.data;
+        if (errData.error && Array.isArray(errData.error)) {
+          // map missing fields to form errors
+          const fieldErrors = {};
+          const labelMap = {
+            productName: "Product name",
+            shortDescription: "Short description",
+            description: "Description",
+            category: "Category",
+            subCategory: "Sub-category",
+            brand: "Brand",
+            price: "Price",
+            salePrice: "Sale price",
+            weight: "Weight",
+            dimensions: "Dimensions",
+            variants: "Variants",
+            tags: "Tags",
+            coverImage: "Cover image",
+            images: "Images",
+          };
+          errData.error.forEach((field) => {
+            fieldErrors[field] = `${labelMap[field] || field} is missing`;
+          });
+          setErrors(fieldErrors);
+          setBanner({
+            type: "error",
+            messages: errData.error.map((f) => `${labelMap[f] || f} is required`),
+          });
+        } 
+        else {
+          setApiError(errData.message || "Something went wrong");
+          setBanner({ type: "error", messages: [errData.message || "Unknown error"] });
+        }
+        // auto‑hide error banner after 4s
+        setTimeout(() => setBanner({ type: null, messages: [] }), 4000);
+        return;
+      }
+
+      // ---- success ----
+      setBanner({ type: "success", messages: ["Product created successfully!"] });
+      onCreated(response.data.data);
+      // form will auto‑close after 2.5s via useEffect
+    } 
+    catch (error) {
+      const msg = error?.response?.data?.message || "Something went wrong. Please try again.";
+      setApiError(msg);
+      setBanner({ type: "error", messages: [msg] });
+      setTimeout(() => setBanner({ type: null, messages: [] }), 4000);
+    } 
+    finally {
+      setSubmitting(false);
+    }
+  };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  import { useState, useEffect } from "react";
+  import { X, Plus, Trash2, CheckCircle, AlertCircle, Loader } from "lucide-react";
+  import api from "../../../../Api/Axios";
+  import styles from "./ProductRegester.module.css";
+  
+  
+  
+  function ProductRegister({ onClose, onCreated }) {
+    
+    const [form, setForm] = useState({
+      productName: "",
+      shortDescription: "",
+      description: "",
+      category: "",
+      subCategory: "",
+      brand: "",
+      price: "",
+      salePrice: "",
+      weight: "",
+      length: "",
+      width: "",
+      height: "",
+      coverImage: "",
+      images: [], // array of URLs
+    });
+  
+    const [variants, setVariants] = useState([{ color: "", size: "", stock: "" }]);
+    const [tags, setTags] = useState([]);
+    const [tagInput, setTagInput] = useState("");
+    const [imageInput, setImageInput] = useState("");
+  
+    const [errors, setErrors] = useState({});
+    const [apiError, setApiError] = useState("");
+    const [submitting, setSubmitting] = useState(false);
+  
+    const [banner, setBanner] = useState({ type: null, messages: [] }); 
+  
+    // auto‑close on success after 2.5s
+    useEffect(() => {
+      if (banner.type === "success") {
+        const timer = setTimeout(() => {
+          onClose(); // close the entire modal
+        }, 2500);
+        return () => clearTimeout(timer);
+      }
+    }, [banner, onClose]);
+  
+    const updateForm = (field, value) => {
+      setForm((prev) => ({ ...prev, [field]: value }));
+      if (errors[field]) {
+        setErrors((prev) => ({ ...prev, [field]: undefined }));
+      }
+    };
+  
+    // ---- variant handlers ----
+    const updateVariant = (index, key, value) => {
+      setVariants((prev) => {
+        const next = [...prev];
+        next[index] = { ...next[index], [key]: value };
+        return next;
+      });
+    };
+    const addVariant = () => {
+      setVariants((prev) => [...prev, { color: "", size: "", stock: "" }]);
+    };
+    const removeVariant = (index) => {
+      if (variants.length === 1) return;
+      setVariants((prev) => prev.filter((_, i) => i !== index));
+    };
+  
+    // ---- tag handlers ----
+    const addTag = () => {
+      const value = tagInput.trim();
+      if (!value || tags.includes(value)) {
+        setTagInput("");
+        return;
+      }
+      setTags((prev) => [...prev, value]);
+      setTagInput("");
+    };
+    const removeTag = (tag) => {
+      setTags((prev) => prev.filter((t) => t !== tag));
+    };
+  
+    // ---- image handlers ----
+    const addImage = () => {
+      const value = imageInput.trim();
+      if (!value) return;
+      setForm((prev) => ({
+        ...prev,
+        images: [...prev.images, value],
+      }));
+      setImageInput("");
+    };
+    const removeImage = (url) => {
+      setForm((prev) => ({
+        ...prev,
+        images: prev.images.filter((i) => i !== url),
+      }));
+    };
+    const validate = () => {
+      const e = {};
+      if (!form.productName.trim()) e.productName = "Product name is required";
+      if (!form.category.trim()) e.category = "Category is required";
+      if (!form.price || Number(form.price) <= 0) e.price = "Enter a valid price";
+      if (form.salePrice && Number(form.salePrice) > Number(form.price)) {
+        e.salePrice = "Sale price can't be higher than the regular price";
+      }
+      if (!form.coverImage.trim()) e.coverImage = "Cover image URL is required";
+  
+      const hasIncompleteVariant = variants.some(
+        (v) => !v.color.trim() || !v.size.trim() || v.stock === ""
+      );
+      if (hasIncompleteVariant) e.variants = "Every variant needs a color, size, and stock count";
+  
+      setErrors(e);
+      return e;
+    };
+  
+  
+  
+    // ---- submit ----
+    const handleSubmit = async (e) => {
+      e.preventDefault();
+  
+      const validationErrors = validate();
+      if (Object.keys(validationErrors).length > 0) {
+        // scroll to top to show errors
+        document.querySelector(`.${styles.form}`)?.scrollTo({ top: 0, behavior: "smooth" });
+        return;
+      }
+  
+      const payload = {
+        productName: form.productName.trim(),
+        shortDescription: form.shortDescription.trim(),
+        description: form.description.trim(),
+        category: form.category.trim(),
+        subCategory: form.subCategory.trim(),
+        brand: form.brand.trim(),
+        price: Number(form.price),
+        salePrice: form.salePrice === "" ? undefined : Number(form.salePrice),
+        weight: form.weight.trim(),
+        dimensions: {
+          length: Number(form.length) || 0,
+          width: Number(form.width) || 0,
+          height: Number(form.height) || 0,
+        },
+        variants: variants.map((v) => ({
+          color: v.color.trim(),
+          size: v.size.trim(),
+          stock: Number(v.stock),
+        })),
+        tags,
+        coverImage: form.coverImage.trim(),
+        images: form.images,
+      };
+  
+      setApiError("");
+      setSubmitting(true);
+      setBanner({ type: null, messages: [] });
+  
+      try {
+        const response = await api.post("/v1/products/regester", payload);
+  
+        if (!response.data?.success) {
+          const errData = response.data;
+          if (errData.error && Array.isArray(errData.error)) {
+            // map missing fields to form errors
+            const fieldErrors = {};
+            const labelMap = {
+              productName: "Product name",
+              shortDescription: "Short description",
+              description: "Description",
+              category: "Category",
+              subCategory: "Sub-category",
+              brand: "Brand",
+              price: "Price",
+              salePrice: "Sale price",
+              weight: "Weight",
+              dimensions: "Dimensions",
+              variants: "Variants",
+              tags: "Tags",
+              coverImage: "Cover image",
+              images: "Images",
+            };
+            errData.error.forEach((field) => {
+              fieldErrors[field] = `${labelMap[field] || field} is missing`;
+            });
+            setErrors(fieldErrors);
+            setBanner({
+              type: "error",
+              messages: errData.error.map((f) => `${labelMap[f] || f} is required`),
+            });
+          } 
+          else {
+            setApiError(errData.message || "Something went wrong");
+            setBanner({ type: "error", messages: [errData.message || "Unknown error"] });
+          }
+          // auto‑hide error banner after 4s
+          setTimeout(() => setBanner({ type: null, messages: [] }), 4000);
+          return;
+        }
+  
+        // ---- success ----
+        setBanner({ type: "success", messages: ["Product created successfully!"] });
+        onCreated(response.data.data);
+        // form will auto‑close after 2.5s via useEffect
+      } 
+      catch (error) {
+        const msg = error?.response?.data?.message || "Something went wrong. Please try again.";
+        setApiError(msg);
+        setBanner({ type: "error", messages: [msg] });
+        setTimeout(() => setBanner({ type: null, messages: [] }), 4000);
+      } 
+      finally {
+        setSubmitting(false);
+      }
+    };
+  
+    // ---- render ----
+    return (
+      <div className={styles.overlay} onClick={onClose}>
+        <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+  
+          {/* Header */}
+          <div className={styles.header}>
+            <h2>Add Product</h2>
+            <button type="button" className={styles.closeBtn} onClick={onClose}>
+              <X size={20} />
+            </button>
+          </div>
+  
+          {/* Form */}
+          <form className={styles.form} onSubmit={handleSubmit}>
+            {/* Inline Banner */}
+            {banner.type && (
+              <div className={`${styles.banner} ${styles[banner.type]}`}>
+                {banner.type === "success" ? (
+                  <CheckCircle size={18} />
+                ) : (
+                  <AlertCircle size={18} />
+                )}
+                <div>
+                  {banner.messages.map((msg, i) => (
+                    <p key={i}>{msg}</p>
+                  ))}
+                </div>
+              </div>
+            )}
+  
+            {apiError && !banner.type && (
+              <div className={`${styles.banner} ${styles.error}`}>
+                <AlertCircle size={18} />
+                <p>{apiError}</p>
+              </div>
+            )}
+  
+            {/* ---- Basics ---- */}
+            <div className={styles.sectionTitle}>Basics</div>
+  
+            <div className={styles.fieldWrap}>
+              <label>Product name <span className={styles.required}>*</span></label>
+              <input
+                value={form.productName}
+                onChange={(e) => updateForm("productName", e.target.value)}
+                className={errors.productName ? styles.inputError : ""}
+                placeholder="e.g. Premium Wireless Headphones"
+              />
+              {errors.productName && <p className={styles.errorText}>{errors.productName}</p>}
+            </div>
+  
+            <div className={styles.fieldWrap}>
+              <label>Short description</label>
+              <input
+                value={form.shortDescription}
+                onChange={(e) => updateForm("shortDescription", e.target.value)}
+                placeholder="Brief summary"
+              />
+            </div>
+  
+            <div className={styles.fieldWrap}>
+              <label>Description</label>
+              <textarea
+                rows={3}
+                value={form.description}
+                onChange={(e) => updateForm("description", e.target.value)}
+                placeholder="Full product description"
+              />
+            </div>
+  
+            {/* ---- Classification ---- */}
+            <div className={styles.sectionTitle}>Classification</div>
+  
+            <div className={styles.grid3}>
+              <div className={styles.fieldWrap}>
+                <label>Category <span className={styles.required}>*</span></label>
+                <input
+                  value={form.category}
+                  onChange={(e) => updateForm("category", e.target.value)}
+                  className={errors.category ? styles.inputError : ""}
+                  placeholder="e.g. Electronics"
+                />
+                {errors.category && <p className={styles.errorText}>{errors.category}</p>}
+              </div>
+              <div className={styles.fieldWrap}>
+                <label>Sub‑category</label>
+                <input
+                  value={form.subCategory}
+                  onChange={(e) => updateForm("subCategory", e.target.value)}
+                  placeholder="e.g. Headphones"
+                />
+              </div>
+              <div className={styles.fieldWrap}>
+                <label>Brand</label>
+                <input
+                  value={form.brand}
+                  onChange={(e) => updateForm("brand", e.target.value)}
+                  placeholder="e.g. Sony"
+                />
+              </div>
+            </div>
+  
+            {/* ---- Pricing & Shipping ---- */}
+            <div className={styles.sectionTitle}>Pricing &amp; Shipping</div>
+  
+            <div className={styles.grid3}>
+              <div className={styles.fieldWrap}>
+                <label>Price (₹) <span className={styles.required}>*</span></label>
+                <input
+                  type="number"
+                  value={form.price}
+                  onChange={(e) => updateForm("price", e.target.value)}
+                  className={errors.price ? styles.inputError : ""}
+                  placeholder="0"
+                />
+                {errors.price && <p className={styles.errorText}>{errors.price}</p>}
+              </div>
+              <div className={styles.fieldWrap}>
+                <label>Sale price (₹)</label>
+                <input
+                  type="number"
+                  value={form.salePrice}
+                  onChange={(e) => updateForm("salePrice", e.target.value)}
+                  className={errors.salePrice ? styles.inputError : ""}
+                  placeholder="0"
+                />
+                {errors.salePrice && <p className={styles.errorText}>{errors.salePrice}</p>}
+              </div>
+              <div className={styles.fieldWrap}>
+                <label>Weight</label>
+                <input
+                  value={form.weight}
+                  onChange={(e) => updateForm("weight", e.target.value)}
+                  className={errors.weight ? styles.inputError : ""}
+                  placeholder="e.g. 250g"
+                />
+                {errors.weight && <p className={styles.errorText}>{errors.weight}</p>}
+              </div>
+            </div>
+  
+            <div className={styles.grid3}>
+              <div className={styles.fieldWrap}>
+                <label>Length (cm)</label>
+                <input
+                  type="number"
+                  value={form.length}
+                  onChange={(e) => updateForm("length", e.target.value)}
+                  placeholder="0"
+                />
+              </div>
+              <div className={styles.fieldWrap}>
+                <label>Width (cm)</label>
+                <input
+                  type="number"
+                  value={form.width}
+                  onChange={(e) => updateForm("width", e.target.value)}
+                  placeholder="0"
+                />
+              </div>
+              <div className={styles.fieldWrap}>
+                <label>Height (cm)</label>
+                <input
+                  type="number"
+                  value={form.height}
+                  onChange={(e) => updateForm("height", e.target.value)}
+                  placeholder="0"
+                />
+              </div>
+            </div>
+  
+            {/* ---- Variants ---- */}
+            <div className={styles.sectionTitle}>Variants</div>
+            {errors.variants && <p className={styles.errorText}>{errors.variants}</p>}
+  
+            <div className={styles.variantList}>
+              {variants.map((variant, index) => (
+                <div key={index} className={styles.variantRow}>
+                  <input
+                    placeholder="Color"
+                    value={variant.color}
+                    onChange={(e) => updateVariant(index, "color", e.target.value)}
+                  />
+                  <input
+                    placeholder="Size"
+                    value={variant.size}
+                    onChange={(e) => updateVariant(index, "size", e.target.value)}
+                  />
+                  <input
+                    placeholder="Stock"
+                    type="number"
+                    value={variant.stock}
+                    onChange={(e) => updateVariant(index, "stock", e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    className={styles.removeRowBtn}
+                    onClick={() => removeVariant(index)}
+                    disabled={variants.length === 1}
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+              ))}
+            </div>
+            <button type="button" className={styles.addRowBtn} onClick={addVariant}>
+              <Plus size={14} /> Add variant
+            </button>
+  
+            {/* ---- Tags ---- */}
+            <div className={styles.sectionTitle}>Tags</div>
+            <div className={styles.chipInputRow}>
+              <input
+                placeholder="Type a tag and press Enter"
+                value={tagInput}
+                onChange={(e) => setTagInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === ",") {
+                    e.preventDefault();
+                    addTag();
+                  }
+                }}
+              />
+              <button type="button" onClick={addTag}>Add</button>
+            </div>
+            <div className={styles.chipRow}>
+              {tags.map((tag) => (
+                <span key={tag} className={styles.chip}>
+                  {tag}
+                  <button type="button" onClick={() => removeTag(tag)}>
+                    <X size={11} />
+                  </button>
+                </span>
+              ))}
+            </div>
+  
+            {/* ---- Media ---- */}
+            <div className={styles.sectionTitle}>Media</div>
+            <div className={styles.fieldWrap}>
+              <label>Cover image URL <span className={styles.required}>*</span></label>
+              <input
+                value={form.coverImage}
+                onChange={(e) => updateForm("coverImage", e.target.value)}
+                className={errors.coverImage ? styles.inputError : ""}
+                placeholder="https://example.com/cover.jpg"
+              />
+              {errors.coverImage && <p className={styles.errorText}>{errors.coverImage}</p>}
+            </div>
+  
+            <div className={styles.chipInputRow}>
+              <input
+                placeholder="Paste image URL and press Enter"
+                value={imageInput}
+                onChange={(e) => setImageInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    addImage();
+                  }
+                }}
+              />
+              <button type="button" onClick={addImage}>Add</button>
+            </div>
+            <div className={styles.chipRow}>
+              {form.images.map((url) => (
+                <span key={url} className={styles.chip}>
+                  {url.length > 28 ? `${url.slice(0, 28)}…` : url}
+                  <button type="button" onClick={() => removeImage(url)}>
+                    <X size={11} />
+                  </button>
+                </span>
+              ))}
+            </div>
+  
+            {/* ---- Footer ---- */}
+            <div className={styles.footer}>
+              <button type="button" className={styles.cancelBtn} onClick={onClose}>
+                Cancel
+              </button>
+              <button type="submit" className={styles.saveBtn} disabled={submitting}>
+                {submitting ? (
+                  <>
+                    <Loader size={16} className={styles.spinner} /> Saving…
+                  </>
+                ) : (
+                  "Create product"
+                )}
+              </button>
+            </div>
+          </form>
+  
+        </div>
+      </div>
+    );
+  }
+  
+  export default ProductRegister;
+  
+  
+  
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  // import React from 'react'
+
+// const ProductEdit = () => {
+//   return (
+//     <div>ProductEdit</div>
+//   )
+// }
+
+
+// export default ProductEdit;
+
+
+
+
+import { useState } from "react";
+import { X, Plus, Trash2 } from "lucide-react";
+import api from '../../../../Api/Axios';
+import styles from "./ProductEdit.module.css";
+
+function ProductEdit({ product, onClose, onUpdated }) {
+  const [productName, setProductName] = useState(product.productName || "");
+  const [slug, setSlug] = useState(product.slug || "");
+  const [shortDescription, setShortDescription] = useState(product.shortDescription || "");
+  const [description, setDescription] = useState(product.description || "");
+  const [category, setCategory] = useState(product.category || "");
+  const [subCategory, setSubCategory] = useState(product.subCategory || "");
+  const [brand, setBrand] = useState(product.brand || "");
+  const [price, setPrice] = useState(product.price ?? "");
+  const [salePrice, setSalePrice] = useState(product.salePrice ?? "");
+  const [weight, setWeight] = useState(product.weight || "");
+  const [length, setLength] = useState(product.dimensions?.length ?? "");
+  const [width, setWidth] = useState(product.dimensions?.width ?? "");
+  const [height, setHeight] = useState(product.dimensions?.height ?? "");
+  // strip the backend-generated _id from each variant — the API doesn't want it back
+  const [variants, setVariants] = useState(
+    (product.variants && product.variants.length
+      ? product.variants
+      : [{ color: "", size: "", stock: "" }]
+    ).map(({ color, size, stock }) => ({ color, size, stock }))
+  );
+  const [tags, setTags] = useState(product.tags ? product.tags.filter(Boolean) : []);
+  const [tagInput, setTagInput] = useState("");
+  const [coverImage, setCoverImage] = useState(product.coverImage || "");
+  const [images, setImages] = useState(product.images || []);
+  const [imageInput, setImageInput] = useState("");
+
+  const [errors, setErrors] = useState({});
+  const [apiError, setApiError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  const updateVariant = (index, key, value) => {
+    setVariants((prev) => {
+      const next = [...prev];
+      next[index] = { ...next[index], [key]: value };
+      return next;
+    });
+  };
+
+  const addVariant = () => {
+    setVariants((prev) => [...prev, { color: "", size: "", stock: "" }]);
+  };
+
+  const removeVariant = (index) => {
+    setVariants((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const addTag = () => {
+    const value = tagInput.trim();
+    if (!value || tags.includes(value)) {
+      setTagInput("");
+      return;
+    }
+    setTags((prev) => [...prev, value]);
+    setTagInput("");
+  };
+
+  const removeTag = (tag) => {
+    setTags((prev) => prev.filter((t) => t !== tag));
+  };
+
+  const addImage = () => {
+    const value = imageInput.trim();
+    if (!value) return;
+    setImages((prev) => [...prev, value]);
+    setImageInput("");
+  };
+
+  const removeImage = (url) => {
+    setImages((prev) => prev.filter((i) => i !== url));
+  };
+
+  const validate = () => {
+    const e = {};
+
+    if (!productName.trim()) e.productName = "Product name is required";
+    if (!slug.trim()) e.slug = "Slug is required";
+    if (!category.trim()) e.category = "Category is required";
+
+    if (!price || Number(price) <= 0) e.price = "Enter a valid price";
+    if (salePrice && Number(salePrice) > Number(price)) {
+      e.salePrice = "Sale price can't be higher than the regular price";
+    }
+
+    if (!coverImage.trim()) e.coverImage = "Cover image URL is required";
+
+    const hasIncompleteVariant = variants.some(
+      (v) => !v.color.trim() || !v.size.trim() || v.stock === ""
+    );
+    if (hasIncompleteVariant) e.variants = "Every variant needs a color, size, and stock count";
+
+    setErrors(e);
+    return e;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (Object.keys(validate()).length > 0) return;
+
+    const payload = {
+      productName: productName.trim(),
+      slug: slug.trim(),
+      shortDescription: shortDescription.trim(),
+      description: description.trim(),
+      category: category.trim(),
+      subCategory: subCategory.trim(),
+      brand: brand.trim(),
+      price: Number(price),
+      salePrice: salePrice === "" ? undefined : Number(salePrice),
+      weight: weight.trim(),
+      dimensions: {
+        length: Number(length) || 0,
+        width: Number(width) || 0,
+        height: Number(height) || 0,
+      },
+      variants: variants.map((v) => ({
+        color: v.color.trim(),
+        size: v.size.trim(),
+        stock: Number(v.stock),
+      })),
+      tags,
+      coverImage: coverImage.trim(),
+      images,
+    };
+
+    setApiError("");
+    setSubmitting(true);
+
+    try {
+      const response = await api.put(`/v1/products/update/${product._id}`, payload);
+
+      if (!response.data?.success) {
+        setApiError(response.data?.message || "Something went wrong. Please try again.");
+        return;
+      }
+
+      onUpdated(response.data.data);
+    } catch (error) {
+      setApiError(error?.response?.data?.message || "Something went wrong. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div className={styles.overlay} onClick={onClose}>
+      <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+        <div className={styles.header}>
+          <h2>Edit product</h2>
+          <button type="button" className={styles.closeBtn} onClick={onClose}>
+            <X size={18} />
+          </button>
+        </div>
+
+        <form className={styles.form} onSubmit={handleSubmit}>
+          {apiError && <p className={styles.apiError}>{apiError}</p>}
+
+          <div className={styles.sectionTitle}>Basics</div>
+          <div className={styles.grid2}>
+            <div className={styles.fieldWrap}>
+              <label>Product name</label>
+              <input
+                value={productName}
+                onChange={(e) => setProductName(e.target.value)}
+                className={errors.productName ? styles.inputError : ""}
+              />
+              {errors.productName && <p className={styles.errorText}>{errors.productName}</p>}
+            </div>
+
+            <div className={styles.fieldWrap}>
+              <label>Slug</label>
+              <input
+                value={slug}
+                onChange={(e) => setSlug(e.target.value)}
+                className={errors.slug ? styles.inputError : ""}
+              />
+              {errors.slug && <p className={styles.errorText}>{errors.slug}</p>}
+            </div>
+          </div>
+
+          <div className={styles.fieldWrap}>
+            <label>Short description</label>
+            <input value={shortDescription} onChange={(e) => setShortDescription(e.target.value)} />
+          </div>
+
+          <div className={styles.fieldWrap}>
+            <label>Description</label>
+            <textarea rows={3} value={description} onChange={(e) => setDescription(e.target.value)} />
+          </div>
+
+          <div className={styles.sectionTitle}>Classification</div>
+          <div className={styles.grid3}>
+            <div className={styles.fieldWrap}>
+              <label>Category</label>
+              <input
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                className={errors.category ? styles.inputError : ""}
+              />
+              {errors.category && <p className={styles.errorText}>{errors.category}</p>}
+            </div>
+
+            <div className={styles.fieldWrap}>
+              <label>Sub-category</label>
+              <input value={subCategory} onChange={(e) => setSubCategory(e.target.value)} />
+            </div>
+
+            <div className={styles.fieldWrap}>
+              <label>Brand</label>
+              <input value={brand} onChange={(e) => setBrand(e.target.value)} />
+            </div>
+          </div>
+
+          <div className={styles.sectionTitle}>Pricing &amp; shipping</div>
+          <div className={styles.grid3}>
+            <div className={styles.fieldWrap}>
+              <label>Price (₹)</label>
+              <input
+                type="number"
+                value={price}
+                onChange={(e) => setPrice(e.target.value)}
+                className={errors.price ? styles.inputError : ""}
+              />
+              {errors.price && <p className={styles.errorText}>{errors.price}</p>}
+            </div>
+
+            <div className={styles.fieldWrap}>
+              <label>Sale price (₹)</label>
+              <input
+                type="number"
+                value={salePrice}
+                onChange={(e) => setSalePrice(e.target.value)}
+                className={errors.salePrice ? styles.inputError : ""}
+              />
+              {errors.salePrice && <p className={styles.errorText}>{errors.salePrice}</p>}
+            </div>
+
+            <div className={styles.fieldWrap}>
+              <label>Weight</label>
+              <input value={weight} onChange={(e) => setWeight(e.target.value)} />
+            </div>
+          </div>
+
+          <div className={styles.grid3}>
+            <div className={styles.fieldWrap}>
+              <label>Length</label>
+              <input type="number" value={length} onChange={(e) => setLength(e.target.value)} />
+            </div>
+            <div className={styles.fieldWrap}>
+              <label>Width</label>
+              <input type="number" value={width} onChange={(e) => setWidth(e.target.value)} />
+            </div>
+            <div className={styles.fieldWrap}>
+              <label>Height</label>
+              <input type="number" value={height} onChange={(e) => setHeight(e.target.value)} />
+            </div>
+          </div>
+
+          <div className={styles.sectionTitle}>Variants</div>
+          {errors.variants && <p className={styles.errorText}>{errors.variants}</p>}
+
+          <div className={styles.variantList}>
+            {variants.map((variant, index) => (
+              <div key={index} className={styles.variantRow}>
+                <input
+                  placeholder="Color"
+                  value={variant.color}
+                  onChange={(e) => updateVariant(index, "color", e.target.value)}
+                />
+                <input
+                  placeholder="Size"
+                  value={variant.size}
+                  onChange={(e) => updateVariant(index, "size", e.target.value)}
+                />
+                <input
+                  placeholder="Stock"
+                  type="number"
+                  value={variant.stock}
+                  onChange={(e) => updateVariant(index, "stock", e.target.value)}
+                />
+                <button
+                  type="button"
+                  className={styles.removeRowBtn}
+                  onClick={() => removeVariant(index)}
+                  disabled={variants.length === 1}
+                  title={variants.length === 1 ? "At least one variant is required" : "Remove variant"}
+                >
+                  <Trash2 size={14} />
+                </button>
+              </div>
+            ))}
+          </div>
+          <button type="button" className={styles.addRowBtn} onClick={addVariant}>
+            <Plus size={14} />
+            Add variant
+          </button>
+
+          <div className={styles.sectionTitle}>Tags</div>
+          <div className={styles.chipInputRow}>
+            <input
+              placeholder="Type a tag and press Enter"
+              value={tagInput}
+              onChange={(e) => setTagInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === ",") {
+                  e.preventDefault();
+                  addTag();
+                }
+              }}
+            />
+            <button type="button" onClick={addTag}>
+              Add
+            </button>
+          </div>
+          <div className={styles.chipRow}>
+            {tags.map((tag) => (
+              <span key={tag} className={styles.chip}>
+                {tag}
+                <button type="button" onClick={() => removeTag(tag)}>
+                  <X size={11} />
+                </button>
+              </span>
+            ))}
+          </div>
+
+          <div className={styles.sectionTitle}>Media</div>
+          <div className={styles.fieldWrap}>
+            <label>Cover image URL</label>
+            <input
+              value={coverImage}
+              onChange={(e) => setCoverImage(e.target.value)}
+              className={errors.coverImage ? styles.inputError : ""}
+            />
+            {errors.coverImage && <p className={styles.errorText}>{errors.coverImage}</p>}
+          </div>
+
+          <div className={styles.chipInputRow}>
+            <input
+              placeholder="Paste an image URL and press Enter"
+              value={imageInput}
+              onChange={(e) => setImageInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  addImage();
+                }
+              }}
+            />
+            <button type="button" onClick={addImage}>
+              Add
+            </button>
+          </div>
+          <div className={styles.chipRow}>
+            {images.map((url) => (
+              <span key={url} className={styles.chip}>
+                {url.length > 28 ? `${url.slice(0, 28)}…` : url}
+                <button type="button" onClick={() => removeImage(url)}>
+                  <X size={11} />
+                </button>
+              </span>
+            ))}
+          </div>
+
+          <div className={styles.footer}>
+            <button type="button" className={styles.cancelBtn} onClick={onClose}>
+              Cancel
+            </button>
+            <button type="submit" className={styles.saveBtn} disabled={submitting}>
+              {submitting ? "Saving..." : "Save changes"}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+export default ProductEdit;
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 20, 15, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3000;
+  padding: 24px;
+}
+
+.modal {
+  width: 640px;
+  max-width: 100%;
+  max-height: 88vh;
+  background: #ffffff;
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  font-family: "Inter", sans-serif;
+  color: #14140f;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 22px;
+  border-bottom: 1px solid #e6e3d8;
+}
+
+.header h2 {
+  font-family: "Sora", sans-serif;
+  font-size: 16.5px;
+  font-weight: 600;
+}
+
+.closeBtn {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  border: 0;
+  background: #f4f2ea;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #14140f;
+}
+
+.form {
+  padding: 20px 22px 22px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.apiError {
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: #fbe9e5;
+  color: #c1391f;
+  font-size: 13px;
+}
+
+.sectionTitle {
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #a8a595;
+  font-weight: 600;
+  margin-top: 6px;
+}
+
+.grid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.grid3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+}
+
+.fieldWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.fieldWrap label {
+  font-size: 12px;
+  font-weight: 500;
+  color: #4a483f;
+}
+
+.fieldWrap input,
+.fieldWrap textarea {
+  padding: 9px 11px;
+  border: 1px solid #e6e3d8;
+  border-radius: 9px;
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+  color: #14140f;
+  resize: vertical;
+}
+
+.fieldWrap input:focus,
+.fieldWrap textarea:focus {
+  border-color: #14140f;
+}
+
+.inputError {
+  border-color: #e02424 !important;
+}
+
+.errorText {
+  font-size: 11.5px;
+  color: #e02424;
+  margin-top: -2px;
+}
+
+.variantList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.variantRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr 90px 32px;
+  gap: 8px;
+  align-items: center;
+}
+
+.variantRow input {
+  padding: 8px 10px;
+  border: 1px solid #e6e3d8;
+  border-radius: 8px;
+  font-size: 12.5px;
+  outline: none;
+}
+
+.variantRow input:focus {
+  border-color: #14140f;
+}
+
+.removeRowBtn {
+  width: 30px;
+  height: 30px;
+  border-radius: 7px;
+  border: 1px solid #e6e3d8;
+  background: #ffffff;
+  color: #c1391f;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.removeRowBtn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.addRowBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  align-self: flex-start;
+  padding: 7px 12px;
+  border: 1px dashed #c8c4b5;
+  border-radius: 8px;
+  background: none;
+  color: #4a483f;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.addRowBtn:hover {
+  border-color: #14140f;
+  color: #14140f;
+}
+
+.chipInputRow {
+  display: flex;
+  gap: 8px;
+}
+
+.chipInputRow input {
+  flex: 1;
+  padding: 8px 11px;
+  border: 1px solid #e6e3d8;
+  border-radius: 9px;
+  font-size: 12.5px;
+  outline: none;
+}
+
+.chipInputRow input:focus {
+  border-color: #14140f;
+}
+
+.chipInputRow button {
+  padding: 8px 14px;
+  border: 1px solid #e6e3d8;
+  border-radius: 9px;
+  background: #f4f2ea;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.chipRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 6px 5px 10px;
+  background: #f4f2ea;
+  border-radius: 20px;
+  font-size: 12px;
+  color: #14140f;
+}
+
+.chip button {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 0;
+  background: #e6e3d8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 8px;
+  padding-top: 14px;
+  border-top: 1px solid #e6e3d8;
+}
+
+.cancelBtn {
+  padding: 9px 16px;
+  border-radius: 9px;
+  border: 1px solid #e6e3d8;
+  background: #ffffff;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.saveBtn {
+  padding: 9px 18px;
+  border-radius: 9px;
+  border: 0;
+  background: #14140f;
+  color: #f7f5ef;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.saveBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (max-width: 640px) {
+  .grid2,
+  .grid3 {
+    grid-template-columns: 1fr;
+  }
+
+  .variantRow {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto;
+  }
+}

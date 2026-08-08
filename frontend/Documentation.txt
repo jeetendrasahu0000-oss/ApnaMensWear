@@ -1,0 +1,382 @@
+src/
+├── features/
+│   ├── auth/
+│   ├── product/
+│   ├── admin/
+│   ├── cart/
+│   ├── order/
+│   └── payment/
+│
+├── shared/
+├── layouts/
+├── api/
+└── assets/
+
+
+
+=================================================================
+=================================================================
+=================================================================
+
+
+
+
+src/
+│
+├── app/
+│   ├── App.jsx
+│   ├── router.jsx
+│   └── providers.jsx
+│
+├── api/
+│   ├── axios.js
+│   ├── auth.api.js
+│   ├── product.api.js
+│   ├── order.api.js
+│   └── user.api.js
+│
+├── assets/
+│   ├── images/
+│   ├── icons/
+│   └── fonts/
+│
+├── shared/
+│   │
+│   ├── components/
+│   │   ├── Navbar/
+│   │   ├── Footer/
+│   │   ├── Loader/
+│   │   ├── Button/
+│   │   ├── Modal/
+│   │   ├── Input/
+│   │   ├── Pagination/
+│   │   └── SearchBar/
+│   │
+│   ├── layouts/
+│   │   ├── MainLayout.jsx
+│   │   └── AdminLayout.jsx
+│   │
+│   ├── hooks/
+│   │   ├── useDebounce.js
+│   │   └── usePagination.js
+│   │
+│   ├── utils/
+│   │   ├── formatPrice.js
+│   │   ├── generateSlug.js
+│   │   └── validators.js
+│   │
+│   └── constants/
+│       ├── routes.js
+│       └── roles.js
+│
+├── features/
+│
+│   ├── auth/
+│   │   │
+│   │   ├── pages/
+│   │   │   ├── Login.jsx
+│   │   │   ├── Signup.jsx
+│   │   │   └── ForgotPassword.jsx
+│   │   │
+│   │   ├── components/
+│   │   │   ├── LoginForm.jsx
+│   │   │   └── SignupForm.jsx
+│   │   │
+│   │   ├── hooks/
+│   │   │   └── useAuth.js
+│   │   │
+│   │   ├── services/
+│   │   │   └── auth.service.js
+│   │   │
+│   │   ├── context/
+│   │   │   └── AuthContext.jsx
+│   │   │
+│   │   └── routes/
+│   │       ├── ProtectedRoute.jsx
+│   │       └── GuestRoute.jsx
+│   │
+│   ├── product/
+│   │   │
+│   │   ├── pages/
+│   │   │   ├── Products.jsx
+│   │   │   └── ProductDetails.jsx
+│   │   │
+│   │   ├── components/
+│   │   │   ├── ProductCard.jsx
+│   │   │   ├── ProductGrid.jsx
+│   │   │   ├── ProductFilter.jsx
+│   │   │   └── ProductSearch.jsx
+│   │   │
+│   │   ├── hooks/
+│   │   │   └── useProducts.js
+│   │   │
+│   │   └── services/
+│   │       └── product.service.js
+│   │
+│   ├── admin/
+│   │   │
+│   │   ├── pages/
+│   │   │   ├── Dashboard.jsx
+│   │   │   ├── Products.jsx
+│   │   │   ├── AddProduct.jsx
+│   │   │   └── EditProduct.jsx
+│   │   │
+│   │   ├── components/
+│   │   │   ├── Sidebar.jsx
+│   │   │   ├── Topbar.jsx
+│   │   │   ├── ProductTable.jsx
+│   │   │   └── ProductForm.jsx
+│   │   │
+│   │   ├── hooks/
+│   │   │   └── useAdminProducts.js
+│   │   │
+│   │   └── services/
+│   │       └── admin.service.js
+│   │
+│   ├── cart/
+│   │   ├── pages/
+│   │   ├── components/
+│   │   ├── hooks/
+│   │   └── services/
+│   │
+│   ├── order/
+│   │   ├── pages/
+│   │   ├── components/
+│   │   ├── hooks/
+│   │   └── services/
+│   │
+│   ├── payment/
+│   │   ├── pages/
+│   │   ├── components/
+│   │   └── services/
+│   │
+│   └── profile/
+│       ├── pages/
+│       ├── components/
+│       └── services/
+│
+└── styles/
+    ├── globals.css
+    └── variables.css
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ok know i want you can build a component for me for signup and login user   
+
+
+
+ok know i want you can build a component for me for signup and login user    use api then route  /v1/user/signup    for signup     the structure of signup user is    {
+
+
+
+    "firstName":"arshlan",
+
+
+
+    "lastName":"sheikh",
+
+
+
+    "email":"a@gmail.com",
+
+
+
+    "phone":9302039953,
+
+
+
+    "password":"11111111",
+
+
+
+    "address":{
+
+
+
+        "country":"india",
+
+
+
+        "state":"mp",
+
+
+
+        "city":"chhatarpur",
+
+
+
+        "pinCode":471001,
+
+
+
+        "addressLine1":"khatkayana mohalla",
+
+
+
+        "addressLine2":"near basari gate sankat mochan"
+
+
+
+    },
+
+
+
+    "profileImage":"https://shirt-front.jpg"
+
+
+
+}      and also add frontend validation  and check is email  and  phone allready   exist or nto for this  the route  is for email check v1/user/validation/is-email-exist/8990809   and for phone number check /v1/user/validation/is-phone-exist/8990809     and the response you get is      "success": true,
+
+    "message": "phone no all ready exists",
+
+    "data": {
+
+        "exists": true
+
+    },
+
+    "error": null
+
+}   when user type and left filed check instant   show validation erorr in bleow of that fields and also add  after phone number send otp and verify opt resend opt  for send opt the route is  /v1/otp/set-otp   and structurre is {  
+
+
+
+    "identifier":9302039953,
+
+
+
+    "expireTime":1
+
+
+
+}   and you get response in this structure  {
+
+
+
+    "success": true,
+
+
+
+    "message": "set otp successfully",
+
+
+
+    "data": {
+
+
+
+        "otp": "626657"
+
+
+
+    },
+
+
+
+    "error": null
+
+
+
+}    and for verify otp  we have route /api/v1/otp/verify-otp   paylod it cary {
+
+    "identifier":9302039953,
+
+    "otp":"945695"
+
+}  and response it get {
+
+    "success": false,
+
+    "message": "falied to varified otp",
+
+    "data": {
+
+        "verified": false
+
+    },
+
+    "error": null
+
+}    and for login the route is api/v1/user/login    payload it cary {
+
+    "identifier":"9302039953",
+
+    "password":"11111111"
+
+}     response it get   {
+
+    "success": true,
+
+    "message": "User login successfully",
+
+    "data": {
+
+        "userResponse": {
+
+            "_id": "6a659f2c4e43e627d3e12131",
+
+            "firstName": "arshlan",
+
+            "lastName": "sheikh",
+
+            "email": "a@gmail.com",
+
+            "phone": "9302039953",
+
+            "roles": [
+
+                "buyer"
+
+            ],
+
+            "provider": "local",
+
+            "address": {
+
+                "country": "india",
+
+                "state": "mp",
+
+                "city": "chhatarpur",
+
+                "pinCode": "471001",
+
+                "addressLine1": "khatkayana mohalla",
+
+                "addressLine2": "near basari gate sankat mochan"
+
+            },
+
+            "profileImage": "https://shirt-front.jpg",
+
+            "isActive": true,
+
+            "lastLogin": "2026-07-26T05:55:40.812Z",
+
+            "createdAt": "2026-07-26T05:46:20.555Z",
+
+            "updatedAt": "2026-07-26T05:55:40.812Z",
+
+            "__v": 0
+
+        },
+
+        "AccessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YTY1OWYyYzRlNDNlNjI3ZDNlMTIxMzEiLCJlbWFpbCI6ImFAZ21haWwuY29tIiwicGhvbmUiOiI5MzAyMDM5OTUzIiwicm9sZXMiOlsiYnV5ZXIiXSwiaWF0IjoxNzg1MDQ1MzQwLCJleHAiOjE3ODUwNDYyNDB9.Bytf8di1ImNLDkqk2KiABfdO5cJqzYhR5woT69xOiUc"
+
+    },
+
+    "error": null
+
+}

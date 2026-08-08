@@ -1,0 +1,23 @@
+.dashboard {
+  min-height: 100vh;
+  background: #f5f5f5;
+}
+
+.mainContainer {
+  display: flex;
+  margin-top: 70px;
+}
+
+.content {
+  flex: 1;
+  padding: 20px;
+  margin-left: 260px;
+  min-height: calc(100vh - 70px);
+}
+
+@media (max-width: 768px) {
+  .content {
+    margin-left: 0;
+    padding: 15px;
+  }
+}

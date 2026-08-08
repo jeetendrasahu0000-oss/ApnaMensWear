@@ -1,0 +1,200 @@
+.page {
+  background: #f7f8fa;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 24px;
+}
+
+.sidebar {
+  background: white;
+  border-radius: 20px;
+  padding: 20px;
+  height: fit-content;
+  position: sticky;
+  top: 80px;
+  border: 1px solid #ececec;
+}
+
+.sidebar h3 {
+  margin-bottom: 20px;
+}
+
+.filterSection {
+  margin-bottom: 24px;
+}
+
+.filterSection h4 {
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+.filterSection input,
+.filterSection select {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+}
+
+.priceInputs {
+  display: flex;
+  gap: 10px;
+}
+
+.optionWrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.optionBtn {
+  border: 1px solid #ddd;
+  background: white;
+  border-radius: 999px;
+  padding: 8px 14px;
+  cursor: pointer;
+}
+
+.active {
+  background: #111827;
+  color: white;
+}
+
+.content {
+  min-width: 0;
+}
+
+.topBar {
+  margin-bottom: 20px;
+}
+
+.topBar h2 {
+  font-size: 24px;
+}
+
+.topBar span {
+  color: #666;
+  margin-left: 8px;
+}
+
+.productGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+}
+
+.loading,
+.empty {
+  min-height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 30px;
+}
+
+.pagination button {
+  border: none;
+  background: #111827;
+  color: white;
+  padding: 10px 18px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.pagination button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.mobileFilterBtn {
+  display: none;
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 1000;
+}
+
+.mobileSidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 320px;
+  height: 100vh;
+  background: white;
+  z-index: 1100;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+.mobileHeader {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.mobileHeader button {
+  border: none;
+  background: none;
+  font-size: 22px;
+  cursor: pointer;
+}
+
+@media (max-width: 1200px) {
+  .productGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    display: none;
+  }
+
+  .mobileFilterBtn {
+    display: flex;
+    margin-bottom: 15px;
+    border: none;
+    background: #111827;
+    color: white;
+    padding: 12px 18px;
+    border-radius: 12px;
+    cursor: pointer;
+  }
+
+  .productGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .page {
+    padding: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .productGrid {
+    gap: 10px;
+  }
+
+  .mobileSidebar {
+    width: 85%;
+  }
+}

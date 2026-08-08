@@ -1,0 +1,405 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+
+  background: rgba(0, 0, 0, 0.45);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  z-index: 2000;
+
+  backdrop-filter: blur(5px);
+}
+
+.modal {
+  width: 1000px;
+  max-height: 80vh;
+  background: #f8f4ef;
+  border-radius: 15px;
+  display: flex;
+
+  overflow: hidden;
+
+  position: relative;
+
+  animation: popup 0.35s ease;
+}
+
+@keyframes popup {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.close {
+  position: absolute;
+
+  right: 10px;
+  top: 10px;
+
+  border: 0;
+  background: transparent;
+
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+
+  cursor: pointer;
+
+  z-index: 5;
+}
+
+.imageBox {
+  width: 50%;
+}
+
+.imageBox img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.formSection {
+  width: 50%;
+
+  padding: 45px;
+
+  overflow-y: auto;
+}
+
+.toggle {
+  display: flex;
+
+  background: #ddd;
+
+  border-radius: 30px;
+
+  padding: 5px;
+}
+
+.toggle button {
+  flex: 1;
+
+  padding: 12px;
+
+  border: 0;
+
+  border-radius: 25px;
+
+  background: none;
+
+  cursor: pointer;
+}
+
+.active {
+  background: #111 !important;
+  color: white;
+}
+
+h1 {
+  font-size: 40px;
+
+  margin: 30px 0;
+}
+
+.grid {
+  display: grid;
+
+  grid-template-columns: 1fr 1fr;
+
+  gap: 15px;
+}
+
+.field {
+  position: relative;
+
+  margin-bottom: 20px;
+}
+
+.field input {
+  width: 100%;
+
+  padding: 17px;
+
+  border-radius: 15px;
+
+  border: 1px solid #ddd;
+}
+
+.field label {
+  position: absolute;
+
+  left: 15px;
+
+  top: 17px;
+
+  color: #777;
+
+  transition: 0.2s;
+
+  cursor: text;
+}
+
+.field input:focus + label,
+.field input:not(:placeholder-shown) + label {
+  top: -9px;
+
+  font-size: 12px;
+
+  background: white;
+
+  padding: 0 5px;
+}
+
+/* --- validation errors --- */
+
+.inputError {
+  border: 1px solid #e02424 !important;
+}
+
+.errorText {
+  margin: 6px 2px 0;
+
+  font-size: 12px;
+
+  color: #e02424;
+}
+
+.apiError {
+  margin-bottom: 15px;
+
+  padding: 10px 14px;
+
+  border-radius: 10px;
+
+  background: #fdeaea;
+
+  color: #b91c1c;
+
+  font-size: 13px;
+}
+
+.password {
+  position: relative;
+}
+
+.password span {
+  position: absolute;
+
+  right: 15px;
+
+  top: 17px;
+
+  cursor: pointer;
+
+  color: #555;
+}
+
+/* --- OTP --- */
+
+/* spans both grid columns so the OTP block never shares a row
+   with an unrelated field */
+.otpWrapper {
+  grid-column: 1 / -1;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+
+  margin-bottom: 10px;
+}
+
+.otpSendBtn {
+  width: 100%;
+
+  padding: 15px;
+
+  border-radius: 25px;
+
+  border: 1px solid #111;
+
+  background: white;
+
+  color: #111;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  text-align: center;
+
+  cursor: pointer;
+
+  transition: 0.2s;
+}
+
+.otpSendBtn:hover {
+  background: #111;
+  color: white;
+}
+
+.otpSendBtn:disabled {
+  cursor: not-allowed;
+}
+
+/* red — OTP has been sent but not yet verified */
+.otpBtnUnverified {
+  border-color: #e02424;
+  color: #e02424;
+  background: #fdeaea;
+}
+
+.otpBtnUnverified:hover {
+  background: #e02424;
+  color: white;
+}
+
+/* green — OTP verified, button locked */
+.otpBtnVerified {
+  border-color: #16a34a;
+  color: white;
+  background: #16a34a;
+  cursor: not-allowed;
+}
+
+.otpBtnVerified:hover {
+  background: #16a34a;
+  color: white;
+}
+
+.otpVerifyBtn {
+  padding: 10px 18px;
+
+  border-radius: 25px;
+
+  border: 1px solid #111;
+
+  background: white;
+
+  color: #111;
+
+  font-size: 13px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition: 0.2s;
+}
+
+.otpVerifyBtn:hover {
+  background: #111;
+  color: white;
+}
+
+.otpTimer {
+  font-size: 12px;
+  color: #777;
+}
+
+.otpContainer {
+  display: flex;
+  gap: 10px;
+
+  margin: 4px 0;
+}
+
+.otpBox {
+  width: 45px;
+  height: 50px;
+
+  text-align: center;
+
+  font-size: 18px;
+  font-weight: 600;
+
+  border-radius: 10px;
+
+  border: 1px solid #ddd;
+
+  outline: none;
+
+  transition: 0.2s;
+}
+
+.otpBox:focus {
+  border-color: #111;
+  box-shadow: 0 0 0 2px rgba(17, 17, 17, 0.1);
+}
+
+.submit {
+  width: 100%;
+
+  padding: 16px;
+
+  border-radius: 30px;
+
+  border: 0;
+
+  background: #111;
+
+  color: white;
+
+  margin-top: 10px;
+
+  cursor: pointer;
+}
+
+.submit:disabled {
+  background: #666;
+  cursor: not-allowed;
+}
+
+.social {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 12px;
+
+  margin-top: 20px;
+}
+
+.social button {
+  padding: 15px;
+
+  border-radius: 30px;
+
+  background: white;
+
+  border: 1px solid #ddd;
+
+  cursor: pointer;
+}
+
+@media (max-width: 800px) {
+  .modal {
+    width: 95%;
+  }
+
+  .imageBox {
+    display: none;
+  }
+
+  .formSection {
+    width: 100%;
+
+    padding: 25px;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .otpBox {
+    width: 38px;
+    height: 44px;
+  }
+}

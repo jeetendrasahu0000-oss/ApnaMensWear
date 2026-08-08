@@ -1,0 +1,370 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 5000;
+  padding: 16px;
+}
+
+.modal {
+  width: 100%;
+  max-width: 950px;
+  max-height: 92vh;
+  overflow-y: auto;
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 20px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.18);
+}
+
+.modal::-webkit-scrollbar {
+  width: 8px;
+}
+
+.modal::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 20px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.header h2 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.header p {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.closeBtn {
+  width: 38px;
+  height: 38px;
+  border: none;
+  border-radius: 50%;
+  background: #f3f4f6;
+  cursor: pointer;
+  font-size: 18px;
+  transition: 0.2s;
+}
+
+.closeBtn:hover {
+  background: #e5e7eb;
+}
+
+/* Progress Bar */
+
+.progressContainer {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 28px;
+  position: relative;
+}
+
+.stepWrapper {
+  flex: 1;
+  position: relative;
+  text-align: center;
+}
+
+.stepCircle {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #e5e7eb;
+  color: #6b7280;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: auto;
+  font-size: 13px;
+  font-weight: 700;
+  position: relative;
+  z-index: 2;
+}
+
+.activeStep {
+  background: #111827;
+  color: white;
+}
+
+.stepWrapper span {
+  display: block;
+  margin-top: 8px;
+  font-size: 12px;
+  color: #4b5563;
+}
+
+.stepLine {
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  width: 100%;
+  height: 3px;
+  background: #e5e7eb;
+  z-index: 1;
+}
+
+.activeLine {
+  background: #111827;
+}
+
+/* Sections */
+
+.section {
+  margin-bottom: 22px;
+}
+
+.section h3 {
+  margin: 0 0 12px;
+  font-size: 16px;
+  color: #111827;
+  font-weight: 700;
+}
+
+/* Products */
+
+.products {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.productCard {
+  display: flex;
+  gap: 12px;
+  padding: 10px;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  transition: 0.2s;
+}
+
+.productCard:hover {
+  background: #f9fafb;
+}
+
+.productImage {
+  width: 75px;
+  height: 90px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.productInfo {
+  flex: 1;
+}
+
+.productInfo h4 {
+  margin: 0;
+  font-size: 14px;
+  color: #111827;
+  font-weight: 600;
+}
+
+.productInfo p {
+  margin: 4px 0;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.productInfo strong {
+  display: block;
+  margin-top: 6px;
+  font-size: 14px;
+  color: #111827;
+}
+
+/* Address */
+
+.address {
+  background: #f8fafc;
+  border-radius: 12px;
+  padding: 14px;
+}
+
+.address p {
+  margin: 4px 0;
+  font-size: 13px;
+  color: #374151;
+}
+
+/* Summary */
+
+.summary {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+  margin-bottom: 22px;
+}
+
+.summary div {
+  background: #f8fafc;
+  padding: 14px;
+  border-radius: 12px;
+}
+
+.summary span {
+  display: block;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.summary strong {
+  display: block;
+  margin-top: 4px;
+  font-size: 16px;
+  color: #111827;
+}
+
+/* Update Section */
+
+.updateSection {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.updateSection label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.updateSection select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  outline: none;
+  font-size: 13px;
+  background: white;
+}
+
+.updateSection select:focus {
+  border-color: #111827;
+}
+
+/* Buttons */
+
+.actions {
+  display: flex;
+  gap: 10px;
+}
+
+.updateBtn,
+.closeActionBtn {
+  flex: 1;
+  border: none;
+  padding: 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: 0.2s;
+}
+
+.updateBtn {
+  background: #111827;
+  color: white;
+}
+
+.updateBtn:hover {
+  opacity: 0.92;
+}
+
+.closeActionBtn {
+  background: #e5e7eb;
+  color: #111827;
+}
+
+.closeActionBtn:hover {
+  background: #d1d5db;
+}
+
+/* Mobile */
+
+@media (max-width: 768px) {
+    .overlay{
+        padding: 0px
+    };
+  .modal {
+    padding: 0px;
+    max-height: 100vh;
+    border-radius: 0px;
+  }
+
+  .header h2 {
+    font-size: 17px;
+  }
+
+  .header p {
+    font-size: 11px;
+  }
+
+  .progressContainer {
+    overflow-x: auto;
+    gap: 20px;
+    padding-bottom: 10px;
+  }
+
+  .stepWrapper {
+    min-width: 80px;
+  }
+
+  .stepCircle {
+    width: 28px;
+    height: 28px;
+    font-size: 11px;
+  }
+
+  .stepWrapper span {
+    font-size: 10px;
+  }
+
+  .productImage {
+    width: 60px;
+    height: 72px;
+  }
+
+  .productInfo h4 {
+    font-size: 13px;
+  }
+
+  .productInfo p {
+    font-size: 11px;
+  }
+
+  .summary {
+    grid-template-columns: 1fr;
+  }
+
+  .updateSection {
+    grid-template-columns: 1fr;
+  }
+
+  .actions {
+    flex-direction: column;
+  }
+
+  .updateBtn,
+  .closeActionBtn {
+    padding: 10px;
+    font-size: 13px;
+  }
+}

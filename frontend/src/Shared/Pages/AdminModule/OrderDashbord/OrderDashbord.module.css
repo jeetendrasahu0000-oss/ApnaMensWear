@@ -1,0 +1,341 @@
+.container {
+  padding: 20px;
+  background: #f8fafc;
+  min-height: 100vh;
+}
+
+.header {
+  margin-bottom: 20px;
+}
+
+.header h2 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: #111827;
+}
+
+/* Stats */
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.statCard {
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 16px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+  border: 1px solid #e5e7eb;
+}
+
+.statCard span {
+  display: block;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.statCard h3 {
+  margin: 8px 0 0;
+  font-size: 22px;
+  color: #111827;
+}
+
+/* Desktop Table */
+
+.desktopView {
+  display: block;
+}
+
+.tableWrapper {
+  background: white;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table thead {
+  background: #111827;
+  color: white;
+}
+
+.table th {
+  padding: 14px;
+  text-align: left;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.table td {
+  padding: 14px;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 13px;
+  color: #374151;
+  vertical-align: middle;
+}
+
+.table tbody tr:hover {
+  background: #f8fafc;
+}
+
+.tableImages {
+  display: flex;
+  gap: 4px;
+}
+
+.tableImages img {
+  width: 38px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+}
+
+.viewBtn {
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 8px;
+  background: #2563eb;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.viewBtn:hover {
+  background: #1d4ed8;
+}
+
+/* Mobile Cards */
+
+.mobileView {
+  display: none;
+}
+
+.orderCard {
+  background: white;
+  border-radius: 14px;
+  padding: 12px;
+  margin-bottom: 12px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cardHeader h4 {
+  margin: 0;
+  font-size: 12px;
+  color: #111827;
+}
+
+.cardHeader span {
+  font-size: 10px;
+  color: #6b7280;
+}
+
+/* Images */
+
+.imagesRow {
+  display: flex;
+  gap: 6px;
+  margin: 10px 0;
+}
+
+.productImage {
+  width: 50px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+
+.moreImages {
+  width: 50px;
+  height: 60px;
+  border-radius: 8px;
+  background: #f3f4f6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: #374151;
+}
+
+/* Info */
+
+.infoGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.infoGrid label {
+  display: block;
+  font-size: 10px;
+  color: #6b7280;
+  margin-bottom: 2px;
+}
+
+.infoGrid p {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: #111827;
+}
+
+/* Status */
+
+.statusRow {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.badge {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+/* Order Status */
+
+.pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.confirmed {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.packed {
+  background: #ede9fe;
+  color: #6d28d9;
+}
+
+.shipped {
+  background: #cffafe;
+  color: #155e75;
+}
+
+.delivered {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.cancelled {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.returned {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+/* Payment Status */
+
+.paid {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.failed {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.refunded {
+  background: #e0e7ff;
+  color: #4338ca;
+}
+
+/* Loading */
+
+.loading {
+  text-align: center;
+  padding: 60px;
+  font-size: 16px;
+  color: #6b7280;
+}
+
+/* Tablet */
+
+@media (max-width: 1024px) {
+  .statsGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Mobile */
+
+@media (max-width: 768px) {
+  .container {
+    padding: 10px;
+  }
+
+  .desktopView {
+    display: none;
+  }
+
+  .mobileView {
+    display: block;
+  }
+
+  .header h2 {
+    font-size: 18px;
+  }
+
+  .statsGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .statCard {
+    padding: 12px;
+  }
+
+  .statCard span {
+    font-size: 10px;
+  }
+
+  .statCard h3 {
+    font-size: 18px;
+  }
+
+  .productImage {
+    width: 45px;
+    height: 55px;
+  }
+
+  .moreImages {
+    width: 45px;
+    height: 55px;
+  }
+
+  .infoGrid p {
+    font-size: 11px;
+  }
+
+  .badge {
+    font-size: 9px;
+  }
+}
