@@ -18,24 +18,30 @@ const OrderDetails = ({ order, onClose, refreshOrders }) => {
     try {
       setLoading(true);
 
-      const [orderRes, paymentRes] = await Promise.all([
-        api.patch(`/v1/order/admin/status/${order._id}`, { orderStatus }),
+      const [orderRes, paymentRes] = await Promise.allSettled([
 
-        api.patch(`/v1/order/admin/payment-status/${order._id}`, {
-          paymentStatus,
-        }),
+        api.post(`/v1/order/admin/status/${order._id}`, { orderStatus }),
+        api.post(`/v1/order/admin/payment-status/${order._id}`, { paymentStatus,}),
+
       ]);
 
-      if (orderRes.data.success && paymentRes.data.success) {
-        alert("Order updated successfully");
+      console.log("orderRes", orderRes);
+      console.log("paymentRes", paymentRes);
 
+      if (orderRes.value.data.success && paymentRes.value.data.success) {
+        alert("Order updated successfully");
         refreshOrders();
 
         onClose();
       }
-    } catch (error) {
+
+    } 
+    catch (error) {
       alert(error.response?.data?.message || "Failed to update order");
-    } finally {
+      console.log('error=>',error)
+
+    } 
+    finally {
       setLoading(false);
     }
   };
@@ -47,7 +53,7 @@ const OrderDetails = ({ order, onClose, refreshOrders }) => {
       <div className={styles.modal}>
 
         {/* Header */}
-        
+
         <div className={styles.header}>
           <div>
             <h2>{order.orderNumber}</h2>

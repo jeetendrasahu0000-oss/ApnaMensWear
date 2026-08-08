@@ -1,0 +1,303 @@
+.container {
+  padding: 14px;
+  background: #f8fafc;
+  min-height: 100vh;
+}
+
+/* Header */
+
+.header {
+  margin-bottom: 14px;
+}
+
+.header h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: #111827;
+}
+
+/* Stats */
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.statCard {
+  background: white;
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+}
+
+.statCard svg {
+  font-size: 22px;
+  color: #2563eb;
+}
+
+.statCard span {
+  display: block;
+  font-size: 11px;
+  color: #64748b;
+}
+
+.statCard h3 {
+  margin: 2px 0 0;
+  font-size: 18px;
+  color: #111827;
+}
+
+/* Loading */
+
+.loading {
+  text-align: center;
+  padding: 40px;
+  font-size: 14px;
+  color: #64748b;
+}
+
+/* Desktop Table */
+
+.desktopTable {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.desktopTable table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.desktopTable thead {
+  background: #111827;
+  color: white;
+}
+
+.desktopTable th {
+  padding: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: left;
+}
+
+.desktopTable td {
+  padding: 10px 12px;
+  font-size: 12px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.desktopTable tbody tr:hover {
+  background: #f8fafc;
+}
+
+/* User */
+
+.userInfo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.userInfo img {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.userInfo span {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Status */
+
+.active,
+.inactive {
+  padding: 3px 8px;
+  border-radius: 30px;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.active {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.inactive {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+/* Actions */
+
+.actions {
+  display: flex;
+  gap: 6px;
+}
+
+.actions button,
+.cardActions button {
+  width: 30px;
+  height: 30px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  background: #eff6ff;
+  color: #2563eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.actions button:hover,
+.cardActions button:hover {
+  opacity: 0.9;
+}
+
+.deleteBtn {
+  background: #fee2e2 !important;
+  color: #dc2626 !important;
+}
+
+/* Mobile Cards */
+
+.mobileCards {
+  display: none;
+}
+
+.userCard {
+  background: white;
+  border-radius: 12px;
+  padding: 10px;
+  margin-bottom: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+}
+
+.cardTop {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.cardTop img {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.cardTop h4 {
+  margin: 0;
+  font-size: 13px;
+  color: #111827;
+}
+
+.cardTop p {
+  margin: 2px 0;
+  font-size: 11px;
+  color: #64748b;
+  word-break: break-word;
+}
+
+.cardMeta {
+  margin-top: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cardMeta span:first-child {
+  font-size: 11px;
+  color: #374151;
+}
+
+.cardActions {
+  display: flex;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+/* Tablet */
+
+@media (max-width: 992px) {
+  .statsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Mobile */
+
+@media (max-width: 768px) {
+  .container {
+    padding: 10px;
+  }
+
+  .header h2 {
+    font-size: 18px;
+  }
+
+  .desktopTable {
+    display: none;
+  }
+
+  .mobileCards {
+    display: block;
+  }
+
+  .statsGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  .statCard {
+    padding: 10px;
+    gap: 8px;
+  }
+
+  .statCard svg {
+    font-size: 18px;
+  }
+
+  .statCard span {
+    font-size: 10px;
+  }
+
+  .statCard h3 {
+    font-size: 15px;
+  }
+}
+
+/* Small Mobile */
+
+@media (max-width: 480px) {
+  .statsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .userCard {
+    padding: 8px;
+  }
+
+  .cardTop img {
+    width: 40px;
+    height: 40px;
+  }
+
+  .cardTop h4 {
+    font-size: 12px;
+  }
+
+  .cardTop p {
+    font-size: 10px;
+  }
+}
