@@ -8,18 +8,19 @@ const router = express.Router()
 
 
 // for admin 
+// ,Authontication,Authorization(["admin","buyer"])
 
-router.get('/',Authontication,Authorization(["admin","buyer"]),GetAllProduct)
-router.post('/regester',RegesterProduct)
-router.put('/update/:id',UpdateProduct)
-router.delete('/delete/:id',DeleteProduct)
+router.get('/',GetAllProduct)
+router.post('/regester',Authontication,Authorization(["admin","buyer"]),RegesterProduct)
+router.put('/update/:id',Authontication,Authorization(["admin","buyer"]),UpdateProduct)
+router.delete('/delete/:id',Authontication,Authorization(["admin","buyer"]),DeleteProduct)
 
 
 // for users 
 
 router.get('/details/:slug',GetProductDetails)
 router.get('/category/:category',GetProductsByCategory)
-router.get('/related/:id',GetRelatedProducts)
+router.get('/related',GetRelatedProducts)
 router.get('/filtered',GetFillterdProducts)
 router.get('/search',SearchProducts)
 

@@ -13,7 +13,7 @@ const setOtpController = async (req,res) =>{
         if(!isOtpSet.success){
             return res.status(200).json({success:false,message:"falied to set otp",data:null,error:null})
         }
-        return res.status(200).json({success:true,message:"set otp successfully",data:isOtpSet.data,error:null})
+        return res.status(200).json({success:true,message:"set otp successfully",data:{otp:isOtpSet.data},error:null})
     }
     catch(error){
         console.log('failed to handel ',error)

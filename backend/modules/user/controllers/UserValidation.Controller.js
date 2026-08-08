@@ -3,9 +3,11 @@ import { isEmailExists, isPhoneExists } from "../services/UserValidation.Service
 
 const isEmailExistsController = async (req,res) => {
   try{
-    console.log('Hit isEmailExistsController Api...')
+    console.log('Hit isEmailExistsController Api.........')
     const {email} = req.params
+  
     const isExist = await isEmailExists(email)
+    
     if(!isExist){
         return res.status(200).json({success:false,message:"email is not exixt",data:{exists:false},error:null})
     }

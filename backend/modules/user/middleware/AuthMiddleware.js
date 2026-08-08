@@ -1,18 +1,24 @@
 import jwt from 'jsonwebtoken'
 
+
+
+// ,Authontication,Authorization(["admin","buyer"])
+
 const Authontication = (req,res,next)=>{
     try{
-        console.log('Hit Authontication Middleware...')
+        console.log('Hit Authontication Middleware......')
 
         const AuthHeader = req.headers.authorization
         if(!AuthHeader?.startsWith('Bearer ')){
+            console.log(`AccessToken Missing`)
             return res.status(401).json({success:false,message:"AccessToken Missing",data:null,error:"ACCESS_TOKEN_MISSING"})
         }
 
         const AccessToken = AuthHeader.split(" ")[1]
-        console.log("AccessToken => ",AccessToken)
+        // console.log("AccessToken => ",AccessToken)
        
         const decodedAccessToken = jwt.verify(AccessToken,process.env.JWT_ACCESS_TOKEN_SECRET)
+        console.log('AccessToken Decoded successfully')
 
         req.user = {
             userId:decodedAccessToken.userId,
@@ -20,6 +26,8 @@ const Authontication = (req,res,next)=>{
             phone:decodedAccessToken.phone,
             roles:decodedAccessToken.roles,
         }
+
+        console.log('Pass Authontication Middleware...')
 
         return next()
 
@@ -29,6 +37,7 @@ const Authontication = (req,res,next)=>{
         console.log('failed to pass Authontication Middleware...')
 
         if (error.name === "TokenExpiredError" ||error.name === "JsonWebTokenError") {
+            console.log(`Invalid or expired AccessToken`)
             return res.status(401).json({
                 success: false,
                 message: "Invalid or expired AccessToken",
@@ -62,6 +71,7 @@ const Authorization = (AllowedRoles)=>{
                     error: "FORBIDDEN"
                 });
             }
+            console.log('pass Authorization Middleware.....')
             return next()
         }
         catch(error){

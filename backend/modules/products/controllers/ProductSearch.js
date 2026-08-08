@@ -84,69 +84,201 @@ const GetProductsByCategory = async (req,res)=>{
 }
 
 
+// const GetRelatedProducts = async (req, res) => {
+//     try {
+
+//         const productId = req.params.id;
+//         const page = Math.max(Number(req.query.page) || 1, 1);
+//         const limit = Math.max(Number(req.query.limit) || 10, 1);
+
+//         const skip = (page - 1) * limit;
+
+//         const product = await ProductModel.findById(productId).select("category subCategory").lean();
+
+//         if (!product) {
+//             return res.status(404).json({success: false,message: "Product not found",data: null,error: null});
+//         }
+
+//         const baseMatch = {
+//             _id: { $ne: product._id },
+//             isActive: true
+//         };
+
+//         const [products, totalProductsResult] = await Promise.all([
+
+//             ProductModel.aggregate([
+//                 {
+//                     $match: baseMatch
+//                 },
+//                 {
+//                     $addFields: {
+//                         priority: {
+//                             $cond: [
+//                                 {
+//                                     $and: [
+//                                         { $eq: ["$category", product.category] },
+//                                         { $eq: ["$subCategory", product.subCategory] }
+//                                     ]
+//                                 },
+//                                 1,
+//                                 2
+//                             ]
+//                         }
+//                     }
+//                 },
+//                 {
+//                     $sort: {
+//                         priority: 1,
+//                         createdAt: -1
+//                     }
+//                 },
+//                 {
+//                     $skip: skip
+//                 },
+//                 {
+//                     $limit: limit
+//                 },
+//                 {
+//                     $project: {
+//                         priority: 0
+//                     }
+//                 }
+//             ]),
+
+//             ProductModel.countDocuments(baseMatch)
+
+//         ]);
+
+//         const totalPages = Math.ceil(totalProductsResult / limit);
+
+//         return res.status(200).json({
+//             success: true,
+//             message: "Products fetched successfully",
+//             data: {
+//                 products,
+//                 pagination: {
+//                     page,
+//                     limit,
+//                     totalProducts: totalProductsResult,
+//                     totalPages,
+//                     hasNextPage: page < totalPages,
+//                     hasPrevPage: page > 1,
+//                     nextPage: page < totalPages ? page + 1 : null,
+//                     prevPage: page > 1 ? page - 1 : null
+//                 }
+//             },
+//             error: null
+//         });
+
+//     } catch (error) {
+
+//         console.error("GetRelatedProducts Error:", error);
+
+//         return res.status(500).json({
+//             success: false,
+//             message: "Internal server error",
+//             data: null,
+//             error: error.message
+//         });
+
+//     }
+// };
+
+
+
 const GetRelatedProducts = async (req, res) => {
     try {
 
-        const productId = req.params.id;
+        const {
+            id,
+            slug,
+            category,
+            subCategory,
+        } = req.query;
+
         const page = Math.max(Number(req.query.page) || 1, 1);
         const limit = Math.max(Number(req.query.limit) || 10, 1);
-
         const skip = (page - 1) * limit;
 
-        const product = await ProductModel.findById(productId).select("category subCategory").lean();
-
-        if (!product) {
-            return res.status(404).json({success: false,message: "Product not found",data: null,error: null});
+        if (!id && !slug && !category && !subCategory) {
+            return res.status(400).json({
+                success: false,
+                message: "At least one of id, slug, category, or subCategory is required",
+                data: null,
+                error: null
+            });
         }
 
-        const baseMatch = {
-            _id: { $ne: product._id },
-            isActive: true
-        };
+        // step 1: resolve a reference product if id or slug was given
+        // (gives us category/subCategory to prioritize against, and an _id to exclude)
+        let refProduct = null;
 
-        const [products, totalProductsResult] = await Promise.all([
+        if (id) {
+            refProduct = await ProductModel.findById(id).select("category subCategory").lean();
+        } else if (slug) {
+            refProduct = await ProductModel.findOne({ slug }).select("category subCategory").lean();
+        }
 
-            ProductModel.aggregate([
-                {
-                    $match: baseMatch
-                },
+        if ((id || slug) && !refProduct) {
+            return res.status(404).json({
+                success: false,
+                message: "Product not found",
+                data: null,
+                error: null
+            });
+        }
+
+        // step 2: build the match — explicit query params override the resolved product's fields
+        const effectiveCategory = category || refProduct?.category;
+        const effectiveSubCategory = subCategory || refProduct?.subCategory;
+
+        const baseMatch = { isActive: true };
+
+        if (refProduct?._id) {
+            baseMatch._id = { $ne: refProduct._id };
+        }
+
+        if (effectiveCategory) {
+            baseMatch.category = effectiveCategory;
+        }
+
+        // step 3: priority scoring only makes sense when we have both fields to weigh
+        // (subCategory match ranked above plain category match)
+        const hasPriorityFields = Boolean(effectiveCategory && effectiveSubCategory);
+
+        const pipeline = [{ $match: baseMatch }];
+
+        if (hasPriorityFields) {
+            pipeline.push(
                 {
                     $addFields: {
                         priority: {
                             $cond: [
-                                {
-                                    $and: [
-                                        { $eq: ["$category", product.category] },
-                                        { $eq: ["$subCategory", product.subCategory] }
-                                    ]
-                                },
+                                { $eq: ["$subCategory", effectiveSubCategory] },
                                 1,
                                 2
                             ]
                         }
                     }
                 },
-                {
-                    $sort: {
-                        priority: 1,
-                        createdAt: -1
-                    }
-                },
-                {
-                    $skip: skip
-                },
-                {
-                    $limit: limit
-                },
-                {
-                    $project: {
-                        priority: 0
-                    }
-                }
-            ]),
+                { $sort: { priority: 1, createdAt: -1 } }
+            );
+        } else {
+            pipeline.push({ $sort: { createdAt: -1 } });
+        }
 
+        pipeline.push(
+            { $skip: skip },
+            { $limit: limit }
+        );
+
+        if (hasPriorityFields) {
+            pipeline.push({ $project: { priority: 0 } });
+        }
+
+        const [products, totalProductsResult] = await Promise.all([
+            ProductModel.aggregate(pipeline),
             ProductModel.countDocuments(baseMatch)
-
         ]);
 
         const totalPages = Math.ceil(totalProductsResult / limit);
@@ -183,7 +315,6 @@ const GetRelatedProducts = async (req, res) => {
 
     }
 };
-
 
 const GetFillterdProducts = async (req, res) => {
     try {

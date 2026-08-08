@@ -1,0 +1,19 @@
+Backend/
+    controller/
+    routes/
+    models/
+    utils/
+    services/
+    config/
+    Modules/
+        Admin/
+            controller/
+            routes/
+            models/
+        User/
+        Product/
+        Order/
+        Payment/
+
+    server.js
+    app.js

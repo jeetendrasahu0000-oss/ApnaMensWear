@@ -40,7 +40,7 @@ const RegesterProduct = async(req,res)=>{
         // console.log('1')
 
         if(missingFields.length > 0){
-            return res.status(404).json({success:false,message:"required fields are missing",data:null,error:missingFields})
+            return res.status(400).json({success:false,message:"required fields are missing",data:null,error:missingFields})
         }
         // console.log('2')
 

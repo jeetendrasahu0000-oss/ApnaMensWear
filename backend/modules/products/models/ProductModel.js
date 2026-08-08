@@ -20,10 +20,25 @@ const variants = new mongoose.Schema(
             trim: true,
         },
     },
-    {
-        id:false
-    }
 )
+
+
+
+const ImageSchema = new mongoose.Schema(
+  {
+    url: {
+      type: String,
+      required: true,
+    },
+    public_id: {
+      type: String,
+      required: true,
+    },
+  }, 
+  { 
+    _id: false 
+  }
+);
 
 
 const productSchema = new mongoose.Schema(
@@ -81,10 +96,10 @@ const productSchema = new mongoose.Schema(
     variants: [variants],
 
     coverImage:{
-      type:String,
+      type:ImageSchema,
       required:true
     },
-    images:[String],
+    images:[ImageSchema],
 
     tags: [String],
 

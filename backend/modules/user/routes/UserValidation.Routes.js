@@ -3,8 +3,8 @@ import { isEmailExistsController, isPhoneExistsController } from '../controllers
 
 const UserValidationRoutes = express.Router()
 
-UserValidationRoutes.get('/is-email-exist/:phoneNo',isEmailExistsController)
-UserValidationRoutes.get('/is-phone-exist/:email',isPhoneExistsController)
+UserValidationRoutes.get('/is-email-exist/:email',isEmailExistsController)
+UserValidationRoutes.get('/is-phone-exist/:phoneNo',isPhoneExistsController)
 
 
 // // http://localhost:5000/api/v1/user/validation/is-email-exist

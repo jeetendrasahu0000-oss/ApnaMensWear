@@ -2,6 +2,7 @@ import bcrypt from "bcrypt";
 import UserModel from "../models/UserModel.js";
 import {isEmailExists,isPhoneExists,} from "../services/UserValidation.Services.js";
 import jwt from 'jsonwebtoken'
+import { verifyOtp } from "../../../Services/OptServices.js";
 
 
 const userSignup = async (req,res) => {
@@ -71,6 +72,10 @@ const userSignup = async (req,res) => {
       return res.status(400).json({success: false,message:"Password must be at least 8 characters",data: null,error: null,});
     }
 
+    const isOtpVerifyed = verifyOtp(commingData.phone,commingData.otp)
+    if(!isOtpVerifyed){
+      return res.status(400).json({success: false,message:"otp not verified",data:{verified:false},error: null,});
+    }
 
     // Hash password
     const hashedPassword = await bcrypt.hash(commingData.password, 10);
@@ -179,7 +184,7 @@ const userLogin = async (req,res) => {
       },
       process.env.JWT_ACCESS_TOKEN_SECRET,
       {
-        expiresIn:'15m'
+        expiresIn:'1m'
       }
     )
 
@@ -187,7 +192,8 @@ const userLogin = async (req,res) => {
       {
         httpOnly:true,
         secure:process.env.NODE_ENV === "production",
-        sameSite:"strict",
+        // sameSite:"strict",
+        sameSite:"lax",
         maxAge: 7 * 24 * 60 * 60 * 1000,
       }
     )
@@ -249,7 +255,8 @@ const refreshAccessToken = async (req,res) => {
     const UserRefreshToken = req.cookies.RefreshToken
 
     if(!UserRefreshToken){
-        return res.status(401).json({success:false,message:"Refresh token missing",data:null,error:"REFRESHTOKEN_MISSING"})
+      console.log('Refresh token missing')
+      return res.status(401).json({success:false,message:"Refresh token missing",data:null,error:"REFRESHTOKEN_MISSING"})
     }
 
     const decodedToken = jwt.verify(UserRefreshToken,process.env.JWT_REFRESH_TOKEN_SECRET)
@@ -259,10 +266,12 @@ const refreshAccessToken = async (req,res) => {
     const user = await UserModel.findById(decodedToken.userId)
 
     if(!user){
+      console.log('User Not Found')
       return res.status(400).json({success:false,message:"User Not Found",data:null,error:"USER_NOT_EXIST"})
     }
 
     if(user.refreshToken !== UserRefreshToken){
+      console.log("Refresh token is invalid or has been revoked")
       res.clearCookie("RefreshToken");
       return res.status(401).json({success:false,message:"Refresh token is invalid or has been revoked",data:null,error:"REFRESH_TOKEN_REVOKED"})
     }
@@ -289,7 +298,7 @@ const refreshAccessToken = async (req,res) => {
       },
       process.env.JWT_ACCESS_TOKEN_SECRET,
       {
-        expiresIn:'15m'
+        expiresIn:'10m'
       }
     )
 
@@ -305,7 +314,8 @@ const refreshAccessToken = async (req,res) => {
       {
         httpOnly:true,
         secure:process.env.NODE_ENV === "production",
-        sameSite:"strict",
+        // sameSite:"strict",
+        sameSite:"lax",
         maxAge: 7 * 24 * 60 * 60 * 1000,
       }
     )
@@ -325,6 +335,7 @@ const refreshAccessToken = async (req,res) => {
     console.error("Failed to handle refreshAccessToken",error);
 
     if (error.name === "TokenExpiredError" ||error.name === "JsonWebTokenError") {
+      console.log("Invalid or expired refresh token")
       return res.status(401).json({
         success: false,
         message: "Invalid or expired refresh token",
