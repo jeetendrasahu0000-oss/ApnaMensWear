@@ -8,6 +8,7 @@ import userRouter from "./user/routes/UserLoginSignup.Routes.js";
 import userCartRoutes from "./user/routes/USerCart.Routes.js";
 import imageRoutes from "./cloudinery/routes/Basic.Routes.js";
 import orderRoutes from "./order/routes/Order.routes.js";
+import UserAdminRoutes from "./user/routes/UserAdmin.Routes.js";
 
 
 
@@ -24,6 +25,7 @@ Router.use('/api/v1/order',orderRoutes)
 Router.use('/api/v1/user/validation',UserValidationRoutes)
 Router.use('/api/v1/user',userRouter)
 Router.use('/api/v1/cart',userCartRoutes)
+Router.use('/api/v1/user/admin',UserAdminRoutes)
 
 
 

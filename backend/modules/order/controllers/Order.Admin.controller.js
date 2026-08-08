@@ -8,6 +8,7 @@ import OrderModel from "../models/OrderModel.js";
 
 const GetAllOrders = async (req, res) => {
   try {
+    console.log('Hit GetAllOrders Api.....')
     const page = Number(req.query.page) || 1;
     const limit = Number(req.query.limit) || 10;
 
@@ -70,6 +71,8 @@ const GetAllOrders = async (req, res) => {
 
 const GetOrderDetails = async (req, res) => {
   try {
+
+    console.log('Hit GetOrderDetails Api.....')
     const { orderId } = req.params;
 
     const order = await OrderModel.findById(orderId);
@@ -107,6 +110,9 @@ const GetOrderDetails = async (req, res) => {
 
 const UpdateOrderStatus = async (req, res) => {
   try {
+
+    console.log('Hit UpdateOrderStatus Api.....')
+
     const { orderId } = req.params;
     const { orderStatus } = req.body;
 
@@ -169,6 +175,9 @@ const UpdateOrderStatus = async (req, res) => {
 
 const UpdatePaymentStatus = async (req, res) => {
   try {
+
+    console.log('Hit UpdatePaymentStatus Api.....')
+
     const { orderId } = req.params;
     const { paymentStatus } = req.body;
 
@@ -222,6 +231,10 @@ const UpdatePaymentStatus = async (req, res) => {
 
 const GetOrderDashboardStats = async (req, res) => {
   try {
+
+    console.log('Hit GetOrderDashboardStats Api.....')
+
+
     const [
       totalOrders,
       pendingOrders,

@@ -13,10 +13,10 @@ orderRoutes.get('/',Authontication,Authorization(['buyer']),GetOrders)
 
 orderRoutes.get("/admin",Authontication,Authorization(["buyer","admin"]),GetAllOrders);
 orderRoutes.get("/admin/:orderId",Authontication,Authorization(["buyer","admin"]),GetOrderDetails);
-orderRoutes.get("/admin/stats",Authontication,Authorization(["admin"]),GetOrderDashboardStats);
+orderRoutes.get("/admin/stats",Authontication,Authorization(["buyer","admin"]),GetOrderDashboardStats);
 
-orderRoutes.patch("/admin/status/:orderId",Authontication,Authorization(["admin"]),UpdateOrderStatus);
-orderRoutes.patch("/admin/payment-status/:orderId",Authontication,Authorization(["admin"]),UpdatePaymentStatus);
+orderRoutes.post("/admin/status/:orderId",Authontication,Authorization(["buyer","admin"]),UpdateOrderStatus);
+orderRoutes.post("/admin/payment-status/:orderId",Authontication,Authorization(["buyer","admin"]),UpdatePaymentStatus);
 
 // http://localhost:5000/api/v1/order/create
 
