@@ -1,35 +1,3 @@
-// import { useState } from "react";
-// import styles from "./AdminDashbord.module.css";
-
-// import AdminHeader from "./AdminHeader/AdminHeader";
-// import AdminSidebar  from "./AdminSideBar/AdminSidebar";
-// import ProductDashboard from "./ProductDashbord/ProductDashbord";
-// import SalesReport from "./SalesReport/SalesReport";
-// import OrderDashbord from "./OrderDashbord/OrderDashbord";
-// import UserDashbord from "./UserDashbord/UserDashbord";
-
-
-
-
-
-// function AdminDashbord(){
-//     return(
-//     <div>
-//         <AdminHeader></AdminHeader>
-//         <AdminSidebar></AdminSidebar>
-//         <SalesReport></SalesReport>
-//         <OrderDashbord></OrderDashbord>
-//         <UserDashbord></UserDashbord>
-//         <ProductDashboard></ProductDashboard>
-//     </div>
-//     )
-// }
-// export default AdminDashbord;
-
-
-
-
-
 import { useState } from "react";
 import styles from "./AdminDashbord.module.css";
 
@@ -40,12 +8,16 @@ import SalesReport from "./SalesReport/SalesReport";
 import OrderDashbord from "./OrderDashbord/OrderDashbord";
 import UserDashbord from "./UserDashbord/UserDashbord";
 import ProductDashboard from "./ProductDashbord/ProductDashbord";
+import PaymentDashbord from "./PaymentDashbord/PaymentDashbord";
+
+
+
 
 
 function AdminDashbord() {
     
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [activePage, setActivePage] = useState("products");
+  const [activePage, setActivePage] = useState("orders");
 
   const renderPage = () => {
     switch (activePage) {
@@ -54,6 +26,10 @@ function AdminDashbord() {
 
       case "orders":
         return <OrderDashbord />;
+      
+      case "payments":
+        return <PaymentDashbord/>;
+
 
       case "users":
         return <UserDashbord />;

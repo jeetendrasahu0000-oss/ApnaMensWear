@@ -288,7 +288,7 @@
     .hero {
         height: 100vh;
         max-height: 700px;
-        min-height: 560px;
+        min-height: 300px;
     }
 
     .slide {
@@ -396,7 +396,7 @@
 @media (max-width: 400px) {
     .hero {
         max-height: 600px;
-        min-height: 480px;
+        /* min-height: 480px; */
     }
 
     .slide {

@@ -1,11 +1,20 @@
 import React, { useMemo, useState } from "react";
 import styles from "./CreateOrder.module.css";
 import api from "../../../Api/Axios";
+import { loadRazorpay } from "../../../Utils/RazorpayUtils";
+import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 
-const CreateOrder = ({ products = [], user = {}, onClose }) => {
+
+
+
+const CreateOrder = ({ products = [], onClose }) => {
 
   const [addressType, setAddressType] = useState("saved");
-  const [paymentMethod, setPaymentMethod] = useState("COD");
+  const [paymentMethod, setPaymentMethod] = useState("RAZORPAY");
+  const [user,setUser] = useState({})
+  const [verifiedPaymentInfo,setVerifiedPaymentInfo] = useState({})
+  const navigate = useNavigate()
 
   console.log('comming product ',products)
 
@@ -19,6 +28,27 @@ const CreateOrder = ({ products = [], user = {}, onClose }) => {
     postalCode: "",
     country: "India",
   });
+
+  useEffect(()=>{
+    const user = JSON.parse(localStorage.getItem("user"))
+
+    if(addressType === 'saved' && user){
+      ;
+      setShippingAddress(
+        {
+          fullName: user.firstName+" "+user.lastName ,
+          phone:user.phone,
+          addressLine1:user.address.addressLine1,
+          addressLine2: user.address.addressLine2,
+          city: user.address.city,
+          state:user.address.state,
+          postalCode:user.address.pinCode,
+          country: user.address.country,
+        }
+      )
+      setUser(user)
+    }
+  },[])
 
   const subtotal = useMemo(() => {
     return products.reduce((total, item) => {
@@ -43,7 +73,9 @@ const CreateOrder = ({ products = [], user = {}, onClose }) => {
     }));
   };
 
-  const HandlePlaceOrder = async () => {
+  const HandleCreateOrder = async (paymentId) => {
+
+    console.log(paymentId)
 
     const payload = {
       products: products.map((item) => ({
@@ -52,8 +84,9 @@ const CreateOrder = ({ products = [], user = {}, onClose }) => {
         selectedVariant: item.selectedVariant,
       })),
 
+      paymentId:paymentId,
       addressType,
-      shippingAddress:addressType === "saved" ? user?.address : shippingAddress,
+      shippingAddress:shippingAddress,
       paymentMethod,
     };
 
@@ -65,13 +98,111 @@ const CreateOrder = ({ products = [], user = {}, onClose }) => {
       if(response.status){
         console.log('response')
         alert(response.data.message)
+        return true
       }
     }
     catch(error){
       console.log('failed to create order ',error)
+      alert(error.response.data.message)
       console.log('comming error response =>',error.response.data)
+      return false
+    }
+};
+
+  const CreateOrderInRazorpay = async()=>{
+     try{
+      console.log('Call CreateOrderInRazorpay api..')
+
+      const payload= {products:products}
+      console.log('payload =',payload)
+
+      const response = await api.post('/v1/payment/create-order',payload)
+      
+      if(response.data.success){
+        console.log('successfully create order =>',response.data)
+        return response.data.data
+      }
+    }
+    catch(error){
+      console.log('failed to handel CreateOrderInRazorpay',error)
+      return null
+    }
+  }
+
+  const HandlePaymentSuccess =async(paymentData)=>{
+     try{
+      console.log('Call HandlePaymentSuccess api..')
+
+      console.log('comming response for verification ',paymentData)
+
+      const response = await api.post('/v1/payment/verify',paymentData)
+      
+      if(response.data.success && response.data.data.isVerified){
+        console.log('successfully create order =>',response.data)
+        if(response.data.data.isVerified){
+          const result = await HandleCreateOrder(response.data.data.paymentId)
+          if(!result){
+            alert(`Payment successful.We received your payment, but we're having trouble creating your order.Our team will process it shortly.`)
+            navigate('/contact')
+            return
+          }
+          alert('payment successfully done  and order created...')
+          console.log('Before navigate');
+          navigate('/order');
+          console.log('After navigate');
+          alert('After navigate')
+          return
+        }
+      }
+    }
+    catch(error){
+      console.log('failed to handel HandlePaymentSuccess',error)
+      return null
+    }
+  }
+
+  const HandlePlaceOrder = async () => {
+    try{
+      console.log('HandlePlaceOrder')
+
+      const razorpayOrderData = await CreateOrderInRazorpay()
+
+      const loaded = await loadRazorpay()
+
+      if(!loaded){
+        alert("Failed to load Razorpay");
+        return;
+      }
+
+      const options = {
+
+        key: import.meta.env.VITE_RAZORPAY_KEY,
+
+        name: "Apna Mens Wear",
+        description: "Order Payment",
+        // image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSZz72QrjVtlo40v1Z-KjdzXGusjChm4qH9wA9pI_EmXE2sn5j7FwpArJWH&s=10",
+
+        order_id:razorpayOrderData.razorpayOrderId,
+        amount:razorpayOrderData.amount,
+        currency:razorpayOrderData.currency,
+
+
+
+        handler:HandlePaymentSuccess
+
+      };
+
+      const razorpay =new window.Razorpay(options);
+
+      razorpay.open();
+
+    }
+    catch(error){
+      console.log('fialed to handel HandlePlaceOrder')
     }
   };
+
+  
 
   return (
     <div className={styles.overlay}>
@@ -245,14 +376,14 @@ const CreateOrder = ({ products = [], user = {}, onClose }) => {
             <div className={styles.card}>
               <h3>Payment Method</h3>
 
-              <label className={styles.radio}>
+              {/* <label className={styles.radio}>
                 <input
                   type="radio"
                   checked={paymentMethod === "COD"}
                   onChange={() => setPaymentMethod("COD")}
                 />
                 Cash On Delivery
-              </label>
+              </label> */}
 
               <label className={styles.radio}>
                 <input
@@ -290,6 +421,7 @@ const CreateOrder = ({ products = [], user = {}, onClose }) => {
               >
                 Place Order
               </button>
+
             </div>
           </div>
         </div>
@@ -299,3 +431,9 @@ const CreateOrder = ({ products = [], user = {}, onClose }) => {
 };
 
 export default CreateOrder;
+
+
+
+// logo for ApnaMensWear
+
+

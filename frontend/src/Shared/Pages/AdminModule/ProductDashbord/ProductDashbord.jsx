@@ -269,7 +269,7 @@ function ProductDashbord() {
                 return (
                   <div key={product._id} className={styles.productCard}>
                     <img
-                      src={product.coverImage}
+                      src={product.coverImage.url}
                       alt={product.productName}
                       className={styles.cardThumb}
                       onError={(e) => {

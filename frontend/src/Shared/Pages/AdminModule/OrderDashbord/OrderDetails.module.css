@@ -368,3 +368,119 @@
     font-size: 13px;
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.infoGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.infoCard {
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 12px;
+}
+
+.infoCard strong {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.infoCard p {
+  margin: 0;
+  font-size: 13px;
+  color: #111827;
+  word-break: break-word;
+}
+
+.statusBadge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.paid {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.failed {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.refunded {
+  background: #e0e7ff;
+  color: #3730a3;
+}
+
+
+
+
+
+.dimensionSection {
+  margin-top: 15px;
+  padding: 15px;
+  border-radius: 12px;
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+}
+
+.dimensionSection h4 {
+  margin: 0 0 12px;
+  font-size: 14px;
+}
+
+.dimensionGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+.dimensionGrid div {
+  display: flex;
+  flex-direction: column;
+}
+
+.dimensionGrid label {
+  font-size: 12px;
+  margin-bottom: 5px;
+  color: #666;
+}
+
+.dimensionGrid input {
+  padding: 8px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+@media (max-width: 768px) {
+  .dimensionGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+}

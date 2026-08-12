@@ -26,6 +26,7 @@ import ViewCartProduct from "../CartComponents/ViewCartProduct";
 import { FiPackage } from "react-icons/fi";
 import { BsBoxSeam } from "react-icons/bs";
 import { HiOutlineShoppingBag } from "react-icons/hi";
+import { GetCategories } from "../../../StataicData/StaticData";
 
 const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -38,17 +39,20 @@ const Header = () => {
     setIsFormOpen(false)
   }
 
-  const navLinks = [
-    { name: "HOME", icon: <FiHome /> },
-    { name: "NEW ARRIVALS", icon: <FiStar /> },
-    { name: "SHIRTS", icon: <FiBox /> },
-    { name: "T-SHIRTS", icon: <FiBox /> },
-    { name: "JEANS", icon: <FiBox /> },
-    { name: "HOODIES", icon: <FiBox /> },
-    { name: "JACKETS", icon: <FiBox /> },
-    { name: "ACCESSORIES", icon: <FiGift /> },
-    { name: "SALE", icon: <FiTag /> },
-  ];
+  // const navLinks = [
+  //   { name: "HOME", icon: <FiHome /> },
+  //   { name: "NEW ARRIVALS", icon: <FiStar /> },
+  //   { name: "SHIRTS", icon: <FiBox /> },
+  //   { name: "T-SHIRTS", icon: <FiBox /> },
+  //   { name: "JEANS", icon: <FiBox /> },
+  //   { name: "HOODIES", icon: <FiBox /> },
+  //   { name: "JACKETS", icon: <FiBox /> },
+  //   { name: "ACCESSORIES", icon: <FiGift /> },
+  //   { name: "SALE", icon: <FiTag /> },
+  // ];
+
+  const categories = GetCategories()
+  console.log('categories',categories)
 
   return (
     <>
@@ -78,17 +82,18 @@ const Header = () => {
         </div>
 
         <nav className={styles.nav}>
-          {navLinks.map((item) => (
-            <a href="/" key={item.name}>
-              {item.name}
+          <a href="/">HOME</a>
+          {categories.map((item) => (
+            <a href={`/filtered/${item}` }key={item}>
+              {item.toUpperCase()}
             </a>
           ))}
         </nav>
 
         <div className={styles.actions}>
-          <button className={styles.iconBtn}>
+          {/* <button className={styles.iconBtn}>
             <FiSearch />
-          </button>
+          </button> */}
 
           <button className={styles.iconBtn} onClick={()=>setIsFormOpen(true)}>
             <FiUser />
@@ -126,24 +131,26 @@ const Header = () => {
           <h3>Menu</h3>
         </div>
 
-        {navLinks.map((item, index) => (
+        <a href="/" className={styles.drawerLink}>HOME</a>
+        {categories.map((item, index) => (
           <a
-            href="/"
-            key={item.name}
+            href={`/filtered/${item}` }
+            key={item}
             className={styles.drawerLink}
             style={{
               animationDelay: `${index * 0.08}s`,
             }}
           >
             <div className={styles.linkLeft}>
-              <span className={styles.linkIcon}>{item.icon}</span>
+              {/* <span className={styles.linkIcon}>{item.icon}</span> */}
 
-              <span>{item.name}</span>
+              <span>{item.toUpperCase()}</span>
             </div>
 
             <FiChevronRight className={styles.arrow} />
           </a>
         ))}
+
       </div>
 
       {isFormOpen && <SignupLogin   close={OnClose}/>}

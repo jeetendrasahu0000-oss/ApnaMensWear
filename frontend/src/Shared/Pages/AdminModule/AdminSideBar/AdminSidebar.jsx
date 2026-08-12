@@ -37,6 +37,10 @@ function AdminSidebar({
           Orders
         </button>
 
+        <button onClick={() => handleClick("payments")}>
+          Payments
+        </button>
+
         <button onClick={() => handleClick("users")}>
           Users
         </button>

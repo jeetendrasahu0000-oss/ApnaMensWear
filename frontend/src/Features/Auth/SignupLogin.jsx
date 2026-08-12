@@ -5,6 +5,7 @@ import styles from "./SignupLogin.module.css";
 import { Eye, EyeOff, X } from "lucide-react";
 import { FaFacebookF } from "react-icons/fa";
 import { GetAccessToken, SetAccessToken } from "../../Api/TokenStore";
+import { fetchUserProfile } from "../../Api/basicStore";
 
 
 
@@ -308,9 +309,8 @@ function SignupLogin({ close }) {
         }
 
         SetAccessToken(response?.data.data.AccessToken)
-        // const dataAcessToken = GetAccessToken()
-        // console.log('data Access TOKen ',dataAcessToken)
-        // alert(dataAcessToken)
+        
+        await fetchUserProfile()
 
         alert(`${response.data.message}`)
         navigate('/')

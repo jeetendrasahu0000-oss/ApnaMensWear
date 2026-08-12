@@ -6,40 +6,7 @@ import "swiper/css";
 import "swiper/css/pagination";
 import "swiper/css/effect-fade";
 
-import styles from "./HeroSection.module.css";
-
-// const slides = [
-//     {
-//         title: "Premium Style For Modern Men",
-//         desc: "Discover timeless outfits crafted for confidence and comfort.",
-//         button: "Shop Collection",
-//         image: "https://i.pinimg.com/736x/a5/ed/15/a5ed15fd5a671cbee8e8911eb53844ad.jpg",
-//         tag: "NEW ARRIVALS",
-//     },
-//     {
-//         title: "New Winter Collection",
-//         desc: "Upgrade your wardrobe with premium jackets and casual wear.",
-//         button: "Explore Now",
-//         image: "https://i.pinimg.com/736x/7c/f9/9a/7cf99a435f0034e2e2ea89f41a78ec5d.jpg",
-//         tag: "SEASONAL PICKS",
-//     },
-//     {
-//         title: "Classic Looks Modern Fit",
-//         desc: "Designed for men who love effortless fashion.",
-//         button: "View Products",
-//         image: "https://i.pinimg.com/736x/1f/22/32/1f223275b871d4a7819c61c614610fb9.jpg",
-//         tag: "BEST SELLERS",
-//     },
-// ];
-
-
-
-
-
-
-
-
-
+import styles from "./HeroSection.module.css"
 
 
 
@@ -73,33 +40,6 @@ const slides = [
 
 
 
-
-// const slides = [
-//   {
-//     title: "Premium Style For Modern Men",
-//     desc: "Timeless outfits that blend confidence and comfort – for every occasion.",
-//     button: "Shop Collection",
-//     image:
-//       "https://img.magnific.com/free-photo/beautiful-men-fashion-wooden-background_74190-4877.jpg",
-//     tag: "New Arrivals",
-//   },
-//   {
-//     title: "Winter Collection 2026",
-//     desc: "Upgrade your wardrobe with premium jackets and layered casual wear.",
-//     button: "Explore Now",
-//     image:
-//       "https://i.pinimg.com/736x/ab/9c/00/ab9c00011daa500b3476fde67a7a5201.jpg",
-//     tag: "Seasonal Picks",
-//   },
-//   {
-//     title: "Classic Looks, Modern Fit",
-//     desc: "Designed for men who value effortless style and superior craftsmanship.",
-//     button: "View Products",
-//     image:
-//       "https://images.unsplash.com/photo-1539533018447-63fcce2678e3?w=1600&q=80",
-//     tag: "Best Sellers",
-//   },
-// ];
 
 
 
@@ -148,7 +88,7 @@ const HeroSection = () => {
 
                                 <p className={styles.desc}>{slide.desc}</p>
 
-                                <button className={styles.ctaButton}>
+                                {/* <button className={styles.ctaButton}>
                                     <span>{slide.button}</span>
                                     <svg
                                         width="20"
@@ -163,7 +103,7 @@ const HeroSection = () => {
                                         <path d="M5 12h14" />
                                         <path d="M12 5l7 7-7 7" />
                                     </svg>
-                                </button>
+                                </button> */}
 
                                 <div className={styles.bottomIndicators}>
                                     <span className={styles.indicatorDot} />

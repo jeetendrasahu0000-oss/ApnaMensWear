@@ -1,240 +1,3 @@
-// import React from 'react'
-// import styles from './MyOrder.module.css'
-
-// const MyOrder = () => {
-//   return (
-//     <div>MyOrder</div>
-//   )
-// }
-
-// export default MyOrder
-
-
-
-
-// import React, { useEffect, useState } from "react";
-// import api from "../../../Api/Axios";
-// import styles from "./MyOrder.module.css";
-
-// const MyOrder = () => {
-//   const [orders, setOrders] = useState([]);
-//   const [loading, setLoading] = useState(true);
-//   const [error, setError] = useState("");
-
-//   useEffect(() => {
-//     GetOrders();
-//   }, []);
-
-//   const GetOrders = async () => {
-//     try {
-//       setLoading(true);
-
-//       const { data } = await api.get("/v1/order");
-
-//       if (data.success) {
-//         setOrders(data.data || []);
-//       }
-//     } catch (error) {
-//       setError(
-//         error.response?.data?.message || "Failed to fetch orders"
-//       );
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   if (loading) {
-//     return (
-//       <div className={styles.stateContainer}>
-//         Loading orders...
-//       </div>
-//     );
-//   }
-
-//   if (error) {
-//     return (
-//       <div className={styles.error}>
-//         {error}
-//       </div>
-//     );
-//   }
-
-//   if (!orders.length) {
-//     return (
-//       <div className={styles.stateContainer}>
-//         No orders found
-//       </div>
-//     );
-//   }
-
-//   return (
-//     <div className={styles.container}>
-//       <h1 className={styles.heading}>
-//         My Orders
-//       </h1>
-
-//       {orders.map((order) => (
-//         <div
-//           key={order._id}
-//           className={styles.orderCard}
-//         >
-//           <div className={styles.orderHeader}>
-//             <div>
-//               <h3>{order.orderNumber}</h3>
-
-//               <p>
-//                 {new Date(
-//                   order.placedAt
-//                 ).toLocaleString()}
-//               </p>
-//             </div>
-
-//             <div className={styles.statusBox}>
-//               <span
-//                 className={styles.orderStatus}
-//               >
-//                 {order.orderStatus}
-//               </span>
-
-//               <span
-//                 className={styles.paymentStatus}
-//               >
-//                 {order.paymentStatus}
-//               </span>
-//             </div>
-//           </div>
-
-//           <div className={styles.products}>
-//             {order.items.map((item, index) => (
-//               <div
-//                 key={index}
-//                 className={styles.productCard}
-//               >
-//                 <img
-//                   src={item.coverImage.url}
-//                   alt={item.productName}
-//                   className={styles.productImage}
-//                 />
-
-//                 <div
-//                   className={styles.productInfo}
-//                 >
-//                   <h4>{item.productName}</h4>
-
-//                   <p>
-//                     Color:{" "}
-//                     {
-//                       item.selectedVariant
-//                         ?.color
-//                     }
-//                   </p>
-
-//                   <p>
-//                     Size:{" "}
-//                     {
-//                       item.selectedVariant
-//                         ?.size
-//                     }
-//                   </p>
-
-//                   <p>
-//                     Qty: {item.quantity}
-//                   </p>
-
-//                   <p>
-//                     ₹
-//                     {
-//                       item.priceAtPurchase
-//                     }
-//                   </p>
-//                 </div>
-//               </div>
-//             ))}
-//           </div>
-
-//           <div className={styles.footer}>
-//             <div>
-//               <strong>
-//                 Total Amount:
-//               </strong>{" "}
-//               ₹{order.totalAmount}
-//             </div>
-
-//             <div>
-//               <strong>
-//                 Payment:
-//               </strong>{" "}
-//               {order.paymentMethod}
-//             </div>
-//           </div>
-
-//           <div className={styles.address}>
-//             <h4>
-//               Shipping Address
-//             </h4>
-
-//             <p>
-//               {
-//                 order
-//                   .shippingAddress
-//                   .fullName
-//               }
-//             </p>
-
-//             <p>
-//               {
-//                 order
-//                   .shippingAddress
-//                   .phone
-//               }
-//             </p>
-
-//             <p>
-//               {
-//                 order
-//                   .shippingAddress
-//                   .addressLine1
-//               }
-//               ,{" "}
-//               {
-//                 order
-//                   .shippingAddress
-//                   .addressLine2
-//               }
-//             </p>
-
-//             <p>
-//               {
-//                 order
-//                   .shippingAddress
-//                   .city
-//               }
-//               ,{" "}
-//               {
-//                 order
-//                   .shippingAddress
-//                   .state
-//               }{" "}
-//               -
-//               {
-//                 order
-//                   .shippingAddress
-//                   .postalCode
-//               }
-//             </p>
-//           </div>
-//         </div>
-//       ))}
-//     </div>
-//   );
-// };
-
-// export default MyOrder;
-
-
-
-
-
 import React, { useEffect, useState } from "react";
 import { FiPackage, FiEye } from "react-icons/fi";
 import { TbTruckDelivery } from "react-icons/tb";
@@ -243,7 +6,12 @@ import { useNavigate } from "react-router-dom";
 import api from "../../../Api/Axios";
 import styles from "./MyOrder.module.css";
 
+
+
+
 const MyOrder = () => {
+
+  console.log("Order component mounted");
   const navigate = useNavigate();
 
   const [orders, setOrders] = useState([]);
@@ -496,7 +264,7 @@ const MyOrder = () => {
 
           {/* Actions */}
 
-          <div className={styles.actions}>
+          {/* <div className={styles.actions}>
             <button
               className={styles.trackBtn}
               onClick={() =>
@@ -537,7 +305,7 @@ const MyOrder = () => {
                 Cancel
               </button>
             )}
-          </div>
+          </div> */}
         </div>
       ))}
     </div>
