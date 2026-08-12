@@ -11,9 +11,9 @@ const router = express.Router()
 // ,Authontication,Authorization(["admin","buyer"])
 
 router.get('/',GetAllProduct)
-router.post('/regester',Authontication,Authorization(["admin","buyer"]),RegesterProduct)
-router.put('/update/:id',Authontication,Authorization(["admin","buyer"]),UpdateProduct)
-router.delete('/delete/:id',Authontication,Authorization(["admin","buyer"]),DeleteProduct)
+router.post('/regester',Authontication,Authorization(["admin"]),RegesterProduct)
+router.put('/update/:id',Authontication,Authorization(["admin"]),UpdateProduct)
+router.delete('/delete/:id',Authontication,Authorization(["admin"]),DeleteProduct)
 
 
 // for users 

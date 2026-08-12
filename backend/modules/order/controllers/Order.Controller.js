@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import ProductModel from "../../products/models/ProductModel.js";
 import OrderModel from "../models/OrderModel.js";
+import PaymentModel from "../../payment/Model/PaymentModel.js";
 
 
 
@@ -15,6 +16,7 @@ const CreateOrder = async (req, res) => {
 
         const requiredFields = [
             "products",
+            "paymentId",
             "shippingAddress"
         ];
 
@@ -228,10 +230,9 @@ const CreateOrder = async (req, res) => {
         const shippingCharge = 0;
         const discount = 0;
 
-        const totalAmount =
-            subtotal +
-            shippingCharge -
-            discount;
+        const totalAmount = subtotal +shippingCharge -discount;
+
+        const paymentInfo = await PaymentModel.findById(commingData.paymentId)
 
         const order = await OrderModel.create({
             user: userId,
@@ -247,9 +248,10 @@ const CreateOrder = async (req, res) => {
             discount,
             totalAmount,
 
+            paymentId:paymentInfo._id,
             paymentMethod:commingData.paymentMethod || "COD",
 
-            paymentStatus: "Pending",
+            paymentStatus: paymentInfo.status,
             orderStatus: "Pending"
         });
 

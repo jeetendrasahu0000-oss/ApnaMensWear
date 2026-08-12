@@ -1,5 +1,46 @@
 import mongoose from "mongoose";
 
+
+const ShippingSchema = new mongoose.Schema({
+  shiprocketOrderId: {
+    type: Number,
+    default: null
+  },
+
+  shipmentId: {
+    type: Number,
+    default: null
+  }
+}, { _id: false });
+
+
+const PackageSchema = new mongoose.Schema(
+  {
+    length: {
+      type: Number,
+      default: null,
+    },
+
+    breadth: {
+      type: Number,
+      default: null,
+    },
+
+    height: {
+      type: Number,
+      default: null,
+    },
+
+    weight: {
+      type: Number,
+      default: null,
+    },
+  },
+  { _id: false }
+);
+
+
+
 const OrderItemSchema = new mongoose.Schema(
   {
     product: {
@@ -88,6 +129,10 @@ const OrderSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    paymentId: {
+      type: String,
+      required:true,
+    },
 
     paymentMethod: {
       type: String,
@@ -125,7 +170,19 @@ const OrderSchema = new mongoose.Schema(
       type: Date,
       default: Date.now,
     },
+
+    shipping: {
+      type: ShippingSchema,
+      default: () => ({})
+    },
+
+    packageDimentionsDetails: {
+      type: PackageSchema,
+      default: () => ({})
+    },
+    
   },
+
   {
     timestamps: true,
   }

@@ -1,5 +1,6 @@
+import { CreateShiprocketOrder } from "../../shiprocket/Services/CreateShiprocketOrder.js";
 import OrderModel from "../models/OrderModel.js";
-
+import UserModel from '../../user/models/UserModel.js'
 
 
 /* ===========================
@@ -114,7 +115,9 @@ const UpdateOrderStatus = async (req, res) => {
     console.log('Hit UpdateOrderStatus Api.....')
 
     const { orderId } = req.params;
-    const { orderStatus } = req.body;
+    const { orderStatus,dimensions } = req.body;
+
+    console.log('dimention in update status ',dimensions)
 
     const allowedStatus = [
       "Pending",
@@ -146,17 +149,38 @@ const UpdateOrderStatus = async (req, res) => {
       });
     }
 
+    const user =await UserModel.findById(order.user)
+    // console.log('User=>',user)
+
     order.orderStatus = orderStatus;
+
+    
+
+    if(order.orderStatus === "Packed"){
+      const response = await CreateShiprocketOrder({order,user,dimensions})
+      console.log(response)
+      if(response.success){
+        if(!order.shipping) {order.shipping = {};}
+
+         order.shipping.shiprocketOrderId = response.data.order_id || ""
+         order.shipping.shipmentId=response.data.shipment_id || ""
+
+         order.packageDimentionsDetails = dimensions
+         
+      }
+    }
 
     await order.save();
 
+    console.log('contniue')
     return res.status(200).json({
       success: true,
       message: "Order status updated successfully",
       data: order,
       error: null,
     });
-  } catch (error) {
+  } 
+  catch (error) {
     console.log(error);
 
     return res.status(500).json({
