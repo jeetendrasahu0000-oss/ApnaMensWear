@@ -1,5 +1,5 @@
 
-import PaymentModel from "../model/PaymentModel.js";
+import PaymentModel from "../Model/PaymentModel.js";
 
 
 
