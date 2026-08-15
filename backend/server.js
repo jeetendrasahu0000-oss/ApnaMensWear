@@ -13,7 +13,7 @@ const PORT = process.env.PORT || 5000
 ConnectMongoDB()
 
 app.listen(PORT,"0.0.0.0",()=>{
-    console.log(`BACKEND IS RUNNING ON PORT http://localhost:${PORT}/`)
+    console.log(`BACKEND IS RUNNING ON PORT https://apnamenswear.onrender.com/:${PORT}/`)
 })
 
 
