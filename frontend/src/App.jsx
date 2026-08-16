@@ -22,38 +22,38 @@ import MyOrder from './Shared/components/Order/MyOrder';
 
 
 function App() {
-    const navigate = useNavigate()
-  
-    const OnClose =()=>{
-      navigate('/')
-    }
+  const navigate = useNavigate()
+
+  const OnClose = () => {
+    navigate('/')
+  }
 
 
   return (
     <>
-    <ScrollToTop />
-    <Routes>
+      <ScrollToTop />
+      <Routes>
         <Route element={<Layout />}>
-        <Route path='/' element={<Home />} ></Route>
-        <Route path='/about' element={<About/>}></Route>
-        <Route path='/contact' element={<ContactUs/>}></Route>
-        <Route path ='/signup' element ={<SignupLogin close={OnClose}/>} ></Route>
-        <Route path='/product/:slug' element={<>
-                                                    <ProductDetailes />
-                                                    <GetRelatedProducts></GetRelatedProducts>
-                                                    <CategoryNavbar></CategoryNavbar>
-                                                    <GetTopRetedProducts></GetTopRetedProducts>
-                                             </>
-        } ></Route>
-        <Route path='/filtered/:category' element={<FilteredProducts />}></Route>
-        <Route path='/order' element={<MyOrder></MyOrder>} ></Route>
-      </Route>
+          <Route path='/' element={<Home />} ></Route>
+          <Route path='/about' element={<About />}></Route>
+          <Route path='/contact' element={<ContactUs />}></Route>
+          <Route path='/signup' element={<SignupLogin close={OnClose} />} ></Route>
+          <Route path='/product/:slug' element={<>
+            <ProductDetailes />
+            <GetRelatedProducts></GetRelatedProducts>
+            <CategoryNavbar></CategoryNavbar>
+            <GetTopRetedProducts></GetTopRetedProducts>
+          </>
+          } ></Route>
+          <Route path='/filtered/:category' element={<FilteredProducts />}></Route>
+          <Route path='/order' element={<MyOrder></MyOrder>} ></Route>
+        </Route>
 
-      
 
-      <Route path='/admin-dashbord' element={<AdminDashboard></AdminDashboard>} ></Route>
-    </Routes>
-    {/* </ScrollToTop> */}
+
+        <Route path='/admin-dashbord' element={<AdminDashboard></AdminDashboard>} ></Route>
+      </Routes>
+      {/* </ScrollToTop> */}
     </>
   )
 }
