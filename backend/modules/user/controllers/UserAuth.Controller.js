@@ -184,7 +184,7 @@ const userLogin = async (req,res) => {
       },
       process.env.JWT_ACCESS_TOKEN_SECRET,
       {
-        expiresIn:'1m'
+        expiresIn:'1000m'
       }
     )
 
@@ -315,7 +315,7 @@ const refreshAccessToken = async (req,res) => {
         httpOnly:true,
         secure:process.env.NODE_ENV === "production",
         // sameSite:"strict",
-        sameSite:"lax",
+        sameSite:"none",
         maxAge: 7 * 24 * 60 * 60 * 1000,
       }
     )
