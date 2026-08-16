@@ -234,7 +234,7 @@ api.interceptors.response.use(
                 ].includes(errorCode)
             ) {
 
-                window.location.href = "/signup";
+                // window.location.href = "/signup";
             }
 
 
