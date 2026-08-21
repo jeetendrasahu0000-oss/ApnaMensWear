@@ -63,6 +63,8 @@ const Authorization = (AllowedRoles)=>{
             
             const hasRole = req.user.roles.some(role => AllowedRoles.includes(role));
 
+            console.log('hasRole',hasRole)
+
             if (!hasRole) {
                 return res.status(403).json({
                     success: false,

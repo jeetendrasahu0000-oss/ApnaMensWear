@@ -84,107 +84,29 @@ const GetProductsByCategory = async (req,res)=>{
 }
 
 
-// const GetRelatedProducts = async (req, res) => {
-//     try {
+const GetTopReatedProduct = async(req,res)=>{
+    try{
+        console.log('hit GetTopReatedProduct api...')
+        const products = await ProductModel.find().limit(10)
 
-//         const productId = req.params.id;
-//         const page = Math.max(Number(req.query.page) || 1, 1);
-//         const limit = Math.max(Number(req.query.limit) || 10, 1);
+        return res.status(200).json({
+            success:true,
+            message:"Products fetched successfully",
+            data:products,
+            error:null
+        });
 
-//         const skip = (page - 1) * limit;
-
-//         const product = await ProductModel.findById(productId).select("category subCategory").lean();
-
-//         if (!product) {
-//             return res.status(404).json({success: false,message: "Product not found",data: null,error: null});
-//         }
-
-//         const baseMatch = {
-//             _id: { $ne: product._id },
-//             isActive: true
-//         };
-
-//         const [products, totalProductsResult] = await Promise.all([
-
-//             ProductModel.aggregate([
-//                 {
-//                     $match: baseMatch
-//                 },
-//                 {
-//                     $addFields: {
-//                         priority: {
-//                             $cond: [
-//                                 {
-//                                     $and: [
-//                                         { $eq: ["$category", product.category] },
-//                                         { $eq: ["$subCategory", product.subCategory] }
-//                                     ]
-//                                 },
-//                                 1,
-//                                 2
-//                             ]
-//                         }
-//                     }
-//                 },
-//                 {
-//                     $sort: {
-//                         priority: 1,
-//                         createdAt: -1
-//                     }
-//                 },
-//                 {
-//                     $skip: skip
-//                 },
-//                 {
-//                     $limit: limit
-//                 },
-//                 {
-//                     $project: {
-//                         priority: 0
-//                     }
-//                 }
-//             ]),
-
-//             ProductModel.countDocuments(baseMatch)
-
-//         ]);
-
-//         const totalPages = Math.ceil(totalProductsResult / limit);
-
-//         return res.status(200).json({
-//             success: true,
-//             message: "Products fetched successfully",
-//             data: {
-//                 products,
-//                 pagination: {
-//                     page,
-//                     limit,
-//                     totalProducts: totalProductsResult,
-//                     totalPages,
-//                     hasNextPage: page < totalPages,
-//                     hasPrevPage: page > 1,
-//                     nextPage: page < totalPages ? page + 1 : null,
-//                     prevPage: page > 1 ? page - 1 : null
-//                 }
-//             },
-//             error: null
-//         });
-
-//     } catch (error) {
-
-//         console.error("GetRelatedProducts Error:", error);
-
-//         return res.status(500).json({
-//             success: false,
-//             message: "Internal server error",
-//             data: null,
-//             error: error.message
-//         });
-
-//     }
-// };
-
-
+    }
+    catch(error){
+        console.log('failed to handel GetTopReatedProduct ')
+         return res.status(500).json({
+            success:false,
+            message:"internall server error",
+            data:[],
+            error:null
+        });
+    }
+}
 
 const GetRelatedProducts = async (req, res) => {
     try {
@@ -316,9 +238,9 @@ const GetRelatedProducts = async (req, res) => {
     }
 };
 
+
 const GetFillterdProducts = async (req, res) => {
     try {
-
         const {
             page = 1,
             limit = 10,
@@ -328,40 +250,45 @@ const GetFillterdProducts = async (req, res) => {
             search,
             minPrice,
             maxPrice,
+            color,
+            size,
             sort = "newest"
         } = req.query;
 
-        const query = {isActive: true};
+        const query = { isActive: true };
 
-        // Dynamic Filters
         if (category) query.category = category;
         if (subCategory) query.subCategory = subCategory;
         if (brand) query.brand = brand;
 
-        // Search
+
+        if (color || size) {
+            const variantMatch = {};
+            if (color) variantMatch.color = color;
+            if (size) variantMatch.size = size;
+            query.variants = { $elemMatch: variantMatch };
+        }
+
         if (search) {
             query.productName = { $regex: search, $options: "i" };
         }
 
-        // Price Range
         if (minPrice || maxPrice) {
             query.price = {};
-
-            if (minPrice) { query.price.$gte = Number(minPrice)}
-            if (maxPrice) {query.price.$lte = Number(maxPrice)}
+            if (minPrice) query.salePrice.$gte = Number(minPrice);
+            if (maxPrice) query.salePrice.$lte = Number(maxPrice);
         }
 
         const sortMap = {
             newest: { createdAt: -1 },
             oldest: { createdAt: 1 },
-            priceAsc: { price: 1 },
-            priceDesc: { price: -1 },
+            priceAsc: { salePrice: 1 },
+            priceDesc: { salePrice : -1 },
             nameAsc: { productName: 1 },
             nameDesc: { productName: -1 }
         };
 
         const sortOption = sortMap[sort] || sortMap.newest;
-
         const skip = (Number(page) - 1) * Number(limit);
 
         const [products, totalProducts] = await Promise.all([
@@ -370,7 +297,6 @@ const GetFillterdProducts = async (req, res) => {
                 .skip(skip)
                 .limit(Number(limit))
                 .lean(),
-
             ProductModel.countDocuments(query)
         ]);
 
@@ -388,9 +314,8 @@ const GetFillterdProducts = async (req, res) => {
             },
             error: null
         });
-
     } catch (error) {
-        return res.status(500).json({success: false,message: "Internal server error",data: null,error: error.message});
+        return res.status(500).json({ success: false, message: "Internal server error", data: null, error: error.message });
     }
 };
 
@@ -465,4 +390,4 @@ const SearchProducts = async (req, res) => {
 
 
 
-export {GetProductDetails,GetProductsByCategory,GetRelatedProducts,GetFillterdProducts,SearchProducts}
+export {GetProductDetails,GetProductsByCategory,GetTopReatedProduct,GetRelatedProducts,GetFillterdProducts,SearchProducts}

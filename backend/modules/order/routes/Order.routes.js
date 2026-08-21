@@ -6,8 +6,8 @@ import { GetAllOrders, GetOrderDashboardStats, GetOrderDetails, UpdateOrderStatu
 
 const orderRoutes = express.Router();
 
-orderRoutes.post("/create",Authontication,Authorization(['buyer']),CreateOrder);
-orderRoutes.get('/',Authontication,Authorization(['buyer']),GetOrders)
+orderRoutes.post("/create",Authontication,Authorization(['buyer','admin']),CreateOrder);
+orderRoutes.get('/',Authontication,Authorization(['buyer','admin']),GetOrders)
 
 /* Admin Routes */
 
