@@ -10,7 +10,7 @@ const GetTopRetedProducts = () => {
   const getProducts = async () => {
     try {
       console.log('fetched Top rated product....')
-      const response = await api.get('/v1/products');
+      const response = await api.get('/v1/products/top-rated');
 
       setProducts(response.data.products || response.data.data || []);
     } catch (error) {

@@ -1,14 +1,3 @@
-// import React from 'react'
-// import styles from './GetRelatedProducts.module.css'
-
-// const GetRelatedProducts = () => {
-//   return (
-//     <div>GetRelatedProducts</div>
-//   )
-// }
-
-// export default GetRelatedProducts
-
 
 
 import { useEffect, useRef, useState, useCallback } from "react";
@@ -19,16 +8,7 @@ import styles from "./GetRelatedProducts.module.css";
 
 const LIMIT = 10;
 
-/**
- * Accepts any combination of: id, slug, category, subCategory
- * (as props, or read from route params if not passed directly).
- * Backend resolves id/slug itself — no client-side resolution needed.
- *
- *   <GetRelatedProducts id={product._id} />
- *   <GetRelatedProducts slug={product.slug} />       // on /product/:slug route, works with no props at all
- *   <GetRelatedProducts category="Men" />
- *   <GetRelatedProducts category="Men" subCategory="Shirts" />
- */
+
 const GetRelatedProducts = ({
   id: idProp,
   slug: slugProp,

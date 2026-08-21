@@ -187,3 +187,381 @@ src/
 └── styles/
     ├── globals.css
     └── variables.css
+
+
+
+
+
+
+
+
+src/
+├── features/
+│   ├── auth/
+│   ├── product/
+│   ├── admin/
+│   ├── cart/
+│   ├── order/
+│   └── payment/
+│
+├── shared/
+├── layouts/
+├── api/
+└── assets/
+
+
+
+
+    
+import React, { useEffect, useState } from "react";
+
+import api from "../../../../Api/Axios";
+
+import styles from "./PaymentDashbord.module.css";
+
+
+
+const PaymentDashbord = () => {
+
+  const [payments, setPayments] = useState([]);
+
+  const [loading, setLoading] = useState(false);
+
+  const [refundLoading, setRefundLoading] = useState(null);
+
+
+
+  const GetPayments = async () => {
+
+    try {
+
+      setLoading(true);
+
+
+
+      const response = await api.get("/v1/payment/admin/all");
+
+
+
+      if (response?.data?.success) {
+
+        setPayments(response.data.data.payments || []);
+
+      }
+
+    } catch (error) {
+
+      console.error(error);
+
+      alert(
+
+        error?.response?.data?.message ||
+
+          "Failed to fetch payments"
+
+      );
+
+    } finally {
+
+      setLoading(false);
+
+    }
+
+  };
+
+
+
+  const RefundPayment = async (paymentId) => {
+
+    try {
+
+      const confirmRefund = window.confirm(
+
+        "Are you sure you want to refund this payment?"
+
+      );
+
+
+
+      if (!confirmRefund) return;
+
+
+
+      setRefundLoading(paymentId);
+
+
+
+      const response = await api.post(
+
+        `/v1/payment/refund/${paymentId}`
+
+      );
+
+
+
+      if (response?.data?.success) {
+
+        alert(response.data.message);
+
+        GetPayments();
+
+      }
+
+    } catch (error) {
+
+      console.error(error);
+
+
+
+      alert(
+
+        error?.response?.data?.message ||
+
+          "Failed to refund payment"
+
+      );
+
+    } finally {
+
+      setRefundLoading(null);
+
+    }
+
+  };
+
+
+
+  useEffect(() => {
+
+    GetPayments();
+
+  }, []);
+
+
+
+  if (loading) {
+
+    return (
+
+      <div className={styles.loading}>
+
+        Loading Payments...
+
+      </div>
+
+    );
+
+  }
+
+
+
+  return (
+
+    <div className={styles.container}>
+
+      <div className={styles.header}>
+
+        <h2>Payment Dashboard</h2>
+
+      </div>
+
+
+
+      <div className={styles.tableWrapper}>
+
+        <table className={styles.table}>
+
+          <thead>
+
+            <tr>
+
+              <th>User</th>
+
+              <th>Email</th>
+
+              <th>Amount</th>
+
+              <th>Method</th>
+
+              <th>Status</th>
+
+              <th>Order Id</th>
+
+              <th>Payment Id</th>
+
+              <th>Paid At</th>
+
+              <th>Action</th>
+
+            </tr>
+
+          </thead>
+
+
+
+          <tbody>
+
+            {payments.length > 0 ? (
+
+              payments.map((payment) => (
+
+                <tr key={payment._id}>
+
+                  <td>
+
+                    {payment?.user?.firstName}{" "}
+
+                    {payment?.user?.lastName}
+
+                  </td>
+
+
+
+                  <td>
+
+                    {payment?.user?.email || "-"}
+
+                  </td>
+
+
+
+                  <td>
+
+                    ₹{payment?.amount?.toLocaleString()}
+
+                  </td>
+
+
+
+                  <td>{payment?.paymentMethod}</td>
+
+
+
+                  <td>
+
+                    <span
+
+                      className={`${styles.status} ${
+
+                        styles[
+
+                          payment.status?.toLowerCase()
+
+                        ]
+
+                      }`}
+
+                    >
+
+                      {payment.status}
+
+                    </span>
+
+                  </td>
+
+
+
+                  <td>
+
+                    {payment?.razorpayOrderId || "-"}
+
+                  </td>
+
+
+
+                  <td>
+
+                    {payment?.razorpayPaymentId || "-"}
+
+                  </td>
+
+
+
+                  <td>
+
+                    {payment?.paidAt
+
+                      ? new Date(
+
+                          payment.paidAt
+
+                        ).toLocaleString()
+
+                      : "-"}
+
+                  </td>
+
+
+
+                  <td>
+
+                    {payment.status === "Paid" ? (
+
+                      <button
+
+                        className={styles.refundBtn}
+
+                        onClick={() =>
+
+                          RefundPayment(payment._id)
+
+                        }
+
+                        disabled={
+
+                          refundLoading === payment._id
+
+                        }
+
+                      >
+
+                        {refundLoading === payment._id
+
+                          ? "Processing..."
+
+                          : "Refund"}
+
+                      </button>
+
+                    ) : (
+
+                      "-"
+
+                    )}
+
+                  </td>
+
+                </tr>
+
+              ))
+
+            ) : (
+
+              <tr>
+
+                <td colSpan="9">
+
+                  No Payments Found
+
+                </td>
+
+              </tr>
+
+            )}
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+  );
+
+};
+
+
+
+export default PaymentDashbord;    
+current ui is verh bad and not  and not responsive on mobnile device make it attractive and responsive    currently one  colum datat will puh into other colum       make it responsive and beutifull ui in desktop table and in mobile card   make text size smaller in both   small text size and 

@@ -18,6 +18,7 @@ import GetRelatedProducts from './Shared/components/Products/GetRelatedProducts/
 import ScrollToTop from './Shared/components/ScrollToTop/ScrollToTop';
 import CategoryNavbar from './Shared/components/CategoryNavBar/CategoryNavBar';
 import MyOrder from './Shared/components/Order/MyOrder';
+import ViewCartProduct from './Shared/components/CartComponents/ViewCartProduct';
 
 
 
@@ -53,7 +54,6 @@ function App() {
 
         <Route path='/admin-dashbord' element={<AdminDashboard></AdminDashboard>} ></Route>
       </Routes>
-      {/* </ScrollToTop> */}
     </>
   )
 }

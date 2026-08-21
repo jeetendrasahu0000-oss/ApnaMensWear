@@ -558,12 +558,11 @@ function SignupLogin({ close }) {
             {submitting ? "Please wait..." : mode === "signup" ? "Create account" : "Login"}
           </button>
 
-          <div className={styles.social}>
+          {/* <div className={styles.social}>
             <button type="button">🌈 Continue with Google</button>
-            <button type="button">
-              <FaFacebookF /> Continue with Facebook
-            </button>
-          </div>
+            <button type="button"><FaFacebookF /> Continue with Facebook</button>
+          </div> */}
+
         </div>
       </div>
     </div>

@@ -5,6 +5,24 @@ import {
     SetAccessToken,
 } from "./TokenStore";
 
+// ======================================================
+// REFRESH TOKEN MANAGEMENT
+// ======================================================
+
+let isRefreshing = false;
+let pendingQueue = [];
+
+const resolveQueue = (error, token = null) => {
+    pendingQueue.forEach(({ resolve, reject }) => {
+        if (error) {
+            reject(error);
+        } else {
+            resolve(token);
+        }
+    });
+
+    pendingQueue = [];
+};
 
 // ======================================================
 // REQUEST INTERCEPTOR
@@ -26,28 +44,6 @@ api.interceptors.request.use(
     }
 );
 
-
-// ======================================================
-// REFRESH TOKEN MANAGEMENT
-// ======================================================
-
-let isRefreshing = false;
-
-let pendingQueue = [];
-
-const resolveQueue = (error, token = null) => {
-    pendingQueue.forEach(({ resolve, reject }) => {
-        if (error) {
-            reject(error);
-        } else {
-            resolve(token);
-        }
-    });
-
-    pendingQueue = [];
-};
-
-
 // ======================================================
 // RESPONSE INTERCEPTOR
 // ======================================================
@@ -60,22 +56,49 @@ api.interceptors.response.use(
     async (error) => {
         const originalRequest = error.config;
 
-        // If request config is missing
+        // --------------------------------------------------
+        // Request config missing
+        // --------------------------------------------------
+
         if (!originalRequest) {
             return Promise.reject(error);
         }
 
+        // --------------------------------------------------
+        // Handle 403 FORBIDDEN
+        // --------------------------------------------------
+
+        if (
+            error.response?.status === 403 &&
+            error.response?.data?.error === "FORBIDDEN"
+        ) {
+            console.log("Access Denied. Returning to home page.");
+
+            window.location.href = "/";
+
+            return Promise.reject(error);
+        }
+
+        // --------------------------------------------------
         // Only handle 401 errors
+        // --------------------------------------------------
+
         if (error.response?.status !== 401) {
             return Promise.reject(error);
         }
 
-        // Don't retry the same request again
+        // --------------------------------------------------
+        // Don't retry the same request
+        // --------------------------------------------------
+
         if (originalRequest._retry) {
             return Promise.reject(error);
         }
 
+        // --------------------------------------------------
         // Don't intercept refresh-token request itself
+        // --------------------------------------------------
+
         if (
             originalRequest.url?.includes("/v1/user/refresh-token")
         ) {
@@ -84,22 +107,18 @@ api.interceptors.response.use(
             return Promise.reject(error);
         }
 
-
         // ==================================================
-        // If another refresh request is already running
+        // Another refresh request is already running
         // ==================================================
 
         if (isRefreshing) {
             return new Promise((resolve, reject) => {
-
                 pendingQueue.push({
                     resolve,
                     reject,
                 });
-
             })
                 .then((newToken) => {
-
                     originalRequest._retry = true;
 
                     originalRequest.headers =
@@ -115,7 +134,6 @@ api.interceptors.response.use(
                 });
         }
 
-
         // ==================================================
         // Start refresh process
         // ==================================================
@@ -124,58 +142,51 @@ api.interceptors.response.use(
         isRefreshing = true;
 
         try {
-
             console.log("AccessToken expired/missing.");
             console.log("Hit refresh API...");
 
-
-            // Refresh token is expected in HTTP-only cookie
+            // Refresh token is stored in HTTP-only cookie
             const response = await api.get(
                 "/v1/user/refresh-token"
             );
-
 
             console.log(
                 "Refresh API response:",
                 response.data
             );
 
+            // --------------------------------------------------
+            // Get new access token
+            // --------------------------------------------------
 
             const newAccessToken =
                 response.data?.data?.AccessToken;
 
-
-            // ==================================================
-            // New token not received
-            // ==================================================
-
             if (!newAccessToken) {
-
                 throw new Error(
                     "New AccessToken not received from refresh API"
                 );
             }
 
+            // --------------------------------------------------
+            // Save new access token
+            // --------------------------------------------------
 
-            // Save new token
             SetAccessToken(newAccessToken);
-
 
             console.log(
                 "New AccessToken saved successfully"
             );
 
-
-            // ==================================================
-            // Resolve all pending requests
-            // ==================================================
+            // --------------------------------------------------
+            // Resolve pending requests
+            // --------------------------------------------------
 
             resolveQueue(null, newAccessToken);
 
-
-            // ==================================================
+            // --------------------------------------------------
             // Retry original request
-            // ==================================================
+            // --------------------------------------------------
 
             originalRequest.headers =
                 originalRequest.headers || {};
@@ -183,32 +194,31 @@ api.interceptors.response.use(
             originalRequest.headers.Authorization =
                 `Bearer ${newAccessToken}`;
 
-
             return api(originalRequest);
 
         } catch (refreshError) {
-
             console.error(
                 "Refresh token error:",
                 refreshError
             );
 
+            // --------------------------------------------------
+            // Reject pending requests
+            // --------------------------------------------------
 
-            // Reject all waiting requests
             resolveQueue(refreshError, null);
 
+            // --------------------------------------------------
+            // Remove old access token
+            // --------------------------------------------------
 
-            // Remove old AccessToken
             ClearAccessToken();
-
 
             const errorCode =
                 refreshError.response?.data?.error;
 
-
             const status =
                 refreshError.response?.status;
-
 
             console.log(
                 "Refresh status:",
@@ -220,10 +230,9 @@ api.interceptors.response.use(
                 errorCode
             );
 
-
-            // ==================================================
-            // Refresh token invalid / missing
-            // ==================================================
+            // --------------------------------------------------
+            // Refresh token invalid / missing / revoked
+            // --------------------------------------------------
 
             if (
                 status === 401 &&
@@ -233,16 +242,15 @@ api.interceptors.response.use(
                     "INVALID_REFRESH_TOKEN",
                 ].includes(errorCode)
             ) {
-
-                // window.location.href = "/signup";
+                window.location.href = "/signup";
             }
-
 
             return Promise.reject(refreshError);
 
         } finally {
-
             isRefreshing = false;
         }
     }
 );
+
+export default api;

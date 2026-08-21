@@ -15,7 +15,7 @@ app.use(compression());
 
 app.use(
   cors({
-    origin: "https://apnamenswearclient.onrender.com",
+    origin: ["https://apnamenswearclient.onrender.com","http://localhost:5173"],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],

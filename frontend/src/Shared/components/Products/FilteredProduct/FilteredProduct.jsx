@@ -3,13 +3,13 @@ import { useParams } from "react-router-dom";
 import api from "../../../../Api/Axios";
 import ProductDesign from "../ProductDesign";
 import styles from "./FilteredProduct.module.css";
+import { GetCategories } from "../../../../StataicData/StaticData";
 
 const LIMIT = 6;
 
 function FilteredProducts() {
   const { category } = useParams();
 
-  // Single filter state – UI values
   const [filters, setFilters] = useState({
     category: category || "",
     search: "",
@@ -20,8 +20,8 @@ function FilteredProducts() {
     sort: "newest",
   });
 
-  // Ref to store the last applied filters (used for API calls)
   const appliedFiltersRef = useRef(filters);
+  const isFirstRun = useRef(true);
 
   const [products, setProducts] = useState([]);
   const [page, setPage] = useState(1);
@@ -31,101 +31,78 @@ function FilteredProducts() {
   const [showFilters, setShowFilters] = useState(false);
 
   const colors = ["Black", "White", "Blue", "Red", "Green"];
-  const sizes = ["S", "M", "L", "XL", "XXL"];
+  const sizes = ["S", "M", "L", "XL", "XXL","XXL"];
 
   const abortRef = useRef(null);
   const observerRef = useRef(null);
   const sentinelRef = useRef(null);
   const fetchingRef = useRef(false);
 
-  // --- Sync category from URL into filters (and auto‑apply) ---
-  useEffect(() => {
-    console.log("🔄 Category changed in URL:", category);
-    setFilters((prev) => ({ ...prev, category: category || "" }));
-  }, [category]);
+   const categoies =  GetCategories()
+  console.log('Categories',categoies)
 
-  // When category changes, apply it automatically (or you can remove this to require Apply)
-  useEffect(() => {
-    if (category !== undefined) {
-      const newFilters = { ...filters, category: category || "" };
-      console.log("📦 Auto‑applying category:", newFilters);
-      appliedFiltersRef.current = newFilters;
-      setPage(1);
-      setProducts([]);
-      setHasMore(true);
-      fetchProducts(1, newFilters);
+  const fetchProducts = useCallback(async (pageToFetch, activeFilters) => {
+    if (fetchingRef.current) return;
+    fetchingRef.current = true;
+
+    if (abortRef.current) abortRef.current.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+
+    pageToFetch === 1 ? setLoading(true) : setLoadingMore(true);
+
+    try {
+
+      console.log('Active Filters =>',activeFilters)
+
+      const response = await api.get("/v1/products/filtered", {
+        params: { page: pageToFetch, limit: LIMIT, ...activeFilters },
+        signal: controller.signal,
+      });
+
+      const fetched = response?.data?.data?.products || [];
+      const totalPages = response?.data?.data?.pagination?.totalPages || 1;
+
+      setProducts((prev) => (pageToFetch === 1 ? fetched : [...prev, ...fetched]));
+      setHasMore(pageToFetch < totalPages && fetched.length > 0);
+    } catch (error) {
+      if (error?.name !== "CanceledError" && error?.code !== "ERR_CANCELED") {
+        console.error("Fetch error:", error);
+      }
+    } finally {
+      setLoading(false);
+      setLoadingMore(false);
+      fetchingRef.current = false;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [category]);
-
-  // --- Initial load (on mount) ---
-  useEffect(() => {
-    console.log("🚀 Initial load with filters:", filters);
-    appliedFiltersRef.current = filters;
-    fetchProducts(1, filters);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // --- Core fetch function ---
-  const fetchProducts = useCallback(
-    async (pageToFetch, activeFilters) => {
-      console.log(`📡 Fetching page ${pageToFetch} with filters:`, activeFilters);
-      if (fetchingRef.current) {
-        console.log("⏳ Already fetching, skipping...");
-        return;
-      }
-      fetchingRef.current = true;
+  // --- Single effect for both mount AND category changes (fixes double-fetch) ---
+  useEffect(() => {
+    setFilters((prev) => ({ ...prev, category: category || "" }));
 
-      if (abortRef.current) abortRef.current.abort();
-      const controller = new AbortController();
-      abortRef.current = controller;
+    const newFilters = { ...appliedFiltersRef.current, category: category || "" };
+    appliedFiltersRef.current = newFilters;
+    setPage(1);
+    setProducts([]);
+    setHasMore(true);
+    fetchProducts(1, newFilters);
 
-      pageToFetch === 1 ? setLoading(true) : setLoadingMore(true);
+    isFirstRun.current = false;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [category]);
 
-      try {
-        const response = await api.get("/v1/products/filtered", {
-          params: { page: pageToFetch, limit: LIMIT, ...activeFilters },
-          signal: controller.signal,
-        });
-
-        console.log("✅ API response:", response?.data);
-
-        const fetched = response?.data?.data?.products || [];
-        const totalPages = response?.data?.data?.pagination?.totalPages || 1;
-
-        setProducts((prev) =>
-          pageToFetch === 1 ? fetched : [...prev, ...fetched]
-        );
-        setHasMore(pageToFetch < totalPages && fetched.length > 0);
-      } catch (error) {
-        if (error?.name !== "CanceledError" && error?.code !== "ERR_CANCELED") {
-          console.error("❌ Fetch error:", error);
-        }
-      } finally {
-        setLoading(false);
-        setLoadingMore(false);
-        fetchingRef.current = false;
-      }
-    },
-    []
-  );
-
-  // --- Fetch next page when page increments ---
   useEffect(() => {
     if (page === 1) return;
-    console.log(`📄 Page changed to ${page}, fetching more...`);
     fetchProducts(page, appliedFiltersRef.current);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page]);
 
-  // --- Intersection Observer for infinite scroll ---
   useEffect(() => {
     if (observerRef.current) observerRef.current.disconnect();
 
     observerRef.current = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting && hasMore && !fetchingRef.current && !loading) {
-          console.log("👀 Sentinel visible, loading next page...");
           setPage((prev) => prev + 1);
         }
       },
@@ -136,21 +113,16 @@ function FilteredProducts() {
     return () => observerRef.current?.disconnect();
   }, [hasMore, loading, products.length]);
 
-  // --- Handlers ---
   const handleChange = (e) => {
     const { name, value } = e.target;
-    console.log(`✏️ Filter changed: ${name} = ${value}`);
     setFilters((prev) => ({ ...prev, [name]: value }));
   };
 
   const updateFilter = (name, value) => {
-    console.log(`🖱️ Toggle filter: ${name} = ${value}`);
     setFilters((prev) => ({ ...prev, [name]: value }));
   };
 
-  // --- Apply button: store current filters, reset, and fetch ---
   const handleApply = () => {
-    console.log("🔘 Apply button clicked. Current filters:", filters);
     appliedFiltersRef.current = { ...filters };
     setPage(1);
     setProducts([]);
@@ -158,48 +130,29 @@ function FilteredProducts() {
     fetchProducts(1, appliedFiltersRef.current);
   };
 
-  // --- Sidebar content (desktop & mobile) ---
   const sidebarContent = (
     <>
       <div className={styles.filterSection}>
         <h4>Search</h4>
-        <input
-          type="text"
-          name="search"
-          value={filters.search}
-          placeholder="Search products..."
-          onChange={handleChange}
-        />
+        <input type="text" name="search" value={filters.search} placeholder="Search products..." onChange={handleChange} />
       </div>
 
       <div className={styles.filterSection}>
         <h4>Category</h4>
         <select name="category" value={filters.category} onChange={handleChange}>
-          <option value="">All Categories</option>
-          <option value="Men">Men</option>
-          <option value="Women">Women</option>
-          <option value="Fashion">Fashion</option>
-          <option value="Electronic">Electronic</option>
+          {categoies.map((category) => (
+            <option key={category} value={category}>
+              {category}
+            </option>
+          ))}
         </select>
       </div>
 
       <div className={styles.filterSection}>
         <h4>Price Range</h4>
         <div className={styles.priceInputs}>
-          <input
-            type="number"
-            placeholder="Min"
-            name="minPrice"
-            value={filters.minPrice}
-            onChange={handleChange}
-          />
-          <input
-            type="number"
-            placeholder="Max"
-            name="maxPrice"
-            value={filters.maxPrice}
-            onChange={handleChange}
-          />
+          <input type="number" placeholder="Min" name="minPrice" value={filters.minPrice} onChange={handleChange} />
+          <input type="number" placeholder="Max" name="maxPrice" value={filters.maxPrice} onChange={handleChange} />
         </div>
       </div>
 
@@ -210,12 +163,8 @@ function FilteredProducts() {
             <button
               key={color}
               type="button"
-              className={`${styles.optionBtn} ${
-                filters.color === color ? styles.active : ""
-              }`}
-              onClick={() =>
-                updateFilter("color", filters.color === color ? "" : color)
-              }
+              className={`${styles.optionBtn} ${filters.color === color ? styles.active : ""}`}
+              onClick={() => updateFilter("color", filters.color === color ? "" : color)}
             >
               {color}
             </button>
@@ -226,16 +175,12 @@ function FilteredProducts() {
       <div className={styles.filterSection}>
         <h4>Sizes</h4>
         <div className={styles.optionWrap}>
-          {sizes.map((size) => (
+          {sizes.map((size,index) => (
             <button
-              key={size}
+              key={`${size}-${index}`}
               type="button"
-              className={`${styles.optionBtn} ${
-                filters.size === size ? styles.active : ""
-              }`}
-              onClick={() =>
-                updateFilter("size", filters.size === size ? "" : size)
-              }
+              className={`${styles.optionBtn} ${filters.size === size ? styles.active : ""}`}
+              onClick={() => updateFilter("size", filters.size === size ? "" : size)}
             >
               {size}
             </button>
@@ -261,13 +206,9 @@ function FilteredProducts() {
     </>
   );
 
-  // --- Render ---
   return (
     <section className={styles.page}>
-      <button
-        className={styles.mobileFilterBtn}
-        onClick={() => setShowFilters(true)}
-      >
+      <button className={styles.mobileFilterBtn} onClick={() => setShowFilters(true)}>
         ☰ Filters
       </button>
 
@@ -298,12 +239,8 @@ function FilteredProducts() {
 
               <div ref={sentinelRef} style={{ height: 1 }} />
 
-              {loadingMore && (
-                <div className={styles.loading}>Loading more...</div>
-              )}
-              {!hasMore && products.length > 0 && (
-                <div className={styles.empty}>No more products</div>
-              )}
+              {loadingMore && <div className={styles.loading}>Loading more...</div>}
+              {!hasMore && products.length > 0 && <div className={styles.empty}>No more products</div>}
             </>
           )}
         </main>
@@ -326,4 +263,3 @@ function FilteredProducts() {
 }
 
 export default FilteredProducts;
-

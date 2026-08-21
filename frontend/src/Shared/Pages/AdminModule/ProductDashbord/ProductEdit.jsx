@@ -3,6 +3,7 @@ import { X, Plus, Trash2, CheckCircle, AlertCircle, Loader } from "lucide-react"
 import api from "../../../../Api/Axios";
 import styles from "./ProductEdit.module.css";
 import UploadImage from "../../../components/Cloudinary/UploadImage";
+import { GetCategories } from "../../../../StataicData/StaticData";
 
 
 
@@ -80,6 +81,9 @@ function ProductEdit({ onClose,product,onUpdated }) {
     }
   };
 
+
+  const categoies =  GetCategories()
+  console.log('Categories',categoies)
 
   // ---- variant handlers ----
   const updateVariant = (index, key, value) => {
@@ -298,7 +302,7 @@ function ProductEdit({ onClose,product,onUpdated }) {
 
           <div className={styles.grid3}>
 
-            <div className={styles.fieldWrap}>
+            {/* <div className={styles.fieldWrap}>
               <label>Category <span className={styles.required}>*</span></label>
               <input
                 value={form.category}
@@ -307,6 +311,30 @@ function ProductEdit({ onClose,product,onUpdated }) {
                 placeholder="e.g. Electronics"
               />
               {errors.category && <p className={styles.errorText}>{errors.category}</p>}
+            </div> */}
+
+            <div className={styles.fieldWrap}>
+                <label>
+                  Category <span className={styles.required}>*</span>
+                </label>
+  
+                <select
+                  value={form.category}
+                  onChange={(e) => updateForm("category", e.target.value)}
+                  className={`${styles.select} ${errors.category ? styles.inputError : ""}`}
+                >
+                  <option value="">Select Category</option>
+  
+                  {categoies.map((category) => (
+                    <option key={category} value={category}>
+                      {category}
+                    </option>
+                  ))}
+                </select>
+  
+              {errors.category && (
+                <p className={styles.errorText}>{errors.category}</p>
+              )}
             </div>
 
             <div className={styles.fieldWrap}>
@@ -415,11 +443,38 @@ function ProductEdit({ onClose,product,onUpdated }) {
                   value={variant.color}
                   onChange={(e) => updateVariant(index, "color", e.target.value)}
                 />
-                <input
+                {/* <input
                   placeholder="Size"
                   value={variant.size}
                   onChange={(e) => updateVariant(index, "size", e.target.value)}
-                />
+                /> */}
+
+                <select
+                  value={variant.size}
+                  onChange={(e) => updateVariant(index, "size", e.target.value)}
+                >
+                  <option value="">Select Size</option>
+                  <option value="S">S</option>
+                  <option value="M">M</option>
+                  <option value="L">L</option>
+                  <option value="XL">XL</option>
+                  <option value="XXL">XXL</option>
+                  <option value="XXXL">XXXL</option>
+                  <option value="OTHER">Other Size</option>
+                </select>
+
+                {variant.size === "OTHER" && (
+                  <input
+                    placeholder="Enter custom size"
+                    value={variant.customSize || ""}
+                    onChange={(e) =>
+                      updateVariant(index, "customSize", e.target.value)
+                    }
+                  />
+                )}
+                
+
+
                 <input
                   placeholder="Stock"
                   type="number"
@@ -471,41 +526,6 @@ function ProductEdit({ onClose,product,onUpdated }) {
           {/* ---- Media ---- */}
           <div className={styles.sectionTitle}>Media</div>
 
-          {/* <div className={styles.fieldWrap}>
-            <label>Cover image URL <span className={styles.required}>*</span></label>
-            <input
-              value={form.coverImage}
-              onChange={(e) => updateForm("coverImage", e.target.value)}
-              className={errors.coverImage ? styles.inputError : ""}
-              placeholder="https://example.com/cover.jpg"
-            />
-            {errors.coverImage && <p className={styles.errorText}>{errors.coverImage}</p>}
-          </div>
-
-          <div className={styles.chipInputRow}>
-            <input
-              placeholder="Paste image URL and press Enter"
-              value={imageInput}
-              onChange={(e) => setImageInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  addImage();
-                }
-              }}
-            />
-            <button type="button" onClick={addImage}>Add</button>
-          </div>
-          <div className={styles.chipRow}>
-            {form.images.map((url) => (
-              <span key={url} className={styles.chip}>
-                {url.length > 28 ? `${url.slice(0, 28)}…` : url}
-                <button type="button" onClick={() => removeImage(url)}>
-                  <X size={11} />
-                </button>
-              </span>
-            ))}
-          </div> */}
 
 
           <label>Cover image<span className={styles.required}>*</span></label>

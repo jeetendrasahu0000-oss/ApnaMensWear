@@ -198,3 +198,34 @@
     width: 85%;
   }
 }
+
+
+
+
+.applyBtn {
+  width: 100%;
+  padding: 12px 20px;
+  margin-top: 16px;
+  background-color: #111111;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.applyBtn:hover {
+  background-color: #2a2a2a;
+}
+
+.applyBtn:active {
+  transform: scale(0.98);
+}
+
+.applyBtn:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
