@@ -1,161 +1,414 @@
-import React, { useState } from "react";
+// Header.jsx
+import React, { useState, useEffect } from "react";
 import styles from "./Header.module.css";
 import { useNavigate } from "react-router-dom";
 
 import {
   FiMenu,
   FiX,
-  FiSearch,
   FiUser,
-  FiHeart,
-  FiShoppingBag,
-  FiHome,
-  FiStar,
-  FiBox,
-  FiGift,
-  FiTag,
   FiChevronRight,
+  FiHome,
 } from "react-icons/fi";
-import { BsCart3 } from "react-icons/bs";
+
+import { BsCart3, BsBoxSeam } from "react-icons/bs";
 
 import SignupLogin from "../../../Features/Auth/SignupLogin";
 import ViewCartProduct from "../CartComponents/ViewCartProduct";
 
-
-
-import { FiPackage } from "react-icons/fi";
-import { BsBoxSeam } from "react-icons/bs";
-import { HiOutlineShoppingBag } from "react-icons/hi";
 import { GetCategories } from "../../../StataicData/StaticData";
 
 const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+  const categories = GetCategories();
 
-  const OnClose =()=>{
-    setIsFormOpen(false)
-  }
+  const onCloseForm = () => setIsFormOpen(false);
 
-  // const navLinks = [
-  //   { name: "HOME", icon: <FiHome /> },
-  //   { name: "NEW ARRIVALS", icon: <FiStar /> },
-  //   { name: "SHIRTS", icon: <FiBox /> },
-  //   { name: "T-SHIRTS", icon: <FiBox /> },
-  //   { name: "JEANS", icon: <FiBox /> },
-  //   { name: "HOODIES", icon: <FiBox /> },
-  //   { name: "JACKETS", icon: <FiBox /> },
-  //   { name: "ACCESSORIES", icon: <FiGift /> },
-  //   { name: "SALE", icon: <FiTag /> },
-  // ];
+  useEffect(() => {
+    document.body.style.overflow = menuOpen ? "hidden" : "";
 
-  const categories = GetCategories()
-  console.log('categories',categories)
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [menuOpen]);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 4);
+
+    window.addEventListener("scroll", onScroll);
+
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  const announcements = [
+    "FREE SHIPPING ON ORDERS ABOVE ₹999",
+    "NEW ARRIVALS — SHOP THE DROP",
+    "USE CODE 'APNA10' FOR 10% OFF",
+    "SUMMER SALE — UP TO 40% OFF",
+  ];
+
+  // =====================================================
+  // CATEGORY EMOJIS - UNIQUE FOR EACH CATEGORY
+  // =====================================================
+
+  const categoryEmojis = {
+    // Tops
+    "Shirt": "👔",
+    "Shirts": "👔",
+    "T-Shirt": "👕",
+    "T-Shirts": "👕",
+    "Polo": "🏌️",
+    "Polo Shirts": "🏌️",
+    "Dress Shirts": "👔",
+    "Formal Shirts": "👔",
+    "Casual Shirts": "👕",
+    
+    // Hoodies & Sweaters
+    "Hoodie": "🧥",
+    "Hoodies": "🧥",
+    "Sweatshirt": "🧶",
+    "Sweatshirts": "🧶",
+    "Sweater": "🧶",
+    "Sweaters": "🧶",
+    
+    // Jackets & Outerwear
+    "Jacket": "🧥",
+    "Jackets": "🧥",
+    "Blazer": "🤵",
+    "Blazers": "🤵",
+    "Suits": "🤵",
+    "Suit": "🤵",
+    "Tuxedo": "🤵",
+    "Vest": "🦺",
+    "Vests": "🦺",
+    "Waistcoat": "🦺",
+    "Winter Wear": "🧣",
+    "Coats": "🧥",
+    
+    // Bottoms
+    "Jeans": "👖",
+    "Jens": "👖",
+    "Trouser": "👖",
+    "Trousers": "👖",
+    "Pants": "👖",
+    "Chinos": "👖",
+    "Cargo": "👖",
+    "Cargo Pants": "👖",
+    "Shorts": "🩳",
+    "Jogger": "🏃",
+    "Joggers": "🏃",
+    "Track Pants": "🏃",
+    "Trackpants": "🏃",
+    
+    // Kurtas & Ethnic
+    "Kurta": "🥻",
+    "Kurtas": "🥻",
+    "Ethnic": "🥻",
+    
+    // Footwear - Sports
+    "Shoe": "👟",
+    "Shoes": "👟",
+    "Sneaker": "👟",
+    "Sneakers": "👟",
+    "Sports Shoes": "👟",
+    "Running Shoes": "👟",
+    "Casual Shoes": "👟",
+    
+    // Footwear - Formal
+    "Formal": "👞",
+    "Formals": "👞",
+    "Formal Shoes": "👞",
+    "Oxford": "👞",
+    "Oxford Shoes": "👞",
+    "Loafer": "👞",
+    "Loafers": "👞",
+    "Derby": "👞",
+    
+    // Footwear - Other
+    "Boot": "🥾",
+    "Boots": "🥾",
+    "Sandals": "🩴",
+    "Flip Flops": "🩴",
+    "Slippers": "🩴",
+    
+    // Accessories
+    "Accessories": "🎒",
+    "Watch": "⌚",
+    "Watches": "⌚",
+    "Bag": "👜",
+    "Bags": "👜",
+    "Backpack": "🎒",
+    "Backpacks": "🎒",
+    "Wallet": "👛",
+    "Wallets": "👛",
+    "Belt": "🥋",
+    "Belts": "🥋",
+    "Tie": "👔",
+    "Ties": "👔",
+    "Bow Tie": "🎀",
+    "Bowtie": "🎀",
+    "Cap": "🧢",
+    "Caps": "🧢",
+    "Hat": "🎩",
+    "Hats": "🎩",
+    "Sunglasses": "🕶️",
+    "Sunglass": "🕶️",
+    "Gloves": "🧤",
+    "Scarf": "🧣",
+    "Scarves": "🧣",
+    "Socks": "🧦",
+    "Underwear": "🩲",
+    "Sleepwear": "🛌",
+    "Swimwear": "🏊",
+    "Activewear": "🏋️",
+    "Cufflinks": "💎",
+    "Pocket Square": "🧣",
+    "Suspenders": "🔗",
+  };
+
+  // =====================================================
+  // GET CATEGORY EMOJI - WITH CASE INSENSITIVE MATCHING
+  // =====================================================
+
+  const getCategoryEmoji = (category) => {
+    if (!category) return "🏷️";
+    
+    // Direct match
+    if (categoryEmojis[category]) {
+      return categoryEmojis[category];
+    }
+    
+    // Case insensitive match
+    const lowerCategory = category.toLowerCase();
+    for (const [key, emoji] of Object.entries(categoryEmojis)) {
+      if (key.toLowerCase() === lowerCategory) {
+        return emoji;
+      }
+    }
+    
+    // Partial match - check if category contains any keyword
+    for (const [key, emoji] of Object.entries(categoryEmojis)) {
+      const lowerKey = key.toLowerCase();
+      if (lowerCategory.includes(lowerKey) || lowerKey.includes(lowerCategory)) {
+        return emoji;
+      }
+    }
+    
+    // Default fallback
+    return "🏷️";
+  };
 
   return (
     <>
-      {/* Top Bar */}
-      <div className={styles.topBar}>
-        <span>🚚 Free Shipping on Orders Above ₹999</span>
+      {/* =====================================================
+          ANNOUNCEMENT BAR
+      ===================================================== */}
 
-        <div className={styles.topBarRight}>
-          <span>COD Available</span>
-          <span>|</span>
-          <span>Easy 7 Days Returns</span>
+      <div className={styles.announcementBar}>
+        <div className={styles.announcementTrack}>
+          {[...announcements, ...announcements].map((text, index) => (
+            <span key={index}>{text}</span>
+          ))}
         </div>
       </div>
 
-      {/* Header */}
-      <header className={styles.header}>
+      {/* =====================================================
+          HEADER
+      ===================================================== */}
+
+      <header
+        className={`${styles.header} ${
+          scrolled ? styles.headerScrolled : ""
+        }`}
+      >
+        {/* Mobile Menu Button */}
+
         <button
           className={styles.mobileMenuBtn}
           onClick={() => setMenuOpen(!menuOpen)}
+          aria-label={menuOpen ? "Close menu" : "Open menu"}
+          aria-expanded={menuOpen}
         >
           {menuOpen ? <FiX /> : <FiMenu />}
         </button>
 
-        <div className={styles.logo} onClick={()=>{navigate('/')}}>
+        {/* Logo */}
+
+        <div className={styles.logo} onClick={() => navigate("/")}>
           <h1>Apna</h1>
-          <p>MEN'S WEAR</p>
+          <p>MEN&apos;S WEAR</p>
         </div>
 
+        {/* =====================================================
+            DESKTOP NAV
+        ===================================================== */}
+
         <nav className={styles.nav}>
-          <a href="/">HOME</a>
+          <a href="/">
+            🏠 Home
+          </a>
+
           {categories.map((item) => (
-            <a href={`/filtered/${item}` }key={item}>
-              {item.toUpperCase()}
+            <a
+              href={`/filtered/${item}`}
+              key={item}
+            >
+              <span className={styles.categoryEmoji}>
+                {getCategoryEmoji(item)}
+              </span>
+
+              <span>{item}</span>
             </a>
           ))}
         </nav>
 
-        <div className={styles.actions}>
-          {/* <button className={styles.iconBtn}>
-            <FiSearch />
-          </button> */}
+        {/* =====================================================
+            HEADER ACTIONS
+        ===================================================== */}
 
-          <button className={styles.iconBtn} onClick={()=>setIsFormOpen(true)}>
+        <div className={styles.actions}>
+          {/* Account */}
+
+          <button
+            className={styles.iconBtn}
+            onClick={() => setIsFormOpen(true)}
+            aria-label="Account"
+          >
             <FiUser />
           </button>
 
-          
+          {/* Cart */}
 
-          <button className={styles.iconBtn}  onClick={()=>{setIsCartOpen(true)}}>
-            {/* <FiShoppingBag /> */}
+          <button
+            className={styles.iconBtn}
+            onClick={() => setIsCartOpen(true)}
+            aria-label="Cart"
+          >
             <BsCart3 />
-            {/* <span className={styles.badge}></span> */}
           </button>
 
+          {/* Orders */}
 
-          <button className={styles.iconBtn} onClick={()=>{navigate('/order')}}>
+          <button
+            className={styles.iconBtn}
+            onClick={() => navigate("/order")}
+            aria-label="Orders"
+          >
             <BsBoxSeam />
           </button>
-
         </div>
       </header>
 
-      {/* Overlay */}
+      {/* =====================================================
+          OVERLAY
+      ===================================================== */}
+
       <div
-        className={`${styles.overlay} ${menuOpen ? styles.showOverlay : ""}`}
+        className={`${styles.overlay} ${
+          menuOpen ? styles.showOverlay : ""
+        }`}
         onClick={() => setMenuOpen(false)}
       />
 
-      {/* Mobile Drawer */}
+      {/* =====================================================
+          MOBILE DRAWER
+      ===================================================== */}
+
       <div
         className={`${styles.mobileDrawer} ${
           menuOpen ? styles.showDrawer : ""
         }`}
       >
+        {/* Drawer Header */}
+
         <div className={styles.drawerHeader}>
-          <h3>Menu</h3>
+          <div className={styles.logo}>
+            <h1>Apna</h1>
+            <p>MEN&apos;S WEAR</p>
+          </div>
+
+          <button
+            className={styles.drawerCloseBtn}
+            onClick={() => setMenuOpen(false)}
+            aria-label="Close menu"
+          >
+            <FiX />
+          </button>
         </div>
 
-        <a href="/" className={styles.drawerLink}>HOME</a>
-        {categories.map((item, index) => (
-          <a
-            href={`/filtered/${item}` }
-            key={item}
-            className={styles.drawerLink}
-            style={{
-              animationDelay: `${index * 0.08}s`,
-            }}
-          >
-            <div className={styles.linkLeft}>
-              {/* <span className={styles.linkIcon}>{item.icon}</span> */}
+        {/* =====================================================
+            HOME
+        ===================================================== */}
 
-              <span>{item.toUpperCase()}</span>
-            </div>
+        <a
+          href="/"
+          className={styles.drawerLink}
+          onClick={() => setMenuOpen(false)}
+        >
+          <span className={styles.drawerLinkContent}>
+            <FiHome className={styles.drawerIcon} />
 
-            <FiChevronRight className={styles.arrow} />
-          </a>
-        ))}
+            <span>Home</span>
+          </span>
 
+          <FiChevronRight className={styles.arrow} />
+        </a>
+
+        {/* =====================================================
+            CATEGORIES - WITH UNIQUE EMOJIS
+        ===================================================== */}
+
+        {categories.map((item, index) => {
+          const emoji = getCategoryEmoji(item);
+          
+          return (
+            <a
+              href={`/filtered/${item}`}
+              key={item}
+              className={styles.drawerLink}
+              style={{
+                animationDelay: `${index * 0.05}s`,
+              }}
+              onClick={() => setMenuOpen(false)}
+            >
+              <span className={styles.drawerLinkContent}>
+                {/* UNIQUE CATEGORY EMOJI */}
+
+                <span className={styles.drawerEmoji}>
+                  {emoji}
+                </span>
+
+                {/* CATEGORY NAME */}
+
+                <span>{item}</span>
+              </span>
+
+              <FiChevronRight className={styles.arrow} />
+            </a>
+          );
+        })}
       </div>
 
-      {isFormOpen && <SignupLogin   close={OnClose}/>}
-      {isCartOpen && <ViewCartProduct onClose={()=>{setIsCartOpen(false)}}></ViewCartProduct>}
+      {/* =====================================================
+          LOGIN MODAL
+      ===================================================== */}
 
+      {isFormOpen && <SignupLogin close={onCloseForm} />}
+
+      {/* =====================================================
+          CART
+      ===================================================== */}
+
+      {isCartOpen && (
+        <ViewCartProduct
+          onClose={() => setIsCartOpen(false)}
+        />
+      )}
     </>
   );
 };

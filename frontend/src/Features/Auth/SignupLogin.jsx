@@ -1,13 +1,12 @@
+// SignupLogin.jsx
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../Api/Axios";
 import styles from "./SignupLogin.module.css";
-import { Eye, EyeOff, X } from "lucide-react";
-import { FaFacebookF } from "react-icons/fa";
+import { Eye, EyeOff, X, Mail, Phone, User, Lock, MapPin, Home } from "lucide-react";
+import { FaFacebookF, FaGoogle } from "react-icons/fa";
 import { GetAccessToken, SetAccessToken } from "../../Api/TokenStore";
 import { fetchUserProfile } from "../../Api/basicStore";
-
-
 
 const FIELD_LABELS = {
   firstName: "First name",
@@ -24,7 +23,7 @@ const FIELD_LABELS = {
 };
 
 function SignupLogin({ close }) {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const [mode, setMode] = useState("login");
   const [showPassword, setShowPassword] = useState(false);
@@ -43,7 +42,7 @@ function SignupLogin({ close }) {
     email: "",
     phone: "",
     password: "",
-    confirmPassword: "", 
+    confirmPassword: "",
     country: "",
     state: "",
     city: "",
@@ -87,17 +86,13 @@ function SignupLogin({ close }) {
   };
 
   const handleOtpChange = (index, value) => {
-    
-    // only allow a single digit
     const digit = value.replace(/[^0-9]/g, "").slice(-1);
-
     const next = [...otp];
     next[index] = digit;
     setOtp(next);
 
     clearFieldError("otp");
 
-    // auto-focus next box
     if (digit && index < otp.length - 1) {
       const nextInput = document.getElementById(`otp-box-${index + 1}`);
       nextInput?.focus();
@@ -111,12 +106,12 @@ function SignupLogin({ close }) {
     }
   };
 
-  // generic fallback for errors that don't follow the {success,message,error} shape
   const handleApiError = (error, fallbackField = "api") => {
     const message =
       error?.response?.data?.message ||
       error?.response?.data?.error ||
-      error?.message || "Something went wrong. Please try again.";
+      error?.message ||
+      "Something went wrong. Please try again.";
 
     const field = error?.response?.data?.field;
 
@@ -127,7 +122,6 @@ function SignupLogin({ close }) {
     }));
   };
 
-  // parses the backend's { success, message, data, error } response shape.
   const applyBackendResponse = (payload) => {
     const data = payload || {};
     const fieldErrors = {};
@@ -148,7 +142,7 @@ function SignupLogin({ close }) {
   };
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  const phoneRegex = /^[6-9]\d{9}$/; 
+  const phoneRegex = /^[6-9]\d{9}$/;
 
   const validateSignup = () => {
     const e = {};
@@ -162,7 +156,7 @@ function SignupLogin({ close }) {
     if (!form.phone.trim()) e.phone = "Phone number is required";
     else if (!phoneRegex.test(form.phone)) e.phone = "Enter a valid 10-digit phone number";
 
-    if (!otpVerified) e.otp = "Please verify your phone/email with OTP";
+    if (!otpVerified) e.otp = "Please verify your phone with OTP";
 
     if (!form.password) e.password = "Password is required";
     else if (form.password.length < 8) e.password = "Password must be at least 8 characters";
@@ -191,7 +185,7 @@ function SignupLogin({ close }) {
 
   const sendOtp = async () => {
     if (!form.phone.trim()) {
-      setErrors((prev) => ({ ...prev, otp: "Enter your phoneNo before requesting an OTP" }));
+      setErrors((prev) => ({ ...prev, otp: "Enter your phone number before requesting an OTP" }));
       return;
     }
     if (!phoneRegex.test(form.phone.trim())) {
@@ -201,19 +195,18 @@ function SignupLogin({ close }) {
 
     try {
       const response = await api.post("/v1/otp/set-otp", {
-        identifier:form.phone,
+        identifier: form.phone,
       });
 
       console.log("OTP => ", response.data?.data?.otp);
-      alert(` OTP => ${response.data?.data?.otp}`)
+      alert(`OTP => ${response.data?.data?.otp}`);
 
       setOtpSent(true);
       setOtpVerified(false);
       setOtp(["", "", "", "", "", ""]);
       setTimer(60);
       clearFieldError("otp");
-    } 
-    catch (error) {
+    } catch (error) {
       handleApiError(error, "otp");
     }
   };
@@ -238,12 +231,10 @@ function SignupLogin({ close }) {
 
       if (!verified) {
         setErrors((prev) => ({ ...prev, otp: "That OTP didn't match. Try again." }));
-      } 
-      else {
+      } else {
         clearFieldError("otp");
       }
-    } 
-    catch (error) {
+    } catch (error) {
       handleApiError(error, "otp");
     }
   };
@@ -261,8 +252,6 @@ function SignupLogin({ close }) {
 
     try {
       if (mode === "signup") {
-        // confirmPassword is intentionally left out of the payload —
-        // it only exists to confirm the user typed their password correctly
         const payload = {
           firstName: form.firstName,
           lastName: form.lastName,
@@ -270,7 +259,6 @@ function SignupLogin({ close }) {
           phone: Number(form.phone),
           password: form.password,
           opt: otp.join(""),
-
           address: {
             country: form.country,
             state: form.state,
@@ -279,7 +267,6 @@ function SignupLogin({ close }) {
             addressLine1: form.addressLine1,
             addressLine2: form.addressLine2,
           },
-
           profileImage:
             "https://images.unsplash.com/photo-1483985988355-763728e1935b",
         };
@@ -291,13 +278,26 @@ function SignupLogin({ close }) {
           return;
         }
 
-        alert(`${response.data.message}`)
-        setMode('login')
-        
-
-
-      }
-      else {
+        alert(response.data.message);
+        setMode("login");
+        setForm({
+          firstName: "",
+          lastName: "",
+          email: "",
+          phone: "",
+          password: "",
+          confirmPassword: "",
+          country: "",
+          state: "",
+          city: "",
+          pinCode: "",
+          addressLine1: "",
+          addressLine2: "",
+        });
+        setOtpVerified(false);
+        setOtpSent(false);
+        setOtp(["", "", "", "", "", ""]);
+      } else {
         const response = await api.post("/v1/user/login", {
           identifier: login.identifier,
           password: login.password,
@@ -308,51 +308,47 @@ function SignupLogin({ close }) {
           return;
         }
 
-        SetAccessToken(response?.data.data.AccessToken)
-        
-        await fetchUserProfile()
+        SetAccessToken(response?.data?.data?.AccessToken);
+        await fetchUserProfile();
 
-        alert(`${response.data.message}`)
-        navigate('/')
-        close?.()
-
+        alert(response.data.message);
+        navigate("/");
+        close?.();
       }
-
-      // close?.();
-
-    } 
-    catch (error) {
+    } catch (error) {
       if (error?.response?.data && typeof error.response.data.success !== "undefined") {
         applyBackendResponse(error.response.data);
-      } 
-      else {
+      } else {
         handleApiError(error);
       }
-    } 
-    finally {
+    } finally {
       setSubmitting(false);
     }
   };
 
-  const otpBtnClass = [styles.otpSendBtn,otpVerified ? styles.otpBtnVerified : otpSent ? styles.otpBtnUnverified : "",]
+  const otpBtnClass = [
+    styles.otpSendBtn,
+    otpVerified ? styles.otpBtnVerified : otpSent ? styles.otpBtnUnverified : "",
+  ]
     .filter(Boolean)
     .join(" ");
 
-
-
-
   return (
-    <div className={styles.overlay}>
-      <div className={styles.modal}>
+    <div className={styles.overlay} onClick={close}>
+      <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
         <button className={styles.close} onClick={close} type="button">
-          <X />
+          <X size={24} />
         </button>
 
         <div className={styles.imageBox}>
           <img
-            src="https://i.pinimg.com/736x/20/1e/7c/201e7cefd94fd8cf912ff4b3acefa5db.jpg"
-            alt="fashion"
+            src="https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=800&q=80"
+            alt="Fashion"
           />
+          <div className={styles.imageOverlay}>
+            <h2>Welcome to Apna</h2>
+            <p>Your style destination</p>
+          </div>
         </div>
 
         <div className={styles.formSection}>
@@ -367,7 +363,6 @@ function SignupLogin({ close }) {
             >
               Login
             </button>
-
             <button
               type="button"
               className={mode === "signup" ? styles.active : ""}
@@ -380,7 +375,12 @@ function SignupLogin({ close }) {
             </button>
           </div>
 
-          <h1>{mode === "signup" ? "Create account" : "Welcome back"}</h1>
+          <h1>{mode === "signup" ? "Create Account" : "Welcome Back"}</h1>
+          <p className={styles.subtitle}>
+            {mode === "signup"
+              ? "Join us and start shopping"
+              : "Login to continue shopping"}
+          </p>
 
           {errors.api && <p className={styles.apiError}>{errors.api}</p>}
 
@@ -392,6 +392,7 @@ function SignupLogin({ close }) {
                 value={form.firstName}
                 onChange={handleChange}
                 error={errors.firstName}
+                icon={<User size={18} />}
               />
 
               <Field
@@ -400,6 +401,7 @@ function SignupLogin({ close }) {
                 value={form.lastName}
                 onChange={handleChange}
                 error={errors.lastName}
+                icon={<User size={18} />}
               />
 
               <Field
@@ -408,6 +410,7 @@ function SignupLogin({ close }) {
                 value={form.email}
                 onChange={handleChange}
                 error={errors.email}
+                icon={<Mail size={18} />}
               />
 
               <Field
@@ -416,10 +419,9 @@ function SignupLogin({ close }) {
                 value={form.phone}
                 onChange={handleChange}
                 error={errors.phone}
+                icon={<Phone size={18} />}
               />
 
-              {/* OTP block spans the full width of the grid so it never
-                  shares a row with an unrelated field */}
               <div className={styles.otpWrapper}>
                 <button
                   type="button"
@@ -427,7 +429,7 @@ function SignupLogin({ close }) {
                   onClick={sendOtp}
                   disabled={otpVerified || (otpSent && timer > 0)}
                 >
-                  {otpVerified ? "Verified ✓" : otpSent ? "Resend OTP" : "Send OTP"}
+                  {otpVerified ? "✓ Verified" : otpSent ? "Resend OTP" : "Send OTP"}
                 </button>
 
                 {otpSent && !otpVerified && timer > 0 && (
@@ -490,6 +492,7 @@ function SignupLogin({ close }) {
                 value={form.country}
                 onChange={handleChange}
                 error={errors.country}
+                icon={<MapPin size={18} />}
               />
 
               <Field
@@ -498,6 +501,7 @@ function SignupLogin({ close }) {
                 value={form.state}
                 onChange={handleChange}
                 error={errors.state}
+                icon={<MapPin size={18} />}
               />
 
               <Field
@@ -506,6 +510,7 @@ function SignupLogin({ close }) {
                 value={form.city}
                 onChange={handleChange}
                 error={errors.city}
+                icon={<MapPin size={18} />}
               />
 
               <Field
@@ -514,6 +519,7 @@ function SignupLogin({ close }) {
                 value={form.pinCode}
                 onChange={handleChange}
                 error={errors.pinCode}
+                icon={<MapPin size={18} />}
               />
 
               <Field
@@ -522,6 +528,7 @@ function SignupLogin({ close }) {
                 value={form.addressLine1}
                 onChange={handleChange}
                 error={errors.addressLine1}
+                icon={<Home size={18} />}
               />
 
               <Field
@@ -530,6 +537,7 @@ function SignupLogin({ close }) {
                 value={form.addressLine2}
                 onChange={handleChange}
                 error={errors.addressLine2}
+                icon={<Home size={18} />}
               />
             </div>
           ) : (
@@ -540,6 +548,7 @@ function SignupLogin({ close }) {
                 value={login.identifier}
                 onChange={handleChange}
                 error={errors.identifier}
+                icon={<Mail size={18} />}
               />
 
               <PasswordField
@@ -555,35 +564,36 @@ function SignupLogin({ close }) {
           )}
 
           <button className={styles.submit} onClick={submit} disabled={submitting} type="button">
-            {submitting ? "Please wait..." : mode === "signup" ? "Create account" : "Login"}
+            {submitting ? "Please wait..." : mode === "signup" ? "Create Account" : "Login"}
           </button>
 
-          {/* <div className={styles.social}>
-            <button type="button">🌈 Continue with Google</button>
-            <button type="button"><FaFacebookF /> Continue with Facebook</button>
-          </div> */}
-
+          {mode === "login" && (
+            <div className={styles.forgotPassword}>
+              <a href="#">Forgot Password?</a>
+            </div>
+          )}
         </div>
       </div>
     </div>
   );
 }
 
-function Field({ name, label, value, onChange, type = "text", error }) {
+function Field({ name, label, value, onChange, type = "text", error, icon }) {
   return (
     <div className={styles.field}>
-      <input
-        id={name}
-        name={name}
-        type={type}
-        value={value}
-        onChange={onChange}
-        placeholder=" "
-        className={error ? styles.inputError : ""}
-      />
-
-      <label htmlFor={name}>{label}</label>
-
+      <div className={styles.fieldWrapper}>
+        {icon && <span className={styles.fieldIcon}>{icon}</span>}
+        <input
+          id={name}
+          name={name}
+          type={type}
+          value={value}
+          onChange={onChange}
+          placeholder=" "
+          className={`${styles.fieldInput} ${error ? styles.inputError : ""}`}
+        />
+        <label htmlFor={name}>{label}</label>
+      </div>
       {error && <p className={styles.errorText}>{error}</p>}
     </div>
   );
@@ -591,25 +601,30 @@ function Field({ name, label, value, onChange, type = "text", error }) {
 
 function PasswordField({ name, label, value, onChange, show, setShow, error }) {
   return (
-    <div className={styles.password}>
+    <div className={styles.passwordField}>
       <div className={styles.field}>
-        <input
-          id={name}
-          name={name}
-          type={show ? "text" : "password"}
-          value={value}
-          onChange={onChange}
-          placeholder=" "
-          className={error ? styles.inputError : ""}
-        />
-        <label htmlFor={name}>{label}</label>
-        {error && <p className={styles.errorText}>{error}</p>}
+        <div className={styles.fieldWrapper}>
+          <span className={styles.fieldIcon}>
+            <Lock size={18} />
+          </span>
+          <input
+            id={name}
+            name={name}
+            type={show ? "text" : "password"}
+            value={value}
+            onChange={onChange}
+            placeholder=" "
+            className={`${styles.fieldInput} ${error ? styles.inputError : ""}`}
+          />
+          <label htmlFor={name}>{label}</label>
+        </div>
+        <span className={styles.passwordToggle} onClick={() => setShow(!show)}>
+          {show ? <EyeOff size={20} /> : <Eye size={20} />}
+        </span>
       </div>
-
-      <span onClick={() => setShow(!show)}>{show ? <EyeOff /> : <Eye />}</span>
+      {error && <p className={styles.errorText}>{error}</p>}
     </div>
   );
 }
 
 export default SignupLogin;
-

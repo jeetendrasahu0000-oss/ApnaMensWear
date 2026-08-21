@@ -1,5 +1,4 @@
-
-
+// GetRelatedProducts.jsx
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import api from "../../../../Api/Axios";
@@ -7,7 +6,6 @@ import ProductDesign from "../ProductDesign";
 import styles from "./GetRelatedProducts.module.css";
 
 const LIMIT = 10;
-
 
 const GetRelatedProducts = ({
   id: idProp,
@@ -35,8 +33,6 @@ const GetRelatedProducts = ({
   const sentinelRef = useRef(null);
   const observerRef = useRef(null);
 
-  // single source of truth for calling the endpoint — used for both
-  // page 1 (reset) and page > 1 (infinite scroll append)
   const fetchProducts = useCallback(
     async (pageToFetch) => {
       if (fetchingRef.current || !hasQuery) return;
@@ -83,7 +79,6 @@ const GetRelatedProducts = ({
     [id, slug, category, subCategory, hasQuery]
   );
 
-  // whenever the identifying inputs change -> reset list and fetch page 1
   useEffect(() => {
     if (!hasQuery) return;
 
@@ -94,7 +89,6 @@ const GetRelatedProducts = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, slug, category, subCategory]);
 
-  // page increments (via scroll) -> fetch next batch, same function
   useEffect(() => {
     if (page === 1) return;
     fetchProducts(page);
@@ -118,30 +112,58 @@ const GetRelatedProducts = ({
   }, [hasMore, loading, products.length]);
 
   if (!hasQuery) {
-    return null; // nothing to base recommendations on
+    return null;
   }
 
   return (
     <section className={styles.wrapper}>
-      <h3 className={styles.heading}>You may also like</h3>
+      <div className={styles.header}>
+        <div className={styles.headerLine}></div>
+        <h3 className={styles.heading}>
+          <span className={styles.headingIcon}>✦</span> You May Also Like
+        </h3>
+        <p className={styles.subheading}>Discover more products you'll love</p>
+      </div>
 
       {loading ? (
-        <div className={styles.loading}>Loading related products...</div>
+        <div className={styles.loading}>
+          <div className={styles.loadingSpinner}></div>
+          <p>Loading related products...</p>
+        </div>
       ) : products.length === 0 ? (
-        <div className={styles.empty}>No related products found</div>
+        <div className={styles.empty}>
+          <span className={styles.emptyIcon}>🛍️</span>
+          <p>No related products found</p>
+        </div>
       ) : (
         <>
           <div className={styles.productGrid}>
-            {products.map((product) => (
-              <ProductDesign key={product._id} product={product} />
+            {products.map((product, index) => (
+              <div 
+                key={product._id} 
+                className={styles.productItem}
+                style={{ animationDelay: `${index * 0.06}s` }}
+              >
+                <ProductDesign product={product} />
+              </div>
             ))}
           </div>
 
-          <div ref={sentinelRef} style={{ height: 1 }} />
+          <div ref={sentinelRef} className={styles.sentinel} />
 
-          {loadingMore && <div className={styles.loading}>Loading more...</div>}
+          {loadingMore && (
+            <div className={styles.loadingMore}>
+              <div className={styles.loadingSpinnerSmall}></div>
+              <p>Loading more...</p>
+            </div>
+          )}
+          
           {!hasMore && products.length > 0 && (
-            <div className={styles.empty}>No more related products</div>
+            <div className={styles.endMessage}>
+              <span className={styles.endLine}></span>
+              <p>You've seen all related products</p>
+              <span className={styles.endLine}></span>
+            </div>
           )}
         </>
       )}
