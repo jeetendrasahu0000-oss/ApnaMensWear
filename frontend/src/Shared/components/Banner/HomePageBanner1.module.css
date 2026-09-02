@@ -1,11 +1,20 @@
+/* Import fonts at the top */
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;0,9..144,800;1,9..144,500;1,9..144,600&family=Manrope:wght@300;400;500;600;700;800&display=swap");
+
 .banner {
   position: relative;
   width: 100%;
-  height: 38vh;
-  min-height: 240px;
+  height: 75vh;  /* Increased from 44vh */
+  min-height: 450px;  /* Increased from 300px */
+  max-height: 800px;  /* Increased from 560px */
   overflow: hidden;
-  border-radius: 0px;
+  background: #0a0a0f;
+  border-radius: 0;
 }
+
+/* ============================================ */
+/* SLIDES                                       */
+/* ============================================ */
 
 .slide {
   position: absolute;
@@ -13,13 +22,13 @@
 
   background-size: cover;
   background-position: center;
+  background-repeat: no-repeat;
 
   opacity: 0;
-  transform: scale(1.05);
+  transform: scale(1.08);
 
-  transition:
-    opacity 1s ease,
-    transform 6s linear;
+  transition: opacity 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    transform 8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .active {
@@ -28,172 +37,510 @@
   z-index: 2;
 }
 
+/* ============================================ */
+/* OVERLAY                                      */
+/* ============================================ */
+
 .overlay {
   position: absolute;
   inset: 0;
+  z-index: 1;
+}
 
-  /* background: linear-gradient(
-    90deg,
-    rgba(0, 0, 0, 0.55),
-    rgba(0, 0, 0, 0.15)
-  ); */
+.overlayGradient {
+  position: absolute;
+  inset: 0;
   background: linear-gradient(
-    90deg,
-    rgba(0, 0, 0, 0.864),
-    rgba(0, 0, 0, 0.109)
+    105deg,
+    rgba(8, 8, 12, 0.95) 0%,
+    rgba(8, 8, 12, 0.75) 32%,
+    rgba(8, 8, 12, 0.35) 62%,
+    rgba(8, 8, 12, 0.08) 100%
   );
 }
 
+/* ============================================ */
+/* CONTENT                                      */
+/* ============================================ */
+
 .content {
   position: absolute;
-  left: 5%;
+  left: 7%;
   top: 50%;
-
   transform: translateY(-50%);
-
-  max-width: 420px;
-
+  max-width: 680px;
   color: white;
-
-  animation: fadeUp 0.8s ease;
+  z-index: 3;
+  animation: fadeUp 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  padding: 20px 0;
 }
+
+/* ============================================ */
+/* TAG / BADGE                                  */
+/* ============================================ */
 
 .tag {
-  display: inline-block;
-
-  padding: 5px 10px;
-
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 16px 7px 12px;
+  font-family: "Manrope", "Segoe UI", sans-serif;
   font-size: 0.65rem;
-  font-weight: 500;
-  letter-spacing: 1px;
-
+  font-weight: 700;
+  letter-spacing: 2.4px;
+  text-transform: uppercase;
   border-radius: 999px;
-
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(10px);
+  background: rgba(184, 134, 47, 0.18);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(212, 168, 92, 0.35);
+  color: #e8c27f;
+  transition: all 0.3s ease;
 }
+
+.tagIcon {
+  display: flex;
+  align-items: center;
+  font-size: 0.75rem;
+  color: #d4a85c;
+}
+
+.tag::before {
+  display: none;
+}
+
+/* ============================================ */
+/* HEADING                                      */
+/* ============================================ */
 
 .content h2 {
-  margin-top: 10px;
-
-  font-size: clamp(1.4rem, 2vw, 2.4rem);
+  margin: 16px 0 0;
+  font-family: "Fraunces", Georgia, "Times New Roman", serif;
+  font-optical-sizing: auto;
+  font-size: clamp(2.5rem, 5vw, 4.5rem);  /* Increased from clamp(1.9rem, 4vw, 3.4rem) */
   font-weight: 600;
-
-  line-height: 1.1;
+  font-style: normal;
+  line-height: 1.05;
+  letter-spacing: -0.015em;
+  color: #ffffff;
+  text-shadow: 0 4px 40px rgba(0, 0, 0, 0.45);
 }
+
+.content h2 em {
+  font-style: italic;
+  font-weight: 500;
+  color: #e8c27f;
+  position: relative;
+}
+
+.content h2 em::after {
+  content: '';
+  position: absolute;
+  bottom: 2px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, #d4a85c, transparent);
+  opacity: 0.4;
+}
+
+/* ============================================ */
+/* SUBTITLE                                     */
+/* ============================================ */
 
 .content p {
-  margin-top: 8px;
-
-  font-size: 0.85rem;
+  margin-top: 12px;
+  font-family: "Manrope", "Segoe UI", sans-serif;
+  font-size: clamp(1rem, 1.3vw, 1.3rem);  /* Increased from clamp(0.88rem, 1.1vw, 1.05rem) */
   font-weight: 400;
-
-  opacity: 0.9;
-  line-height: 1.5;
+  opacity: 0.88;
+  line-height: 1.6;
+  max-width: 420px;  /* Increased from 380px */
+  color: #f2efe9;
+  letter-spacing: 0.01em;
+  text-shadow: 0 1px 20px rgba(0, 0, 0, 0.25);
 }
 
-.content button {
-  margin-top: 16px;
-  padding: 10px 18px;
+/* ============================================ */
+/* CTA BUTTON                                   */
+/* ============================================ */
 
-  border-radius: 5px;
-
+.ctaBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 24px;
+  padding: 13px 28px;
+  border: none;
+  border-radius: 4px;
   cursor: pointer;
+  font-family: "Manrope", "Segoe UI", sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  background: linear-gradient(135deg, #d4a85c 0%, #b8862f 100%);
+  color: #14140f;
+  transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  box-shadow: 0 6px 24px rgba(184, 134, 47, 0.3);
+}
 
-  font-size: 0.8rem;
+.ctaIcon {
+  display: flex;
+  align-items: center;
+  font-size: 0.9rem;
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.ctaBtn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 36px rgba(184, 134, 47, 0.45);
+  background: linear-gradient(135deg, #e0b466 0%, #c4933a 100%);
+}
+
+.ctaBtn:hover .ctaIcon {
+  transform: translateX(4px);
+}
+
+.ctaBtn:active {
+  transform: translateY(-1px);
+}
+
+/* ============================================ */
+/* DECORATIVE LINE                              */
+/* ============================================ */
+
+.decorativeLine {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #d4a85c, transparent);
+  z-index: 5;
+  transition: width 5s ease;
+}
+
+.active .decorativeLine {
+  width: 100%;
+}
+
+/* ============================================ */
+/* NAVIGATION ARROWS                            */
+/* ============================================ */
+
+.arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  width: 52px;  /* Increased from 48px */
+  height: 52px;  /* Increased from 48px */
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(10, 10, 15, 0.4);
+  backdrop-filter: blur(10px);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1.4rem;  /* Increased from 1.2rem */
+  transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  opacity: 0;
+}
+
+.banner:hover .arrow {
+  opacity: 1;
+}
+
+.arrow:hover {
+  background: rgba(184, 134, 47, 0.3);
+  border-color: rgba(212, 168, 92, 0.5);
+  transform: translateY(-50%) scale(1.08);
+}
+
+.arrow:active {
+  transform: translateY(-50%) scale(0.95);
+}
+
+.arrowLeft {
+  left: 24px;
+}
+
+.arrowRight {
+  right: 24px;
+}
+
+/* ============================================ */
+/* SLIDE COUNTER                                */
+/* ============================================ */
+
+.slideCounter {
+  position: absolute;
+  bottom: 32px;  /* Increased from 28px */
+  right: 36px;  /* Increased from 32px */
+  z-index: 10;
+  font-family: "Manrope", "Segoe UI", sans-serif;
   font-weight: 500;
-
-  background: white;
-  color: #111;
-    background-color:gray;
-    border: 1px solid aliceblue;
-    color: aliceblue;
- 
-
-  transition: 0.3s ease;
+  font-size: 0.95rem;  /* Increased from 0.85rem */
+  color: rgba(255, 255, 255, 0.5);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  letter-spacing: 1px;
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(8px);
+  padding: 6px 16px;  /* Increased from 4px 12px */
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
-.content button:hover {
-  transform: translateY(-2px);
+.counterActive {
+  color: #ffffff;
+  font-weight: 700;
 }
+
+.counterSeparator {
+  opacity: 0.4;
+}
+
+.counterTotal {
+  opacity: 0.6;
+}
+
+/* ============================================ */
+/* DOTS                                         */
+/* ============================================ */
 
 .dots {
   position: absolute;
-
-  bottom: 14px;
+  bottom: 30px;  /* Increased from 26px */
   left: 50%;
-
   transform: translateX(-50%);
-
   display: flex;
-  gap: 8px;
-
-  z-index: 5;
+  gap: 12px;  /* Increased from 10px */
+  z-index: 10;
 }
 
 .dot,
 .activeDot {
-  width: 8px;
-  height: 8px;
-
+  height: 5px;  /* Increased from 4px */
   border: none;
-  border-radius: 50%;
-
+  border-radius: 999px;
   cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  padding: 0;
 }
 
 .dot {
-  background: rgba(255, 255, 255, 0.4);
+  width: 24px;  /* Increased from 20px */
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.dot:hover {
+  background: rgba(255, 255, 255, 0.5);
+  transform: scaleY(1.5);
 }
 
 .activeDot {
-  background: white;
-  width: 22px;
-  border-radius: 999px;
+  background: #d4a85c;
+  width: 48px;  /* Increased from 40px */
+  box-shadow: 0 0 20px rgba(212, 168, 92, 0.4);
 }
+
+/* ============================================ */
+/* ANIMATIONS                                   */
+/* ============================================ */
 
 @keyframes fadeUp {
   from {
     opacity: 0;
-    transform: translateY(-40%) scale(0.98);
+    transform: translateY(-42%) scale(0.97);
   }
-
   to {
     opacity: 1;
     transform: translateY(-50%) scale(1);
   }
 }
 
-@media (max-width: 768px) {
+.slide:not(.active) .content {
+  animation: fadeOut 0.6s ease forwards;
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+    transform: translateY(-50%) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-42%) scale(0.97);
+  }
+}
+
+/* ============================================ */
+/* RESPONSIVE                                   */
+/* ============================================ */
+
+@media (max-width: 1024px) {
   .banner {
-    height: 22vh;
-    min-height: 150px;
-    border-radius: 0px;
+    height: 65vh;  /* Slightly smaller on tablet */
+    min-height: 400px;
+    max-height: 700px;
   }
 
   .content {
-    left: 16px;
-    right: 16px;
-    max-width: 260px;
+    max-width: 420px;
   }
 
   .content h2 {
-    font-size: 1.2rem;
-    font-weight: 600;
+    font-size: clamp(2.2rem, 4.5vw, 3.8rem);
   }
 
   .content p {
-    font-size: 0.72rem;
-    margin-top: 6px;
+    font-size: clamp(0.9rem, 1.2vw, 1.1rem);
   }
 
-  .content button {
-    margin-top: 12px;
-    padding: 4px 7px;
-    font-size: 0.72rem;
+  .arrow {
+    width: 44px;
+    height: 44px;
+    font-size: 1.1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .banner {
+    height: 55vh;  /* Increased from 38vh */
+    min-height: 350px;  /* Increased from 240px */
+    max-height: 500px;  /* Increased from 380px */
+  }
+
+  .content {
+    left: 22px;
+    right: 22px;
+    max-width: 320px;
   }
 
   .tag {
+    font-size: 0.55rem;
+    letter-spacing: 1.6px;
+    padding: 5px 12px 5px 10px;
+    gap: 6px;
+  }
+
+  .tagIcon {
+    font-size: 0.65rem;
+  }
+
+  .content h2 {
+    font-size: 1.8rem;  /* Increased from 1.65rem */
+    margin-top: 12px;
+  }
+
+  .content h2 em::after {
+    bottom: 0;
+    height: 1.5px;
+  }
+
+  .content p {
+    font-size: 0.85rem;  /* Increased from 0.8rem */
+    margin-top: 8px;
+    max-width: 100%;
+  }
+
+  .ctaBtn {
+    margin-top: 16px;
+    padding: 10px 20px;
+    font-size: 0.65rem;
+    gap: 8px;
+  }
+
+  .ctaIcon {
+    font-size: 0.8rem;
+  }
+
+  .arrow {
+    display: none;
+  }
+
+  .slideCounter {
+    display: none;
+  }
+
+  .dots {
+    bottom: 18px;  /* Increased from 14px */
+    gap: 10px;  /* Increased from 8px */
+  }
+
+  .dot {
+    width: 18px;  /* Increased from 16px */
+    height: 4px;  /* Increased from 3px */
+  }
+
+  .activeDot {
+    width: 34px;  /* Increased from 30px */
+    height: 4px;  /* Increased from 3px */
+  }
+}
+
+@media (max-width: 420px) {
+  .banner {
+    height: 45vh;  /* Increased from 32vh */
+    min-height: 280px;  /* Increased from 200px */
+  }
+
+  .content {
+    max-width: 240px;
+    left: 16px;
+    padding: 10px 0;
+  }
+
+  .tag {
+    font-size: 0.45rem;
+    letter-spacing: 1.2px;
+    padding: 4px 10px 4px 8px;
+    gap: 4px;
+  }
+
+  .tagIcon {
+    font-size: 0.55rem;
+  }
+
+  .content h2 {
+    font-size: 1.4rem;  /* Increased from 1.25rem */
+    line-height: 1.12;
+    margin-top: 10px;
+  }
+
+  .content p {
+    font-size: 0.75rem;  /* Increased from 0.7rem */
+    margin-top: 6px;
+  }
+
+  .ctaBtn {
+    padding: 8px 14px;
     font-size: 0.58rem;
+    margin-top: 12px;
+    gap: 6px;
+  }
+
+  .ctaIcon {
+    font-size: 0.7rem;
+  }
+
+  .dot {
+    width: 14px;  /* Increased from 12px */
+    height: 4px;  /* Increased from 3px */
+  }
+
+  .activeDot {
+    width: 26px;  /* Increased from 22px */
+    height: 4px;  /* Increased from 3px */
+  }
+
+  .dots {
+    gap: 8px;  /* Increased from 6px */
+    bottom: 16px;  /* Increased from 12px */
   }
 }

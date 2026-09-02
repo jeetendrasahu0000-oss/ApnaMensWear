@@ -1,11 +1,10 @@
 const categories = [
-  "jacket",
-  "hoddie",
+  // "jacket",
+  // "hoddie",
   "jens",
   "shirt",
   "t-shirts",
-  "shoes",
-  "formals",
+ 
 ];
 
 
