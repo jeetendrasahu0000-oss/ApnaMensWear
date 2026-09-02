@@ -1,6 +1,6 @@
 // FilteredProduct.jsx
 import { useEffect, useState, useRef, useCallback } from "react";
-import { useParams } from "react-router-dom";
+import { useParams,useSearchParams } from "react-router-dom";
 import api from "../../../../Api/Axios";
 import ProductDesign from "../ProductDesign";
 import styles from "./FilteredProduct.module.css";
@@ -10,11 +10,15 @@ import { FiFilter, FiX, FiSearch, FiChevronDown } from "react-icons/fi";
 const LIMIT = 6;
 
 function FilteredProducts() {
+
   const { category } = useParams();
+  const [searchParams] = useSearchParams();
+  const searchQuery = searchParams.get("search") || "";
+
 
   const [filters, setFilters] = useState({
     category: category || "",
-    search: "",
+    search: searchQuery,
     minPrice: "",
     maxPrice: "",
     color: "",
@@ -74,19 +78,42 @@ function FilteredProducts() {
     }
   }, []);
 
-  useEffect(() => {
-    setFilters((prev) => ({ ...prev, category: category || "" }));
+  // useEffect(() => {
+  //   setFilters((prev) => ({ ...prev, category: category || "" }));
 
-    const newFilters = { ...appliedFiltersRef.current, category: category || "" };
+  //   const newFilters = { ...appliedFiltersRef.current, category: category || "" };
+  //   appliedFiltersRef.current = newFilters;
+  //   setPage(1);
+  //   setProducts([]);
+  //   setHasMore(true);
+  //   fetchProducts(1, newFilters);
+
+  //   isFirstRun.current = false;
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [category]);
+
+  useEffect(() => {
+    const newFilters = {
+      ...appliedFiltersRef.current,
+      category: category === "all" ? "" : category || "",
+      search: searchQuery,
+    };
+
+    setFilters((prev) => ({
+      ...prev,
+      category: category === "all" ? "" : category || "",
+      search: searchQuery,
+    }));
+
     appliedFiltersRef.current = newFilters;
+
     setPage(1);
     setProducts([]);
     setHasMore(true);
+
     fetchProducts(1, newFilters);
 
-    isFirstRun.current = false;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [category]);
+  }, [category, searchQuery]);
 
   useEffect(() => {
     if (page === 1) return;
@@ -362,3 +389,6 @@ function FilteredProducts() {
 }
 
 export default FilteredProducts;
+
+
+

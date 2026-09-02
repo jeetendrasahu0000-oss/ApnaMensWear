@@ -9,6 +9,7 @@ import {
   FiUser,
   FiChevronRight,
   FiHome,
+  FiSearch,
 } from "react-icons/fi";
 
 import { BsCart3, BsBoxSeam } from "react-icons/bs";
@@ -17,12 +18,14 @@ import SignupLogin from "../../../Features/Auth/SignupLogin";
 import ViewCartProduct from "../CartComponents/ViewCartProduct";
 
 import { GetCategories } from "../../../StataicData/StaticData";
+import SearchBar from "./SearchBar";
 
 const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [showSearch, setShowSearch] = useState(false);
 
   const navigate = useNavigate();
   const categories = GetCategories();
@@ -265,6 +268,10 @@ const Header = () => {
               <span>{item}</span>
             </a>
           ))}
+
+          <a href="/contact">📞 Contact</a>
+          <a href="/about">👤 About Us</a>
+
         </nav>
 
         {/* =====================================================
@@ -272,6 +279,17 @@ const Header = () => {
         ===================================================== */}
 
         <div className={styles.actions}>
+
+          {/* Search */}
+          <button
+            className={styles.iconBtn}
+            onClick={() => setShowSearch((prev) => !prev)}
+            aria-label="Search"
+          >
+            <FiSearch />
+          </button>
+
+
           {/* Account */}
 
           <button
@@ -392,6 +410,9 @@ const Header = () => {
             </a>
           );
         })}
+
+        <a href="/contact" className={styles.drawerLink}>📞 Contact</a>
+        <a href="/about" className={styles.drawerLink}>👤 About Us</a>
       </div>
 
       {/* =====================================================
@@ -409,6 +430,10 @@ const Header = () => {
           onClose={() => setIsCartOpen(false)}
         />
       )}
+      {/* =====================================================
+          Search bar 
+      ===================================================== */}
+      {showSearch && (<SearchBar onClose={() => setShowSearch(false)} />)}
     </>
   );
 };
