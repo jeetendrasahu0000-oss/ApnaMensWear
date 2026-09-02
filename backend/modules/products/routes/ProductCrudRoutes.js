@@ -26,6 +26,6 @@ router.get('/filtered',GetFillterdProducts)
 router.get('/search',SearchProducts)
 
 
-// http://localhost:5000/api/v1/products
+// http://localhost:5000/api/v1/products/search
 
 export default router

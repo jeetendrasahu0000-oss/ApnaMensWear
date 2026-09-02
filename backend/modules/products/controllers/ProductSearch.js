@@ -239,6 +239,87 @@ const GetRelatedProducts = async (req, res) => {
 };
 
 
+// const GetFillterdProducts = async (req, res) => {
+//     try {
+//         const {
+//             page = 1,
+//             limit = 10,
+//             category,
+//             subCategory,
+//             brand,
+//             search,
+//             minPrice,
+//             maxPrice,
+//             color,
+//             size,
+//             sort = "newest"
+//         } = req.query;
+
+//         const query = { isActive: true };
+
+//         if (category) query.category = category;
+//         if (subCategory) query.subCategory = subCategory;
+//         if (brand) query.brand = brand;
+
+
+//         if (color || size) {
+//             const variantMatch = {};
+//             if (color) variantMatch.color = color;
+//             if (size) variantMatch.size = size;
+//             query.variants = { $elemMatch: variantMatch };
+//         }
+
+//         if (search) {
+//             query.productName = { $regex: search, $options: "i" };
+//         }
+
+//         if (minPrice || maxPrice) {
+//             query.price = {};
+//             if (minPrice) query.salePrice.$gte = Number(minPrice);
+//             if (maxPrice) query.salePrice.$lte = Number(maxPrice);
+//         }
+
+//         const sortMap = {
+//             newest: { createdAt: -1 },
+//             oldest: { createdAt: 1 },
+//             priceAsc: { salePrice: 1 },
+//             priceDesc: { salePrice : -1 },
+//             nameAsc: { productName: 1 },
+//             nameDesc: { productName: -1 }
+//         };
+
+//         const sortOption = sortMap[sort] || sortMap.newest;
+//         const skip = (Number(page) - 1) * Number(limit);
+
+//         const [products, totalProducts] = await Promise.all([
+//             ProductModel.find(query)
+//                 .sort(sortOption)
+//                 .skip(skip)
+//                 .limit(Number(limit))
+//                 .lean(),
+//             ProductModel.countDocuments(query)
+//         ]);
+
+//         return res.status(200).json({
+//             success: true,
+//             message: "Products fetched successfully",
+//             data: {
+//                 products,
+//                 pagination: {
+//                     page: Number(page),
+//                     limit: Number(limit),
+//                     totalProducts,
+//                     totalPages: Math.ceil(totalProducts / Number(limit))
+//                 }
+//             },
+//             error: null
+//         });
+//     } catch (error) {
+//         return res.status(500).json({ success: false, message: "Internal server error", data: null, error: error.message });
+//     }
+// };
+
+
 const GetFillterdProducts = async (req, res) => {
     try {
         const {
@@ -255,70 +336,184 @@ const GetFillterdProducts = async (req, res) => {
             sort = "newest"
         } = req.query;
 
-        const query = { isActive: true };
-
-        if (category) query.category = category;
-        if (subCategory) query.subCategory = subCategory;
-        if (brand) query.brand = brand;
-
-
-        if (color || size) {
-            const variantMatch = {};
-            if (color) variantMatch.color = color;
-            if (size) variantMatch.size = size;
-            query.variants = { $elemMatch: variantMatch };
-        }
-
-        if (search) {
-            query.productName = { $regex: search, $options: "i" };
-        }
-
-        if (minPrice || maxPrice) {
-            query.price = {};
-            if (minPrice) query.salePrice.$gte = Number(minPrice);
-            if (maxPrice) query.salePrice.$lte = Number(maxPrice);
-        }
-
-        const sortMap = {
-            newest: { createdAt: -1 },
-            oldest: { createdAt: 1 },
-            priceAsc: { salePrice: 1 },
-            priceDesc: { salePrice : -1 },
-            nameAsc: { productName: 1 },
-            nameDesc: { productName: -1 }
+        const query = {
+            isActive: true
         };
 
-        const sortOption = sortMap[sort] || sortMap.newest;
-        const skip = (Number(page) - 1) * Number(limit);
+        // Category
+        if (category) {
+            query.category = category;
+        }
 
-        const [products, totalProducts] = await Promise.all([
-            ProductModel.find(query)
-                .sort(sortOption)
-                .skip(skip)
-                .limit(Number(limit))
-                .lean(),
-            ProductModel.countDocuments(query)
-        ]);
+        // Sub Category
+        if (subCategory) {
+            query.subCategory = subCategory;
+        }
+
+        // Brand
+        if (brand) {
+            query.brand = brand;
+        }
+
+        // Color / Size
+        if (color || size) {
+            const variantMatch = {};
+
+            if (color) {
+                variantMatch.color = color;
+            }
+
+            if (size) {
+                variantMatch.size = size;
+            }
+
+            query.variants = {
+                $elemMatch: variantMatch
+            };
+        }
+
+        // =================================
+        // SEARCH
+        // =================================
+
+        if (search?.trim()) {
+            const searchWords = search
+                .trim()
+                .split(/\s+/)
+                .filter(Boolean);
+
+            query.$and = searchWords.map((word) => {
+                const regex = {
+                    $regex: word,
+                    $options: "i"
+                };
+
+                return {
+                    $or: [
+                        { productName: regex },
+                        { category: regex },
+                        { subCategory: regex },
+                        { brand: regex },
+                        { tags: regex },
+                        { shortDescription: regex },
+                        { description: regex },
+                        { "variants.color": regex },
+                        { "variants.size": regex }
+                    ]
+                };
+            });
+        }
+
+        // =================================
+        // PRICE
+        // =================================
+
+        if (minPrice || maxPrice) {
+            query.salePrice = {};
+
+            if (minPrice) {
+                query.salePrice.$gte = Number(minPrice);
+            }
+
+            if (maxPrice) {
+                query.salePrice.$lte = Number(maxPrice);
+            }
+        }
+
+        // =================================
+        // SORT
+        // =================================
+
+        const sortMap = {
+            newest: {
+                createdAt: -1
+            },
+
+            oldest: {
+                createdAt: 1
+            },
+
+            priceAsc: {
+                salePrice: 1
+            },
+
+            priceDesc: {
+                salePrice: -1
+            },
+
+            nameAsc: {
+                productName: 1
+            },
+
+            nameDesc: {
+                productName: -1
+            }
+        };
+
+        const sortOption =
+            sortMap[sort] || sortMap.newest;
+
+        // =================================
+        // PAGINATION
+        // =================================
+
+        const pageNumber = Number(page);
+        const limitNumber = Number(limit);
+
+        const skip =
+            (pageNumber - 1) * limitNumber;
+
+        // =================================
+        // FETCH PRODUCTS
+        // =================================
+
+        const [products, totalProducts] =
+            await Promise.all([
+                ProductModel.find(query)
+                    .sort(sortOption)
+                    .skip(skip)
+                    .limit(limitNumber)
+                    .lean(),
+
+                ProductModel.countDocuments(query)
+            ]);
 
         return res.status(200).json({
             success: true,
+
             message: "Products fetched successfully",
+
             data: {
                 products,
+
                 pagination: {
-                    page: Number(page),
-                    limit: Number(limit),
+                    page: pageNumber,
+                    limit: limitNumber,
                     totalProducts,
-                    totalPages: Math.ceil(totalProducts / Number(limit))
+                    totalPages: Math.ceil(
+                        totalProducts / limitNumber
+                    )
                 }
             },
+
             error: null
         });
+
     } catch (error) {
-        return res.status(500).json({ success: false, message: "Internal server error", data: null, error: error.message });
+
+        console.error(
+            "GetFillterdProducts Error:",
+            error
+        );
+
+        return res.status(500).json({
+            success: false,
+            message: "Internal server error",
+            data: null,
+            error: error.message
+        });
     }
 };
-
 
 const SearchProducts = async (req, res) => {
     try {
