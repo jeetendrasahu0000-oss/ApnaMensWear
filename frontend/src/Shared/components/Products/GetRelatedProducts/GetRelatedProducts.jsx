@@ -9,7 +9,8 @@ const LIMIT = 10;
 const STAGGER_DELAY = 150;
 const SCROLL_THROTTLE = 300;
 const SCROLL_THRESHOLD = 250;
-const FETCH_COOLDOWN = 600; // fetch complete hone ke baad itna time koi naya trigger allow nahi
+const EXIT_BUFFER = 400; // threshold se itna door jaane par hi dobara "arm" hoga
+const FETCH_COOLDOWN = 700;
 
 const GetRelatedProducts = ({
   id: idProp,
@@ -38,7 +39,7 @@ const GetRelatedProducts = ({
   const requestIdRef = useRef(0);
   const throttleRef = useRef(null);
   const cooldownRef = useRef(false);
-  const sectionRef = useRef(null); // pura section ka wrapper — bottom detect karne ke liye
+  const armedRef = useRef(true);
 
   const revealStaggered = (batch, requestId) => {
     batch.forEach((product, i) => {
@@ -102,7 +103,6 @@ const GetRelatedProducts = ({
         }
         fetchingRef.current = false;
 
-        // fetch complete hone ke baad thodi der ke liye naya trigger block karo (cooldown)
         cooldownRef.current = true;
         setTimeout(() => {
           cooldownRef.current = false;
@@ -120,6 +120,7 @@ const GetRelatedProducts = ({
     setVisibleProducts([]);
     setPage(1);
     setHasMore(true);
+    armedRef.current = true;
     fetchProducts(1);
 
     return () => {
@@ -136,7 +137,7 @@ const GetRelatedProducts = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page]);
 
-  // ---------------- Throttled scroll listener ----------------
+  // ---------------- Scroll listener (armed/disarmed gate — iOS Safari safe) ----------------
   useEffect(() => {
     if (!hasQuery) return;
 
@@ -146,19 +147,33 @@ const GetRelatedProducts = ({
       throttleRef.current = setTimeout(() => {
         throttleRef.current = null;
 
-        // agar cooldown chal raha hai, fetch ho raha hai, ya aur data nahi hai — kuch mat karo
-        if (cooldownRef.current || fetchingRef.current || !hasMore || loading) return;
-
-        const scrollBottom = window.innerHeight + window.scrollY;
+        const scrollY = Math.max(window.scrollY, 0);
+        const viewportHeight = window.visualViewport?.height || window.innerHeight;
+        const scrollBottom = viewportHeight + scrollY;
         const docHeight = document.documentElement.scrollHeight;
+        const distanceFromBottom = docHeight - scrollBottom;
 
-        if (docHeight - scrollBottom < SCROLL_THRESHOLD) {
+        // user threshold zone se kaafi door chala gaya — dobara "arm" karo
+        if (distanceFromBottom > SCROLL_THRESHOLD + EXIT_BUFFER) {
+          armedRef.current = true;
+          return;
+        }
+
+        if (
+          armedRef.current &&
+          !cooldownRef.current &&
+          !fetchingRef.current &&
+          hasMore &&
+          !loading &&
+          distanceFromBottom < SCROLL_THRESHOLD
+        ) {
+          armedRef.current = false; // disarm — dobara zone se bahar jaane tak fire nahi hoga
           setPage((prev) => prev + 1);
         }
       }, SCROLL_THROTTLE);
     };
 
-    window.addEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => {
       window.removeEventListener("scroll", handleScroll);
       if (throttleRef.current) clearTimeout(throttleRef.current);
@@ -183,7 +198,7 @@ const GetRelatedProducts = ({
   );
 
   return (
-    <section ref={sectionRef} className={styles.wrapper}>
+    <section className={styles.wrapper}>
       <div className={styles.header}>
         <div className={styles.headerLine}></div>
         <h3 className={styles.heading}>

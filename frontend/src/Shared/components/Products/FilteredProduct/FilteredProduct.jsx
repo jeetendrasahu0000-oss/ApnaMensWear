@@ -11,7 +11,8 @@ const LIMIT = 6;
 const STAGGER_DELAY = 150;
 const SCROLL_THROTTLE = 300;
 const SCROLL_THRESHOLD = 250;
-const FETCH_COOLDOWN = 600;
+const EXIT_BUFFER = 400;
+const FETCH_COOLDOWN = 700;
 
 function FilteredProducts() {
 
@@ -47,6 +48,7 @@ function FilteredProducts() {
   const requestIdRef = useRef(0);
   const throttleRef = useRef(null);
   const cooldownRef = useRef(false);
+  const armedRef = useRef(true);
 
   const categories = GetCategories();
 
@@ -134,6 +136,7 @@ function FilteredProducts() {
 
     setPage(1);
     setHasMore(true);
+    armedRef.current = true;
 
     fetchProducts(1, newFilters);
 
@@ -150,7 +153,7 @@ function FilteredProducts() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page]);
 
-  // ---------------- Throttled scroll listener ----------------
+  // ---------------- Scroll listener (armed/disarmed gate — iOS Safari safe) ----------------
   useEffect(() => {
     const handleScroll = () => {
       if (throttleRef.current) return;
@@ -158,18 +161,32 @@ function FilteredProducts() {
       throttleRef.current = setTimeout(() => {
         throttleRef.current = null;
 
-        if (cooldownRef.current || fetchingRef.current || !hasMore || loading) return;
-
-        const scrollBottom = window.innerHeight + window.scrollY;
+        const scrollY = Math.max(window.scrollY, 0);
+        const viewportHeight = window.visualViewport?.height || window.innerHeight;
+        const scrollBottom = viewportHeight + scrollY;
         const docHeight = document.documentElement.scrollHeight;
+        const distanceFromBottom = docHeight - scrollBottom;
 
-        if (docHeight - scrollBottom < SCROLL_THRESHOLD) {
+        if (distanceFromBottom > SCROLL_THRESHOLD + EXIT_BUFFER) {
+          armedRef.current = true;
+          return;
+        }
+
+        if (
+          armedRef.current &&
+          !cooldownRef.current &&
+          !fetchingRef.current &&
+          hasMore &&
+          !loading &&
+          distanceFromBottom < SCROLL_THRESHOLD
+        ) {
+          armedRef.current = false;
           setPage((prev) => prev + 1);
         }
       }, SCROLL_THROTTLE);
     };
 
-    window.addEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => {
       window.removeEventListener("scroll", handleScroll);
       if (throttleRef.current) clearTimeout(throttleRef.current);
@@ -193,6 +210,7 @@ function FilteredProducts() {
     appliedFiltersRef.current = { ...filters };
     setPage(1);
     setHasMore(true);
+    armedRef.current = true;
     fetchProducts(1, appliedFiltersRef.current);
   };
 
@@ -210,6 +228,7 @@ function FilteredProducts() {
     appliedFiltersRef.current = resetFilters;
     setPage(1);
     setHasMore(true);
+    armedRef.current = true;
     fetchProducts(1, resetFilters);
   };
 
