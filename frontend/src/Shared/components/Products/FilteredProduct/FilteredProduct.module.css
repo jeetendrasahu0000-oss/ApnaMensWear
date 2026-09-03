@@ -317,8 +317,12 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .loading p {
@@ -455,8 +459,12 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .mobileSidebar {
@@ -473,8 +481,12 @@
 }
 
 @keyframes slideIn {
-  from { transform: translateX(-100%); }
-  to { transform: translateX(0); }
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
 }
 
 .mobileHeader {
@@ -669,6 +681,36 @@
 }
 
 @keyframes shimmer {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+.loadMoreWrap {
+  display: flex;
+  justify-content: center;
+  padding: 24px 0 10px;
+}
+
+.loadMoreBtn {
+  padding: 12px 32px;
+  background: #1a1a1a;
+  color: white;
+  border: none;
+  border-radius: 30px;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.loadMoreBtn:hover {
+  background: #333;
+  transform: translateY(-1px);
+}
+
+.loadMoreBtn:active {
+  transform: scale(0.97);
 }

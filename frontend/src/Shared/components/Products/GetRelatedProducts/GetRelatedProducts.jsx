@@ -7,10 +7,6 @@ import styles from "./GetRelatedProducts.module.css";
 
 const LIMIT = 10;
 const STAGGER_DELAY = 150;
-const SCROLL_THROTTLE = 300;
-const SCROLL_THRESHOLD = 250;
-const EXIT_BUFFER = 400; // threshold se itna door jaane par hi dobara "arm" hoga
-const FETCH_COOLDOWN = 700;
 
 const GetRelatedProducts = ({
   id: idProp,
@@ -37,9 +33,6 @@ const GetRelatedProducts = ({
   const fetchingRef = useRef(false);
   const staggerTimeouts = useRef([]);
   const requestIdRef = useRef(0);
-  const throttleRef = useRef(null);
-  const cooldownRef = useRef(false);
-  const armedRef = useRef(true);
 
   const revealStaggered = (batch, requestId) => {
     batch.forEach((product, i) => {
@@ -102,11 +95,6 @@ const GetRelatedProducts = ({
           setLoadingMore(false);
         }
         fetchingRef.current = false;
-
-        cooldownRef.current = true;
-        setTimeout(() => {
-          cooldownRef.current = false;
-        }, FETCH_COOLDOWN);
       }
     },
     [id, slug, category, subCategory, hasQuery]
@@ -120,7 +108,6 @@ const GetRelatedProducts = ({
     setVisibleProducts([]);
     setPage(1);
     setHasMore(true);
-    armedRef.current = true;
     fetchProducts(1);
 
     return () => {
@@ -130,59 +117,21 @@ const GetRelatedProducts = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, slug, category, subCategory]);
 
-  // ---------------- Pagination fetch ----------------
+  // ---------------- Pagination fetch (button click se trigger hoga) ----------------
   useEffect(() => {
     if (page === 1) return;
     fetchProducts(page);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page]);
 
-  // ---------------- Scroll listener (armed/disarmed gate — iOS Safari safe) ----------------
-  useEffect(() => {
-    if (!hasQuery) return;
-
-    const handleScroll = () => {
-      if (throttleRef.current) return;
-
-      throttleRef.current = setTimeout(() => {
-        throttleRef.current = null;
-
-        const scrollY = Math.max(window.scrollY, 0);
-        const viewportHeight = window.visualViewport?.height || window.innerHeight;
-        const scrollBottom = viewportHeight + scrollY;
-        const docHeight = document.documentElement.scrollHeight;
-        const distanceFromBottom = docHeight - scrollBottom;
-
-        // user threshold zone se kaafi door chala gaya — dobara "arm" karo
-        if (distanceFromBottom > SCROLL_THRESHOLD + EXIT_BUFFER) {
-          armedRef.current = true;
-          return;
-        }
-
-        if (
-          armedRef.current &&
-          !cooldownRef.current &&
-          !fetchingRef.current &&
-          hasMore &&
-          !loading &&
-          distanceFromBottom < SCROLL_THRESHOLD
-        ) {
-          armedRef.current = false; // disarm — dobara zone se bahar jaane tak fire nahi hoga
-          setPage((prev) => prev + 1);
-        }
-      }, SCROLL_THROTTLE);
-    };
-
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-      if (throttleRef.current) clearTimeout(throttleRef.current);
-    };
-  }, [hasQuery, hasMore, loading]);
-
   useEffect(() => {
     return () => clearStaggerTimeouts();
   }, []);
+
+  const handleLoadMore = () => {
+    if (fetchingRef.current || loadingMore || !hasMore) return;
+    setPage((prev) => prev + 1);
+  };
 
   if (!hasQuery) {
     return null;
@@ -236,6 +185,14 @@ const GetRelatedProducts = ({
                 <SkeletonCard key={`loading-${i}`} delay={i * 60} />
               ))}
           </div>
+
+          {hasMore && !loadingMore && (
+            <div className={styles.loadMoreWrap}>
+              <button className={styles.loadMoreBtn} onClick={handleLoadMore}>
+                Load More
+              </button>
+            </div>
+          )}
 
           {!hasMore && visibleProducts.length > 0 && (
             <div className={styles.endMessage}>
