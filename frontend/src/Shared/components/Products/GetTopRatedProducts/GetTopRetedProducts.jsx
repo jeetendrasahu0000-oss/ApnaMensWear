@@ -4,29 +4,41 @@ import api from '../../../../Api/Axios';
 import ProductDesign from '../ProductDesign';
 import styles from './GetTopRetedProducts.module.css';
 
-const LIMIT = 10;           // ek baar me kitne products load honge
-const STAGGER_DELAY = 150;  // har product ke beech ka gap (ms)
-const SCROLL_THROTTLE = 300; // scroll event throttle gap (ms)
-const SCROLL_THRESHOLD = 200; // bottom se kitna door reh jaye to next batch fetch ho (px)
+const LIMIT = 10;
+const STAGGER_DELAY = 150;
+const SCROLL_THROTTLE = 300;
+const SCROLL_THRESHOLD = 200;
 
 const GetTopRetedProducts = () => {
-  const [products, setProducts] = useState([]);       // fetched but not yet revealed
-  const [visibleProducts, setVisibleProducts] = useState([]); // actually rendered (staggered)
+  const [products, setProducts] = useState([]);
+  const [visibleProducts, setVisibleProducts] = useState([]);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
-
   const [initialLoading, setInitialLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState(null);
 
-  const isFetchingRef = useRef(false);   // guard against duplicate calls
-  const throttleRef = useRef(null);      // throttle timer id
-  const staggerTimeouts = useRef([]);    // to clear on unmount
+  const isFetchingRef = useRef(false);
+  const throttleRef = useRef(null);
+  const staggerTimeouts = useRef([]);
+  const fetchedPagesRef = useRef(new Set()); // Track which pages are already fetched
+  const currentPageRef = useRef(1); // Track current page without closure issues
 
   // ---------------- Fetch products ----------------
   const fetchProducts = useCallback(async (pageNum, isInitial = false) => {
-    if (isFetchingRef.current) return;
+    // Check if this page is already fetched
+    if (fetchedPagesRef.current.has(pageNum)) {
+      console.log(`Page ${pageNum} already fetched, skipping...`);
+      return;
+    }
+
+    if (isFetchingRef.current) {
+      console.log('Already fetching, skipping...');
+      return;
+    }
+
     isFetchingRef.current = true;
+    fetchedPagesRef.current.add(pageNum);
 
     try {
       isInitial ? setInitialLoading(true) : setLoadingMore(true);
@@ -38,51 +50,55 @@ const GetTopRetedProducts = () => {
       const raw = response?.data?.products || response?.data?.data || response?.data || [];
       const newProducts = Array.isArray(raw) ? raw : [];
 
-      // agar backend hasMore bhejta hai to wo use karo, warna length se andaza lagao
+      // Filter out duplicates based on product _id
+      setProducts(prev => {
+        const existingIds = new Set(prev.map(p => p._id));
+        const uniqueNewProducts = newProducts.filter(p => !existingIds.has(p._id));
+        return [...prev, ...uniqueNewProducts];
+      });
+
+      // Only reveal unique products
+      setVisibleProducts(prev => {
+        const existingIds = new Set(prev.map(p => p._id));
+        const uniqueNewProducts = newProducts.filter(p => !existingIds.has(p._id));
+        return [...prev, ...uniqueNewProducts];
+      });
+
       const backendHasMore = response?.data?.hasMore;
       const computedHasMore =
         typeof backendHasMore === 'boolean' ? backendHasMore : newProducts.length === LIMIT;
 
       setHasMore(computedHasMore);
       setError(null);
-
-      if (newProducts.length > 0) {
-        setProducts((prev) => [...prev, ...newProducts]);
-        revealStaggered(newProducts);
-      }
     } catch (err) {
       console.error('Error fetching top rated products:', err);
       setError('Failed to load products. Please try again later.');
       if (isInitial) setProducts([]);
+      // Remove from fetched pages if failed, so it can be retried
+      fetchedPagesRef.current.delete(pageNum);
     } finally {
       isInitial ? setInitialLoading(false) : setLoadingMore(false);
       isFetchingRef.current = false;
     }
   }, []);
 
-  // ---------------- Stagger reveal (ek ek product delay se dikhana) ----------------
-  const revealStaggered = (batch) => {
-    batch.forEach((product, i) => {
-      const timeoutId = setTimeout(() => {
-        setVisibleProducts((prev) => [...prev, product]);
-      }, i * STAGGER_DELAY);
-      staggerTimeouts.current.push(timeoutId);
-    });
-  };
-
   // ---------------- Initial load ----------------
   useEffect(() => {
+    currentPageRef.current = 1;
     fetchProducts(1, true);
 
     return () => {
       staggerTimeouts.current.forEach(clearTimeout);
+      // Reset refs on unmount
+      fetchedPagesRef.current.clear();
+      isFetchingRef.current = false;
     };
   }, [fetchProducts]);
 
   // ---------------- Throttled scroll listener for infinite load ----------------
   useEffect(() => {
     const handleScroll = () => {
-      if (throttleRef.current) return; // throttle: ek baar me ek hi call chalne do
+      if (throttleRef.current) return;
 
       throttleRef.current = setTimeout(() => {
         throttleRef.current = null;
@@ -96,11 +112,10 @@ const GetTopRetedProducts = () => {
           !isFetchingRef.current &&
           !initialLoading
         ) {
-          setPage((prev) => {
-            const nextPage = prev + 1;
-            fetchProducts(nextPage, false);
-            return nextPage;
-          });
+          const nextPage = currentPageRef.current + 1;
+          currentPageRef.current = nextPage;
+          setPage(nextPage);
+          fetchProducts(nextPage, false);
         }
       }, SCROLL_THROTTLE);
     };
@@ -118,6 +133,8 @@ const GetTopRetedProducts = () => {
     setVisibleProducts([]);
     setPage(1);
     setHasMore(true);
+    currentPageRef.current = 1;
+    fetchedPagesRef.current.clear();
     fetchProducts(1, true);
   };
 
@@ -148,7 +165,7 @@ const GetTopRetedProducts = () => {
     );
   }
 
-  // ---------------- Error state (only when nothing loaded yet) ----------------
+  // ---------------- Error state ----------------
   if (error && visibleProducts.length === 0) {
     return (
       <div className={styles.container}>
@@ -181,17 +198,15 @@ const GetTopRetedProducts = () => {
       </div>
 
       <div className={styles.productGrid}>
-        {visibleProducts.map((product, index) => (
+        {visibleProducts.map((product) => (
           <div
-            key={product?._id || index}
+            key={product?._id || `product-${Math.random()}`}
             className={styles.productItem}
-            style={{ animationDelay: `${(index % LIMIT) * 0.08}s` }}
           >
             <ProductDesign product={product} />
           </div>
         ))}
 
-        {/* Jab agla batch load ho raha ho tab skeleton cards dikhao */}
         {loadingMore &&
           Array.from({ length: LIMIT }).map((_, i) => (
             <SkeletonCard key={`loading-${i}`} delay={i * 60} />
