@@ -8,7 +8,10 @@ import { GetCategories } from "../../../../StataicData/StaticData";
 import { FiFilter, FiX, FiSearch, FiChevronDown } from "react-icons/fi";
 
 const LIMIT = 6;
-const STAGGER_DELAY = 150; // har product ke beech gap (ms)
+const STAGGER_DELAY = 150;
+const SCROLL_THROTTLE = 300;
+const SCROLL_THRESHOLD = 250;
+const FETCH_COOLDOWN = 600;
 
 function FilteredProducts() {
 
@@ -27,7 +30,6 @@ function FilteredProducts() {
   });
 
   const appliedFiltersRef = useRef(filters);
-  const isFirstRun = useRef(true);
 
   const [visibleProducts, setVisibleProducts] = useState([]);
   const [page, setPage] = useState(1);
@@ -40,19 +42,18 @@ function FilteredProducts() {
   const sizes = ["S", "M", "L", "XL", "XXL", "XXXL"];
 
   const abortRef = useRef(null);
-  const observerRef = useRef(null);
-  const sentinelRef = useRef(null);
   const fetchingRef = useRef(false);
   const staggerTimeouts = useRef([]);
-  const requestIdRef = useRef(0); // stale fetch calls ko ignore karne ke liye
+  const requestIdRef = useRef(0);
+  const throttleRef = useRef(null);
+  const cooldownRef = useRef(false);
 
   const categories = GetCategories();
 
-  // ---------------- Staggered reveal ----------------
   const revealStaggered = (batch, requestId) => {
     batch.forEach((product, i) => {
       const timeoutId = setTimeout(() => {
-        if (requestIdRef.current !== requestId) return; // stale check
+        if (requestIdRef.current !== requestId) return;
         setVisibleProducts((prev) => [...prev, product]);
       }, i * STAGGER_DELAY);
       staggerTimeouts.current.push(timeoutId);
@@ -82,7 +83,6 @@ function FilteredProducts() {
         signal: controller.signal,
       });
 
-      // stale response guard
       if (requestIdRef.current !== currentRequestId) return;
 
       const fetched = response?.data?.data?.products || [];
@@ -108,6 +108,11 @@ function FilteredProducts() {
         setLoadingMore(false);
       }
       fetchingRef.current = false;
+
+      cooldownRef.current = true;
+      setTimeout(() => {
+        cooldownRef.current = false;
+      }, FETCH_COOLDOWN);
     }
   }, []);
 
@@ -133,7 +138,7 @@ function FilteredProducts() {
     fetchProducts(1, newFilters);
 
     return () => {
-      requestIdRef.current += 1; // is effect ko invalidate karo
+      requestIdRef.current += 1;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [category, searchQuery]);
@@ -145,32 +150,31 @@ function FilteredProducts() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page]);
 
-  // ---------------- IntersectionObserver (stable — sirf ek baar create) ----------------
+  // ---------------- Throttled scroll listener ----------------
   useEffect(() => {
-    observerRef.current = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting && hasMore && !fetchingRef.current) {
-          // fetch shuru hote hi turant unobserve — jab tak naya batch na aaye tab tak dobara fire na ho
-          observerRef.current?.unobserve(entry.target);
+    const handleScroll = () => {
+      if (throttleRef.current) return;
+
+      throttleRef.current = setTimeout(() => {
+        throttleRef.current = null;
+
+        if (cooldownRef.current || fetchingRef.current || !hasMore || loading) return;
+
+        const scrollBottom = window.innerHeight + window.scrollY;
+        const docHeight = document.documentElement.scrollHeight;
+
+        if (docHeight - scrollBottom < SCROLL_THRESHOLD) {
           setPage((prev) => prev + 1);
         }
-      },
-      { root: null, rootMargin: "150px", threshold: 0 }
-    );
+      }, SCROLL_THROTTLE);
+    };
 
-    if (sentinelRef.current) observerRef.current.observe(sentinelRef.current);
-
-    return () => observerRef.current?.disconnect();
-    // dependency intentionally khali — observer sirf ek baar banega, baar baar recreate nahi hoga
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // jab naya batch load complete ho jaye, sentinel ko wapas observe karo (agar aur data baaki hai)
-  useEffect(() => {
-    if (!loading && !loadingMore && hasMore && sentinelRef.current && observerRef.current) {
-      observerRef.current.observe(sentinelRef.current);
-    }
-  }, [loading, loadingMore, hasMore]);
+    window.addEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      if (throttleRef.current) clearTimeout(throttleRef.current);
+    };
+  }, [hasMore, loading]);
 
   useEffect(() => {
     return () => clearStaggerTimeouts();
@@ -319,7 +323,6 @@ function FilteredProducts() {
     </>
   );
 
-  // ---------------- Skeleton card ----------------
   const SkeletonCard = ({ delay = 0 }) => (
     <div className={styles.skeletonCard} style={{ animationDelay: `${delay}ms` }}>
       <div className={styles.skeletonImage} />
@@ -398,8 +401,6 @@ function FilteredProducts() {
                     <SkeletonCard key={`loading-${i}`} delay={i * 60} />
                   ))}
               </div>
-
-              <div ref={sentinelRef} className={styles.sentinel} />
 
               {!hasMore && visibleProducts.length > 0 && (
                 <div className={styles.endMessage}>

@@ -6,7 +6,10 @@ import ProductDesign from "../ProductDesign";
 import styles from "./GetRelatedProducts.module.css";
 
 const LIMIT = 10;
-const STAGGER_DELAY = 150; // har product ke beech gap (ms)
+const STAGGER_DELAY = 150;
+const SCROLL_THROTTLE = 300;
+const SCROLL_THRESHOLD = 250;
+const FETCH_COOLDOWN = 600; // fetch complete hone ke baad itna time koi naya trigger allow nahi
 
 const GetRelatedProducts = ({
   id: idProp,
@@ -31,16 +34,16 @@ const GetRelatedProducts = ({
 
   const abortRef = useRef(null);
   const fetchingRef = useRef(false);
-  const sentinelRef = useRef(null);
-  const observerRef = useRef(null);
   const staggerTimeouts = useRef([]);
-  const requestIdRef = useRef(0); // stale fetch calls ko ignore karne ke liye
+  const requestIdRef = useRef(0);
+  const throttleRef = useRef(null);
+  const cooldownRef = useRef(false);
+  const sectionRef = useRef(null); // pura section ka wrapper — bottom detect karne ke liye
 
-  // ---------------- Staggered reveal ----------------
   const revealStaggered = (batch, requestId) => {
     batch.forEach((product, i) => {
       const timeoutId = setTimeout(() => {
-        if (requestIdRef.current !== requestId) return; // stale check
+        if (requestIdRef.current !== requestId) return;
         setVisibleProducts((prev) => [...prev, product]);
       }, i * STAGGER_DELAY);
       staggerTimeouts.current.push(timeoutId);
@@ -78,7 +81,6 @@ const GetRelatedProducts = ({
           signal: controller.signal,
         });
 
-        // stale response guard
         if (requestIdRef.current !== currentRequestId) return;
 
         const fetched = response?.data?.data?.products || [];
@@ -89,8 +91,6 @@ const GetRelatedProducts = ({
         if (fetched.length > 0) {
           revealStaggered(fetched, currentRequestId);
         }
-
-        return fetched;
       } catch (error) {
         if (error?.name !== "CanceledError" && error?.code !== "ERR_CANCELED") {
           console.error("GetRelatedProducts fetch error:", error);
@@ -101,6 +101,12 @@ const GetRelatedProducts = ({
           setLoadingMore(false);
         }
         fetchingRef.current = false;
+
+        // fetch complete hone ke baad thodi der ke liye naya trigger block karo (cooldown)
+        cooldownRef.current = true;
+        setTimeout(() => {
+          cooldownRef.current = false;
+        }, FETCH_COOLDOWN);
       }
     },
     [id, slug, category, subCategory, hasQuery]
@@ -117,7 +123,7 @@ const GetRelatedProducts = ({
     fetchProducts(1);
 
     return () => {
-      requestIdRef.current += 1; // is effect ko invalidate karo (StrictMode / query change)
+      requestIdRef.current += 1;
       clearStaggerTimeouts();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -130,34 +136,34 @@ const GetRelatedProducts = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page]);
 
-  // ---------------- IntersectionObserver (stable — sirf ek baar create) ----------------
+  // ---------------- Throttled scroll listener ----------------
   useEffect(() => {
     if (!hasQuery) return;
 
-    observerRef.current = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting && hasMore && !fetchingRef.current) {
-          // fetch shuru hote hi turant unobserve — jab tak naya batch na aaye tab tak dobara fire na ho
-          observerRef.current?.unobserve(entry.target);
+    const handleScroll = () => {
+      if (throttleRef.current) return;
+
+      throttleRef.current = setTimeout(() => {
+        throttleRef.current = null;
+
+        // agar cooldown chal raha hai, fetch ho raha hai, ya aur data nahi hai — kuch mat karo
+        if (cooldownRef.current || fetchingRef.current || !hasMore || loading) return;
+
+        const scrollBottom = window.innerHeight + window.scrollY;
+        const docHeight = document.documentElement.scrollHeight;
+
+        if (docHeight - scrollBottom < SCROLL_THRESHOLD) {
           setPage((prev) => prev + 1);
         }
-      },
-      { root: null, rootMargin: "150px", threshold: 0 }
-    );
+      }, SCROLL_THROTTLE);
+    };
 
-    if (sentinelRef.current) observerRef.current.observe(sentinelRef.current);
-
-    return () => observerRef.current?.disconnect();
-    // sirf hasQuery pe depend — products/loading pe nahi, taaki observer baar baar recreate na ho
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hasQuery]);
-
-  // jab naya batch load complete ho jaye, sentinel ko wapas observe karo (agar aur data baaki hai)
-  useEffect(() => {
-    if (!loading && !loadingMore && hasMore && sentinelRef.current && observerRef.current) {
-      observerRef.current.observe(sentinelRef.current);
-    }
-  }, [loading, loadingMore, hasMore]);
+    window.addEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      if (throttleRef.current) clearTimeout(throttleRef.current);
+    };
+  }, [hasQuery, hasMore, loading]);
 
   useEffect(() => {
     return () => clearStaggerTimeouts();
@@ -167,7 +173,6 @@ const GetRelatedProducts = ({
     return null;
   }
 
-  // ---------------- Skeleton card ----------------
   const SkeletonCard = ({ delay = 0 }) => (
     <div className={styles.skeletonCard} style={{ animationDelay: `${delay}ms` }}>
       <div className={styles.skeletonImage} />
@@ -178,7 +183,7 @@ const GetRelatedProducts = ({
   );
 
   return (
-    <section className={styles.wrapper}>
+    <section ref={sectionRef} className={styles.wrapper}>
       <div className={styles.header}>
         <div className={styles.headerLine}></div>
         <h3 className={styles.heading}>
@@ -216,8 +221,6 @@ const GetRelatedProducts = ({
                 <SkeletonCard key={`loading-${i}`} delay={i * 60} />
               ))}
           </div>
-
-          <div ref={sentinelRef} className={styles.sentinel} />
 
           {!hasMore && visibleProducts.length > 0 && (
             <div className={styles.endMessage}>

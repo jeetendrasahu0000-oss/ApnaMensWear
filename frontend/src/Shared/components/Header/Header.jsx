@@ -95,7 +95,7 @@ const Header = () => {
     
     // Bottoms
     "Jeans": "👖",
-    "Jens": "👖",
+  
     "Trouser": "👖",
     "Trousers": "👖",
     "Pants": "👖",
