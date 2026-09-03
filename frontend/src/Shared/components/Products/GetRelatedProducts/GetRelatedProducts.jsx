@@ -6,6 +6,7 @@ import ProductDesign from "../ProductDesign";
 import styles from "./GetRelatedProducts.module.css";
 
 const LIMIT = 10;
+const STAGGER_DELAY = 150; // har product ke beech gap (ms)
 
 const GetRelatedProducts = ({
   id: idProp,
@@ -22,7 +23,7 @@ const GetRelatedProducts = ({
 
   const hasQuery = Boolean(id || slug || category || subCategory);
 
-  const [products, setProducts] = useState([]);
+  const [visibleProducts, setVisibleProducts] = useState([]); // staggered reveal ke liye
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [loading, setLoading] = useState(true);
@@ -32,6 +33,22 @@ const GetRelatedProducts = ({
   const fetchingRef = useRef(false);
   const sentinelRef = useRef(null);
   const observerRef = useRef(null);
+  const staggerTimeouts = useRef([]);
+
+  // ---------------- Staggered reveal ----------------
+  const revealStaggered = (batch) => {
+    batch.forEach((product, i) => {
+      const timeoutId = setTimeout(() => {
+        setVisibleProducts((prev) => [...prev, product]);
+      }, i * STAGGER_DELAY);
+      staggerTimeouts.current.push(timeoutId);
+    });
+  };
+
+  const clearStaggerTimeouts = () => {
+    staggerTimeouts.current.forEach(clearTimeout);
+    staggerTimeouts.current = [];
+  };
 
   const fetchProducts = useCallback(
     async (pageToFetch) => {
@@ -60,10 +77,11 @@ const GetRelatedProducts = ({
         const fetched = response?.data?.data?.products || [];
         const paginationData = response?.data?.data?.pagination;
 
-        setProducts((prev) =>
-          pageToFetch === 1 ? fetched : [...prev, ...fetched]
-        );
         setHasMore(Boolean(paginationData?.hasNextPage) && fetched.length > 0);
+
+        if (fetched.length > 0) {
+          revealStaggered(fetched);
+        }
 
         return fetched;
       } catch (error) {
@@ -82,7 +100,8 @@ const GetRelatedProducts = ({
   useEffect(() => {
     if (!hasQuery) return;
 
-    setProducts([]);
+    clearStaggerTimeouts();
+    setVisibleProducts([]);
     setPage(1);
     setHasMore(true);
     fetchProducts(1);
@@ -109,11 +128,25 @@ const GetRelatedProducts = ({
 
     if (sentinelRef.current) observerRef.current.observe(sentinelRef.current);
     return () => observerRef.current?.disconnect();
-  }, [hasMore, loading, products.length]);
+  }, [hasMore, loading, visibleProducts.length]);
+
+  useEffect(() => {
+    return () => clearStaggerTimeouts();
+  }, []);
 
   if (!hasQuery) {
     return null;
   }
+
+  // ---------------- Skeleton card ----------------
+  const SkeletonCard = ({ delay = 0 }) => (
+    <div className={styles.skeletonCard} style={{ animationDelay: `${delay}ms` }}>
+      <div className={styles.skeletonImage} />
+      <div className={styles.skeletonLine} style={{ width: "80%" }} />
+      <div className={styles.skeletonLine} style={{ width: "55%" }} />
+      <div className={styles.skeletonLine} style={{ width: "40%", height: "18px", marginTop: "8px" }} />
+    </div>
+  );
 
   return (
     <section className={styles.wrapper}>
@@ -125,12 +158,13 @@ const GetRelatedProducts = ({
         <p className={styles.subheading}>Discover more products you'll love</p>
       </div>
 
-      {loading ? (
-        <div className={styles.loading}>
-          <div className={styles.loadingSpinner}></div>
-          <p>Loading related products...</p>
+      {loading && visibleProducts.length === 0 ? (
+        <div className={styles.productGrid}>
+          {Array.from({ length: LIMIT }).map((_, i) => (
+            <SkeletonCard key={i} delay={i * 60} />
+          ))}
         </div>
-      ) : products.length === 0 ? (
+      ) : visibleProducts.length === 0 ? (
         <div className={styles.empty}>
           <span className={styles.emptyIcon}>🛍️</span>
           <p>No related products found</p>
@@ -138,27 +172,25 @@ const GetRelatedProducts = ({
       ) : (
         <>
           <div className={styles.productGrid}>
-            {products.map((product, index) => (
-              <div 
-                key={product._id} 
+            {visibleProducts.map((product, index) => (
+              <div
+                key={product._id}
                 className={styles.productItem}
-                style={{ animationDelay: `${index * 0.06}s` }}
+                style={{ animationDelay: `${(index % LIMIT) * 0.06}s` }}
               >
                 <ProductDesign product={product} />
               </div>
             ))}
+
+            {loadingMore &&
+              Array.from({ length: LIMIT }).map((_, i) => (
+                <SkeletonCard key={`loading-${i}`} delay={i * 60} />
+              ))}
           </div>
 
           <div ref={sentinelRef} className={styles.sentinel} />
 
-          {loadingMore && (
-            <div className={styles.loadingMore}>
-              <div className={styles.loadingSpinnerSmall}></div>
-              <p>Loading more...</p>
-            </div>
-          )}
-          
-          {!hasMore && products.length > 0 && (
+          {!hasMore && visibleProducts.length > 0 && (
             <div className={styles.endMessage}>
               <span className={styles.endLine}></span>
               <p>You've seen all related products</p>

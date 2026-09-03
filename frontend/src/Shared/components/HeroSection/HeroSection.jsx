@@ -14,7 +14,7 @@ const slides = [
     desc: "Timeless outfits that blend confidence and comfort – for every occasion.",
     button: "Shop Collection",
     image:
-      "https://i.pinimg.com/736x/05/b0/eb/05b0ebcec1bfc29002cbc6479710ec20.jpg",
+      "https://i.pinimg.com/736x/f9/6a/f0/f96af0d61f141448f81cddfa4d2775dc.jpg",
     tag: "New Arrivals",
   },
   {
@@ -22,7 +22,7 @@ const slides = [
     desc: "Upgrade your wardrobe with premium jackets and layered casual wear.",
     button: "Explore Now",
     image:
-      "https://i.pinimg.com/1200x/01/64/8c/01648cb657af7993643533260833daf7.jpg",
+      "https://i.pinimg.com/736x/8e/7a/aa/8e7aaa281f5c892149fcdd0eae6f9c87.jpg",
     tag: "Seasonal Picks",
   },
   {
@@ -30,15 +30,14 @@ const slides = [
     desc: "Designed for men who value effortless style and superior craftsmanship.",
     button: "View Products",
     image:
-      "https://i.pinimg.com/736x/c6/12/9c/c6129c1e78cfc4f2b92a65ff5455eaf6.jpg",
-    tag: "Best Sellers",
+      "https://i.pinimg.com/736x/26/47/f2/2647f21911b94fd48220cf6c69c91e59.jpg"
   },
   {
     title: "Summer Breeze Collection",
     desc: "Lightweight fabrics and breathable designs for the perfect summer look.",
     button: "Shop Summer",
     image:
-      "https://i.pinimg.com/1200x/bb/f8/f3/bbf8f3fc435f46777c5098fe9ae5e572.jpg",
+      "https://i.pinimg.com/736x/0a/e6/3c/0ae63cc4d304a80e4dfa1ae75c106187.jpg",
     tag: "Summer 2026",
   },
   {
@@ -46,7 +45,7 @@ const slides = [
     desc: "Bold styles, relaxed fits – street fashion redefined for the modern man.",
     button: "Explore Streetwear",
     image:
-      "https://i.pinimg.com/736x/2b/6f/da/2b6fda338af21809cab9d551ce749f51.jpg",
+      "https://i.pinimg.com/736x/3e/ca/4c/3eca4cc358012b5c88bfc849e83485a6.jpg",
     tag: "Street Style",
   },
   {
@@ -54,7 +53,7 @@ const slides = [
     desc: "Exquisite tailoring and premium fabrics for the discerning gentleman.",
     button: "View Formal",
     image:
-      "https://i.pinimg.com/736x/e3/ca/e9/e3cae90cd3718cd2ed47eaa9c8aaad19.jpg",
+      "https://i.pinimg.com/736x/1b/0d/a2/1b0da24584e1a5f918ce1b3ffca46dd7.jpg",
     tag: "Luxury Collection",
   },
 ];

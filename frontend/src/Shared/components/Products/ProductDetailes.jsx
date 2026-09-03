@@ -1,3 +1,4 @@
+// ProductDetailes.jsx
 import React, { useState, useMemo, useEffect } from "react";
 import style from "./ProductDetailes.module.css";
 import api from "../../../Api/Axios";
@@ -5,22 +6,20 @@ import { useParams } from "react-router-dom";
 import AddToCart from "../CartComponents/AddToCart";
 import CreateOrder from "../Order/CreateOrder";
 
-
-
 const ProductDetailes = () => {
 
   const { slug } = useParams();
 
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const [activeImage, setActiveImage] = useState("");
   const [selectedColor, setSelectedColor] = useState("");
   const [selectedSize, setSelectedSize] = useState("");
   const [quantity, setQuantity] = useState(1);
 
-  const [createOrderOpen, setCreateOrderOpen] = useState(false)
-
+  const [createOrderOpen, setCreateOrderOpen] = useState(false);
 
   useEffect(() => {
 
@@ -29,6 +28,7 @@ const ProductDetailes = () => {
     const fetchProductDetailes = async () => {
       try {
         setLoading(true);
+        setError(null);
 
         const response = await api.get(`/v1/products/details/${slug}`);
 
@@ -38,6 +38,9 @@ const ProductDetailes = () => {
       } 
       catch (error) {
         console.log("failed to fetch product details", error.message);
+        if (mounted) {
+          setError("Failed to load product. Please try again.");
+        }
       } 
       finally {
         if (mounted) {
@@ -109,7 +112,7 @@ const ProductDetailes = () => {
 
   const maxStock = selectedVariant?.stock || 0;
 
-  const discountPercent =price && salePrice ? Math.round(((price - salePrice) / price) * 100) : 0;
+  const discountPercent = price && salePrice ? Math.round(((price - salePrice) / price) * 100) : 0;
 
   const handleColorChange = (color) => {
     setSelectedColor(color);
@@ -127,40 +130,89 @@ const ProductDetailes = () => {
     });
   };
 
+  const handleAddToCart = async () => {
+    try {
+      const CartPayload = {
+        productId: product._id,
+        variantId: selectedVariant?._id,
+        quantity: quantity,
+      };
 
+      const response = await api.post('/v1/cart/add', CartPayload);
 
-
-  const handleAddToCart = async() => {
-    try{
-       const CartPayload = {
-          productId: product._id,
-          variantId: selectedVariant?._id,
-          quantity:quantity
-        }
-
-        const response = await api.post('/v1/cart/add',CartPayload)
-
-        if(response.data.success){
-          alert('Product Add To Cart')
-        }
-
+      if (response.data.success) {
+        alert('Product Add To Cart');
+      }
     }
-    catch(error){
-      console.log('failed to add to cart ',error.response)
-      alert(`${error.response.data.message}`)
+    catch (error) {
+      console.log('failed to add to cart ', error.response);
+      alert(`${error.response.data.message}`);
     }
   };
 
   const handleBuyNow = () => {
     if (!inStock) return;
-    console.log('seting open true')
-    setCreateOrderOpen(true)
+    setCreateOrderOpen(true);
   };
 
   // AFTER ALL HOOKS
 
+  // ---------------- Skeleton Loading UI ----------------
   if (loading) {
-    return <div className={style.loading}>Loading...</div>;
+    return (
+      <div className={style.container}>
+        <div className={style.imageSection}>
+          <div className={`${style.mainImageWrapper} ${style.skeletonBox}`} />
+          <div className={style.thumbnailRow}>
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className={`${style.thumbnail} ${style.skeletonBox}`} />
+            ))}
+          </div>
+        </div>
+
+        <div className={style.detailsSection}>
+          <div className={`${style.skeletonLine} ${style.skeletonBox}`} style={{ width: "40%", height: "12px" }} />
+          <div className={`${style.skeletonLine} ${style.skeletonBox}`} style={{ width: "70%", height: "24px", marginTop: "10px" }} />
+          <div className={`${style.skeletonLine} ${style.skeletonBox}`} style={{ width: "30%", height: "12px", marginTop: "10px" }} />
+          <div className={`${style.skeletonLine} ${style.skeletonBox}`} style={{ width: "90%", height: "14px", marginTop: "16px" }} />
+          <div className={`${style.skeletonLine} ${style.skeletonBox}`} style={{ width: "60%", height: "14px", marginTop: "8px" }} />
+
+          <div className={`${style.skeletonLine} ${style.skeletonBox}`} style={{ width: "35%", height: "28px", marginTop: "20px" }} />
+
+          <div className={style.optionRow} style={{ marginTop: "20px" }}>
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className={`${style.sizeBox} ${style.skeletonBox}`} style={{ width: "50px" }} />
+            ))}
+          </div>
+
+          <div className={style.optionRow} style={{ marginTop: "16px" }}>
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className={`${style.sizeBox} ${style.skeletonBox}`} style={{ width: "44px" }} />
+            ))}
+          </div>
+
+          <div className={style.actionRow} style={{ marginTop: "24px" }}>
+            <div className={`${style.addToCartBtn} ${style.skeletonBox}`} style={{ border: "none" }} />
+            <div className={`${style.buyNowBtn} ${style.skeletonBox}`} />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ---------------- Error state ----------------
+  if (error) {
+    return (
+      <div className={style.errorWrapper}>
+        <p>{error}</p>
+        <button
+          className={style.retryBtn}
+          onClick={() => window.location.reload()}
+        >
+          Try Again
+        </button>
+      </div>
+    );
   }
 
   if (!product) {
@@ -213,9 +265,7 @@ const ProductDetailes = () => {
           {salePrice ? (
             <>
               <span className={style.salePrice}>₹{salePrice}</span>
-
               <span className={style.mrp}>₹{price}</span>
-
               <span className={style.discount}>{discountPercent}% OFF</span>
             </>
           ) : (
@@ -227,7 +277,6 @@ const ProductDetailes = () => {
         {colors.length > 0 && (
           <div className={style.optionGroup}>
             <p className={style.optionLabel}>Color: {selectedColor}</p>
-
             <div className={style.optionRow}>
               {colors.map((color) => (
                 <button
@@ -248,7 +297,6 @@ const ProductDetailes = () => {
         {sizesForColor.length > 0 && (
           <div className={style.optionGroup}>
             <p className={style.optionLabel}>Size: {selectedSize}</p>
-
             <div className={style.optionRow}>
               {sizesForColor.map((variant) => (
                 <button
@@ -282,7 +330,6 @@ const ProductDetailes = () => {
         {inStock && (
           <div className={style.quantityRow}>
             <span className={style.optionLabel}>Quantity</span>
-
             <div className={style.quantityControl}>
               <button
                 onClick={() => handleQuantityChange(-1)}
@@ -290,9 +337,7 @@ const ProductDetailes = () => {
               >
                 -
               </button>
-
               <span>{quantity}</span>
-
               <button
                 onClick={() => handleQuantityChange(1)}
                 disabled={quantity >= maxStock}
@@ -312,7 +357,6 @@ const ProductDetailes = () => {
           >
             Add To Cart
           </button>
-
           <button
             className={style.buyNowBtn}
             disabled={!inStock}
@@ -340,17 +384,21 @@ const ProductDetailes = () => {
         )}
       </div>
 
-      {createOrderOpen && <CreateOrder products={[
-        { 
-          product,
-          quantity: quantity,
-          selectedVariant: {
-            color: selectedColor,
-            size: selectedSize
-          }
-        }
-      ]} onClose={()=>{setCreateOrderOpen(false)}}></CreateOrder>}
-      
+      {createOrderOpen && (
+        <CreateOrder
+          products={[
+            {
+              product,
+              quantity: quantity,
+              selectedVariant: {
+                color: selectedColor,
+                size: selectedSize,
+              },
+            },
+          ]}
+          onClose={() => { setCreateOrderOpen(false); }}
+        />
+      )}
     </div>
   );
 };

@@ -8,7 +8,7 @@ import { GetCategories } from "../../../../StataicData/StaticData";
 
 
 function ProductRegister({ onClose, onCreated }) {
-  
+
   const [form, setForm] = useState({
     productName: "",
     shortDescription: "",
@@ -23,7 +23,7 @@ function ProductRegister({ onClose, onCreated }) {
     width: "",
     height: "",
     coverImage: {},
-    images: [], 
+    images: [],
   });
 
   const [variants, setVariants] = useState([{ color: "", size: "", stock: "" }]);
@@ -35,7 +35,7 @@ function ProductRegister({ onClose, onCreated }) {
   const [apiError, setApiError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  
+
   const updateForm = (field, value) => {
     setForm((prev) => ({ ...prev, [field]: value }));
     if (errors[field]) {
@@ -44,8 +44,8 @@ function ProductRegister({ onClose, onCreated }) {
   };
 
 
-  const categoies =  GetCategories()
-  console.log('Categories',categoies)
+  const categoies = GetCategories()
+  console.log('Categories', categoies)
 
   // ---- variant handlers ----
   const updateVariant = (index, key, value) => {
@@ -96,26 +96,26 @@ function ProductRegister({ onClose, onCreated }) {
     return e;
   };
 
-  const CoverImageHandeler =(data)=>{
-    setForm((prev)=>{
+  const CoverImageHandeler = (data) => {
+    setForm((prev) => {
       return {
         ...prev,
-        coverImage:data[0]
+        coverImage: data[0]
       }
     })
   }
 
-   const ImagesHandeler =(data)=>{
-    setForm((prev)=>{
+  const ImagesHandeler = (data) => {
+    setForm((prev) => {
       return {
         ...prev,
-        images:data
+        images: data
       }
     })
   }
 
 
-  console.log('final data ',form)
+  console.log('final data ', form)
 
   // ---- submit ----
   const handleSubmit = async (e) => {
@@ -156,38 +156,38 @@ function ProductRegister({ onClose, onCreated }) {
 
     try {
       const response = await api.post("/v1/products/regester", payload);
-      console.log('response => ',response.data)
+      console.log('response => ', response.data)
 
       alert(response.data.message)
       onCreated(response.data.data);
-    } 
+    }
     catch (error) {
       const errData = error.response.data;
       if (errData.error && Array.isArray(errData.error)) {
-          const fieldErrors = {};
-          const labelMap = {
-            productName: "Product name",
-            shortDescription: "Short description",
-            description: "Description",
-            category: "Category",
-            subCategory: "Sub-category",
-            brand: "Brand",
-            price: "Price",
-            salePrice: "Sale price",
-            weight: "Weight",
-            dimensions: "Dimensions",
-            variants: "Variants",
-            tags: "Tags",
-            coverImage: "Cover image",
-            images: "Images",
-          };
-          errData.error.forEach((field) => {fieldErrors[field] = `${labelMap[field] || field} is missing` });
-          setErrors(fieldErrors);
+        const fieldErrors = {};
+        const labelMap = {
+          productName: "Product name",
+          shortDescription: "Short description",
+          description: "Description",
+          category: "Category",
+          subCategory: "Sub-category",
+          brand: "Brand",
+          price: "Price",
+          salePrice: "Sale price",
+          weight: "Weight",
+          dimensions: "Dimensions",
+          variants: "Variants",
+          tags: "Tags",
+          coverImage: "Cover image",
+          images: "Images",
+        };
+        errData.error.forEach((field) => { fieldErrors[field] = `${labelMap[field] || field} is missing` });
+        setErrors(fieldErrors);
       }
       const msg = error?.response?.data?.message || "Something went wrong. Please try again.";
       setApiError(msg);
       alert(msg)
-    } 
+    }
     finally {
       setSubmitting(false);
     }
@@ -230,7 +230,7 @@ function ProductRegister({ onClose, onCreated }) {
               onChange={(e) => updateForm("shortDescription", e.target.value)}
               placeholder="Brief summary"
             />
-             {errors.shortDescription && <p className={styles.errorText}>{errors.shortDescription}</p>}
+            {errors.shortDescription && <p className={styles.errorText}>{errors.shortDescription}</p>}
           </div>
 
           <div className={styles.fieldWrap}>
@@ -280,10 +280,10 @@ function ProductRegister({ onClose, onCreated }) {
                 ))}
               </select>
 
-            {errors.category && (
-              <p className={styles.errorText}>{errors.category}</p>
-            )}
-          </div>
+              {errors.category && (
+                <p className={styles.errorText}>{errors.category}</p>
+              )}
+            </div>
 
             <div className={styles.fieldWrap}>
               <label>Sub‑category</label>
@@ -403,12 +403,27 @@ function ProductRegister({ onClose, onCreated }) {
                   onChange={(e) => updateVariant(index, "size", e.target.value)}
                 >
                   <option value="">Select Size</option>
+
+                  {/* Clothing Sizes */}
                   <option value="S">S</option>
                   <option value="M">M</option>
                   <option value="L">L</option>
                   <option value="XL">XL</option>
                   <option value="XXL">XXL</option>
                   <option value="XXXL">XXXL</option>
+
+                  {/* Pants / Jeans Waist Sizes */}
+                  <option value="28">28</option>
+                  <option value="30">30</option>
+                  <option value="32">32</option>
+                  <option value="34">34</option>
+                  <option value="36">36</option>
+                  <option value="38">38</option>
+                  <option value="40">40</option>
+                  <option value="42">42</option>
+                  <option value="44">44</option>
+                  <option value="46">46</option>
+
                   <option value="OTHER">Other Size</option>
                 </select>
 
@@ -421,7 +436,7 @@ function ProductRegister({ onClose, onCreated }) {
                     }
                   />
                 )}
-                
+
                 <input
                   placeholder="Stock"
                   type="number"
@@ -473,29 +488,29 @@ function ProductRegister({ onClose, onCreated }) {
           {/* ---- Media ---- */}
           <div className={styles.sectionTitle}>Media</div>
 
-            <label>Cover image<span className={styles.required}>*</span></label>
-            <UploadImage
-                onChange={(data)=>{
-                  console.log('data=>',data)
-                  CoverImageHandeler(data)
-                }}
+          <label>Cover image<span className={styles.required}>*</span></label>
+          <UploadImage
+            onChange={(data) => {
+              console.log('data=>', data)
+              CoverImageHandeler(data)
+            }}
 
-                type={'product'}
+            type={'product'}
 
-                maxImageCount={1}
+            maxImageCount={1}
 
-            />
+          />
 
-            <label>Upload multiple images <span className={styles.required}>*</span></label>
-            <UploadImage
-                onChange={(data)=>{
-                  console.log('data=>',data)
-                  ImagesHandeler(data)
-                }}
+          <label>Upload multiple images <span className={styles.required}>*</span></label>
+          <UploadImage
+            onChange={(data) => {
+              console.log('data=>', data)
+              ImagesHandeler(data)
+            }}
 
-                type={'product'}
+            type={'product'}
 
-            />
+          />
 
 
 

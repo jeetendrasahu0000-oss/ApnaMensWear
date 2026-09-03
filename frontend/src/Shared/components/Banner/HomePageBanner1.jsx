@@ -33,7 +33,7 @@ const banners = [
     tag: "Exclusive",
     tagIcon: <FiStar />,
     image:
-      "https://i.pinimg.com/736x/3e/f4/cd/3ef4cdf97af7f4830e0957294f73fd79.jpg",
+      "https://i.pinimg.com/736x/a2/0d/1e/a20d1e7f23c02239f27c58fdf36d33f2.jpg",
     bgColor: "#0d0d14",
   },
   {

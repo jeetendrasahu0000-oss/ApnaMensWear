@@ -1,5 +1,4 @@
-
-
+// ProductDashbord.jsx
 import { useEffect, useMemo, useState } from "react";
 import { Boxes, AlertTriangle, XCircle, Plus, Eye, Pencil, Trash2, RefreshCw } from "lucide-react";
 import api from '../../../../Api/Axios'
@@ -26,7 +25,6 @@ function ProductDashbord() {
   const [deletingProduct, setDeletingProduct] = useState(null);
   const [showRegister, setShowRegister] = useState(false);
 
-  // stock helpers defined right here — used only in this file
   const getTotalStock = (product) =>
     (product.variants || []).reduce((sum, v) => sum + (Number(v.stock) || 0), 0);
 
@@ -105,8 +103,6 @@ function ProductDashbord() {
     setDeletingProduct(null);
   };
 
-  // shared by both the table row and the mobile card — avoids writing
-  // the view/edit/delete buttons twice with different markup
   const renderRowActions = (product) => (
     <div className={styles.rowActions}>
       <button type="button" title="View" onClick={() => setViewingProduct(product)}>
@@ -126,12 +122,64 @@ function ProductDashbord() {
     </div>
   );
 
+  // ---------------- Skeleton pieces ----------------
+  const SkeletonSummaryCard = ({ delay = 0 }) => (
+    <div className={styles.summaryCard} style={{ animationDelay: `${delay}ms` }}>
+      <div className={`${styles.skeletonBlock} ${styles.skeletonPulse}`} style={{ width: 40, height: 40, borderRadius: 11 }} />
+      <div style={{ flex: 1 }}>
+        <div className={`${styles.skeletonLine} ${styles.skeletonPulse}`} style={{ width: "40%", height: "20px" }} />
+        <div className={`${styles.skeletonLine} ${styles.skeletonPulse}`} style={{ width: "60%", height: "11px", marginTop: "6px" }} />
+      </div>
+    </div>
+  );
+
+  const SkeletonTableRow = ({ delay = 0 }) => (
+    <tr className={styles.skeletonRow} style={{ animationDelay: `${delay}ms` }}>
+      <td>
+        <div className={styles.productCell}>
+          <div className={`${styles.skeletonBlock} ${styles.skeletonPulse}`} style={{ width: 40, height: 40, borderRadius: 9 }} />
+          <div>
+            <div className={`${styles.skeletonLine} ${styles.skeletonPulse}`} style={{ width: "120px" }} />
+            <div className={`${styles.skeletonLine} ${styles.skeletonPulse}`} style={{ width: "80px", height: "10px", marginTop: "4px" }} />
+          </div>
+        </div>
+      </td>
+      <td><div className={`${styles.skeletonLine} ${styles.skeletonPulse}`} style={{ width: "90px" }} /></td>
+      <td><div className={`${styles.skeletonLine} ${styles.skeletonPulse}`} style={{ width: "70px" }} /></td>
+      <td><div className={`${styles.skeletonLine} ${styles.skeletonPulse}`} style={{ width: "60px" }} /></td>
+      <td><div className={`${styles.skeletonLine} ${styles.skeletonPulse}`} style={{ width: "30px" }} /></td>
+      <td><div className={`${styles.skeletonBlock} ${styles.skeletonPulse}`} style={{ width: 70, height: 20, borderRadius: 20 }} /></td>
+      <td><div className={`${styles.skeletonBlock} ${styles.skeletonPulse}`} style={{ width: 90, height: 30, borderRadius: 8 }} /></td>
+    </tr>
+  );
+
+  const SkeletonProductCard = ({ delay = 0 }) => (
+    <div className={styles.productCard} style={{ animationDelay: `${delay}ms` }}>
+      <div className={`${styles.skeletonBlock} ${styles.skeletonPulse}`} style={{ width: 100, height: 100, borderRadius: 10, flexShrink: 0 }} />
+      <div className={styles.cardBody}>
+        <div className={`${styles.skeletonLine} ${styles.skeletonPulse}`} style={{ width: "70%", height: "14px" }} />
+        <div className={`${styles.skeletonLine} ${styles.skeletonPulse}`} style={{ width: "50%", height: "11px", marginTop: "6px" }} />
+        <div className={`${styles.skeletonLine} ${styles.skeletonPulse}`} style={{ width: "40%", height: "14px", marginTop: "10px" }} />
+      </div>
+    </div>
+  );
+
   return (
     <div className={styles.wrap}>
       <div className={styles.summaryRow}>
-        <SummaryCard icon={Boxes} label="Total products" value={products.length} />
-        <SummaryCard icon={AlertTriangle} label="Low stock" value={lowStockCount} tone="warning" />
-        <SummaryCard icon={XCircle} label="Out of stock" value={outOfStockCount} tone="danger" />
+        {loading ? (
+          <>
+            <SkeletonSummaryCard delay={0} />
+            <SkeletonSummaryCard delay={60} />
+            <SkeletonSummaryCard delay={120} />
+          </>
+        ) : (
+          <>
+            <SummaryCard icon={Boxes} label="Total products" value={products.length} />
+            <SummaryCard icon={AlertTriangle} label="Low stock" value={lowStockCount} tone="warning" />
+            <SummaryCard icon={XCircle} label="Out of stock" value={outOfStockCount} tone="danger" />
+          </>
+        )}
       </div>
 
       <div className={styles.tableCard}>
@@ -192,7 +240,37 @@ function ProductDashbord() {
           </div>
         )}
 
-        {loading && <div className={styles.stateMsg}>Loading products...</div>}
+        {/* ---------------- Skeleton loading ---------------- */}
+        {loading && (
+          <>
+            <div className={styles.tableScroll}>
+              <table className={styles.table}>
+                <thead>
+                  <tr>
+                    <th>Product</th>
+                    <th>Category</th>
+                    <th>Brand</th>
+                    <th>Price</th>
+                    <th>Stock</th>
+                    <th>Status</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {Array.from({ length: 6 }).map((_, i) => (
+                    <SkeletonTableRow key={i} delay={i * 60} />
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <div className={styles.cardList}>
+              {Array.from({ length: 4 }).map((_, i) => (
+                <SkeletonProductCard key={i} delay={i * 60} />
+              ))}
+            </div>
+          </>
+        )}
 
         {!loading && filtered.length === 0 && !loadError && (
           <div className={styles.stateMsg}>No products match your filters.</div>
@@ -215,10 +293,14 @@ function ProductDashbord() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filtered.map((product) => {
+                  {filtered.map((product, index) => {
                     const status = getStockStatus(product);
                     return (
-                      <tr key={product._id}>
+                      <tr
+                        key={product._id}
+                        className={styles.animatedRow}
+                        style={{ animationDelay: `${(index % 20) * 0.03}s` }}
+                      >
                         <td>
                           <div className={styles.productCell}>
                             <img
@@ -264,10 +346,14 @@ function ProductDashbord() {
 
             {/* mobile — rectangular cards, hidden on larger screens via CSS */}
             <div className={styles.cardList}>
-              {filtered.map((product) => {
+              {filtered.map((product, index) => {
                 const status = getStockStatus(product);
                 return (
-                  <div key={product._id} className={styles.productCard}>
+                  <div
+                    key={product._id}
+                    className={`${styles.productCard} ${styles.animatedRow}`}
+                    style={{ animationDelay: `${(index % 20) * 0.03}s` }}
+                  >
                     <img
                       src={product.coverImage.url}
                       alt={product.productName}
@@ -357,8 +443,3 @@ function SummaryCard({ icon: Icon, label, value, tone }) {
 }
 
 export default ProductDashbord;
-
-
-
-
-

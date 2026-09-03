@@ -453,14 +453,29 @@ function ProductEdit({ onClose,product,onUpdated }) {
                   value={variant.size}
                   onChange={(e) => updateVariant(index, "size", e.target.value)}
                 >
-                  <option value="">Select Size</option>
-                  <option value="S">S</option>
-                  <option value="M">M</option>
-                  <option value="L">L</option>
-                  <option value="XL">XL</option>
-                  <option value="XXL">XXL</option>
-                  <option value="XXXL">XXXL</option>
-                  <option value="OTHER">Other Size</option>
+                 <option value="">Select Size</option>
+
+{/* Clothing Sizes */}
+<option value="S">S</option>
+<option value="M">M</option>
+<option value="L">L</option>
+<option value="XL">XL</option>
+<option value="XXL">XXL</option>
+<option value="XXXL">XXXL</option>
+
+{/* Pants / Jeans Waist Sizes */}
+<option value="28">28</option>
+<option value="30">30</option>
+<option value="32">32</option>
+<option value="34">34</option>
+<option value="36">36</option>
+<option value="38">38</option>
+<option value="40">40</option>
+<option value="42">42</option>
+<option value="44">44</option>
+<option value="46">46</option>
+
+<option value="OTHER">Other Size</option>
                 </select>
 
                 {variant.size === "OTHER" && (

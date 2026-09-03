@@ -1,6 +1,6 @@
 // FilteredProduct.jsx
 import { useEffect, useState, useRef, useCallback } from "react";
-import { useParams,useSearchParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import api from "../../../../Api/Axios";
 import ProductDesign from "../ProductDesign";
 import styles from "./FilteredProduct.module.css";
@@ -8,13 +8,13 @@ import { GetCategories } from "../../../../StataicData/StaticData";
 import { FiFilter, FiX, FiSearch, FiChevronDown } from "react-icons/fi";
 
 const LIMIT = 6;
+const STAGGER_DELAY = 150; // har product ke beech gap (ms)
 
 function FilteredProducts() {
 
   const { category } = useParams();
   const [searchParams] = useSearchParams();
   const searchQuery = searchParams.get("search") || "";
-
 
   const [filters, setFilters] = useState({
     category: category || "",
@@ -29,7 +29,7 @@ function FilteredProducts() {
   const appliedFiltersRef = useRef(filters);
   const isFirstRun = useRef(true);
 
-  const [products, setProducts] = useState([]);
+  const [visibleProducts, setVisibleProducts] = useState([]); // staggered reveal
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [loading, setLoading] = useState(true);
@@ -43,8 +43,24 @@ function FilteredProducts() {
   const observerRef = useRef(null);
   const sentinelRef = useRef(null);
   const fetchingRef = useRef(false);
+  const staggerTimeouts = useRef([]);
 
   const categories = GetCategories();
+
+  // ---------------- Staggered reveal ----------------
+  const revealStaggered = (batch) => {
+    batch.forEach((product, i) => {
+      const timeoutId = setTimeout(() => {
+        setVisibleProducts((prev) => [...prev, product]);
+      }, i * STAGGER_DELAY);
+      staggerTimeouts.current.push(timeoutId);
+    });
+  };
+
+  const clearStaggerTimeouts = () => {
+    staggerTimeouts.current.forEach(clearTimeout);
+    staggerTimeouts.current = [];
+  };
 
   const fetchProducts = useCallback(async (pageToFetch, activeFilters) => {
     if (fetchingRef.current) return;
@@ -65,7 +81,15 @@ function FilteredProducts() {
       const fetched = response?.data?.data?.products || [];
       const totalPages = response?.data?.data?.pagination?.totalPages || 1;
 
-      setProducts((prev) => (pageToFetch === 1 ? fetched : [...prev, ...fetched]));
+      if (pageToFetch === 1) {
+        clearStaggerTimeouts();
+        setVisibleProducts([]);
+      }
+
+      if (fetched.length > 0) {
+        revealStaggered(fetched);
+      }
+
       setHasMore(pageToFetch < totalPages && fetched.length > 0);
     } catch (error) {
       if (error?.name !== "CanceledError" && error?.code !== "ERR_CANCELED") {
@@ -77,20 +101,6 @@ function FilteredProducts() {
       fetchingRef.current = false;
     }
   }, []);
-
-  // useEffect(() => {
-  //   setFilters((prev) => ({ ...prev, category: category || "" }));
-
-  //   const newFilters = { ...appliedFiltersRef.current, category: category || "" };
-  //   appliedFiltersRef.current = newFilters;
-  //   setPage(1);
-  //   setProducts([]);
-  //   setHasMore(true);
-  //   fetchProducts(1, newFilters);
-
-  //   isFirstRun.current = false;
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [category]);
 
   useEffect(() => {
     const newFilters = {
@@ -108,7 +118,6 @@ function FilteredProducts() {
     appliedFiltersRef.current = newFilters;
 
     setPage(1);
-    setProducts([]);
     setHasMore(true);
 
     fetchProducts(1, newFilters);
@@ -135,7 +144,11 @@ function FilteredProducts() {
 
     if (sentinelRef.current) observerRef.current.observe(sentinelRef.current);
     return () => observerRef.current?.disconnect();
-  }, [hasMore, loading, products.length]);
+  }, [hasMore, loading, visibleProducts.length]);
+
+  useEffect(() => {
+    return () => clearStaggerTimeouts();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -149,7 +162,6 @@ function FilteredProducts() {
   const handleApply = () => {
     appliedFiltersRef.current = { ...filters };
     setPage(1);
-    setProducts([]);
     setHasMore(true);
     fetchProducts(1, appliedFiltersRef.current);
   };
@@ -167,7 +179,6 @@ function FilteredProducts() {
     setFilters(resetFilters);
     appliedFiltersRef.current = resetFilters;
     setPage(1);
-    setProducts([]);
     setHasMore(true);
     fetchProducts(1, resetFilters);
   };
@@ -179,12 +190,12 @@ function FilteredProducts() {
           <FiSearch className={styles.sectionIcon} />
           Search
         </h4>
-        <input 
-          type="text" 
-          name="search" 
-          value={filters.search} 
-          placeholder="Search products..." 
-          onChange={handleChange} 
+        <input
+          type="text"
+          name="search"
+          value={filters.search}
+          placeholder="Search products..."
+          onChange={handleChange}
           className={styles.searchInput}
         />
       </div>
@@ -204,20 +215,20 @@ function FilteredProducts() {
       <div className={styles.filterSection}>
         <h4>Price Range</h4>
         <div className={styles.priceInputs}>
-          <input 
-            type="number" 
-            placeholder="Min ₹" 
-            name="minPrice" 
-            value={filters.minPrice} 
-            onChange={handleChange} 
+          <input
+            type="number"
+            placeholder="Min ₹"
+            name="minPrice"
+            value={filters.minPrice}
+            onChange={handleChange}
             className={styles.priceInput}
           />
-          <input 
-            type="number" 
-            placeholder="Max ₹" 
-            name="maxPrice" 
-            value={filters.maxPrice} 
-            onChange={handleChange} 
+          <input
+            type="number"
+            placeholder="Max ₹"
+            name="maxPrice"
+            value={filters.maxPrice}
+            onChange={handleChange}
             className={styles.priceInput}
           />
         </div>
@@ -282,6 +293,16 @@ function FilteredProducts() {
     </>
   );
 
+  // ---------------- Skeleton card ----------------
+  const SkeletonCard = ({ delay = 0 }) => (
+    <div className={styles.skeletonCard} style={{ animationDelay: `${delay}ms` }}>
+      <div className={styles.skeletonImage} />
+      <div className={styles.skeletonLine} style={{ width: "80%" }} />
+      <div className={styles.skeletonLine} style={{ width: "55%" }} />
+      <div className={styles.skeletonLine} style={{ width: "40%", height: "18px", marginTop: "8px" }} />
+    </div>
+  );
+
   return (
     <section className={styles.page}>
       <div className={styles.headerBar}>
@@ -290,8 +311,8 @@ function FilteredProducts() {
           Filters
         </button>
         <div className={styles.resultsCount}>
-          {!loading && products.length > 0 && (
-            <span>{products.length} products found</span>
+          {!loading && visibleProducts.length > 0 && (
+            <span>{visibleProducts.length} products found</span>
           )}
         </div>
       </div>
@@ -311,19 +332,20 @@ function FilteredProducts() {
           <div className={styles.topBar}>
             <h2>
               {category ? category : "All"} Products
-              <span className={styles.count}>{!loading && `(${products.length})`}</span>
+              <span className={styles.count}>{!loading && `(${visibleProducts.length})`}</span>
             </h2>
-            {!loading && products.length > 0 && (
+            {!loading && visibleProducts.length > 0 && (
               <span className={styles.sortInfo}>Sorted by: {filters.sort}</span>
             )}
           </div>
 
-          {loading ? (
-            <div className={styles.loading}>
-              <div className={styles.loadingSpinner}></div>
-              <p>Loading Products...</p>
+          {loading && visibleProducts.length === 0 ? (
+            <div className={styles.productGrid}>
+              {Array.from({ length: LIMIT }).map((_, i) => (
+                <SkeletonCard key={i} delay={i * 60} />
+              ))}
             </div>
-          ) : products.length === 0 ? (
+          ) : visibleProducts.length === 0 ? (
             <div className={styles.empty}>
               <span className={styles.emptyIcon}>🔍</span>
               <h3>No Products Found</h3>
@@ -335,27 +357,25 @@ function FilteredProducts() {
           ) : (
             <>
               <div className={styles.productGrid}>
-                {products.map((product, index) => (
-                  <div 
-                    key={product._id} 
+                {visibleProducts.map((product, index) => (
+                  <div
+                    key={product._id}
                     className={styles.productItem}
-                    style={{ animationDelay: `${index * 0.05}s` }}
+                    style={{ animationDelay: `${(index % LIMIT) * 0.05}s` }}
                   >
                     <ProductDesign product={product} />
                   </div>
                 ))}
+
+                {loadingMore &&
+                  Array.from({ length: LIMIT }).map((_, i) => (
+                    <SkeletonCard key={`loading-${i}`} delay={i * 60} />
+                  ))}
               </div>
 
               <div ref={sentinelRef} className={styles.sentinel} />
 
-              {loadingMore && (
-                <div className={styles.loadingMore}>
-                  <div className={styles.loadingSpinnerSmall}></div>
-                  <p>Loading more products...</p>
-                </div>
-              )}
-              
-              {!hasMore && products.length > 0 && (
+              {!hasMore && visibleProducts.length > 0 && (
                 <div className={styles.endMessage}>
                   <span className={styles.endLine}></span>
                   <p>You've seen all products</p>
@@ -389,6 +409,3 @@ function FilteredProducts() {
 }
 
 export default FilteredProducts;
-
-
-
