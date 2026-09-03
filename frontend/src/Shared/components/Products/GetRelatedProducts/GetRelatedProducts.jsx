@@ -23,7 +23,7 @@ const GetRelatedProducts = ({
 
   const hasQuery = Boolean(id || slug || category || subCategory);
 
-  const [visibleProducts, setVisibleProducts] = useState([]); // staggered reveal ke liye
+  const [visibleProducts, setVisibleProducts] = useState([]);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [loading, setLoading] = useState(true);
@@ -34,11 +34,13 @@ const GetRelatedProducts = ({
   const sentinelRef = useRef(null);
   const observerRef = useRef(null);
   const staggerTimeouts = useRef([]);
+  const requestIdRef = useRef(0); // stale fetch calls ko ignore karne ke liye
 
   // ---------------- Staggered reveal ----------------
-  const revealStaggered = (batch) => {
+  const revealStaggered = (batch, requestId) => {
     batch.forEach((product, i) => {
       const timeoutId = setTimeout(() => {
+        if (requestIdRef.current !== requestId) return; // stale check
         setVisibleProducts((prev) => [...prev, product]);
       }, i * STAGGER_DELAY);
       staggerTimeouts.current.push(timeoutId);
@@ -54,6 +56,8 @@ const GetRelatedProducts = ({
     async (pageToFetch) => {
       if (fetchingRef.current || !hasQuery) return;
       fetchingRef.current = true;
+
+      const currentRequestId = ++requestIdRef.current;
 
       if (abortRef.current) abortRef.current.abort();
       const controller = new AbortController();
@@ -74,13 +78,16 @@ const GetRelatedProducts = ({
           signal: controller.signal,
         });
 
+        // stale response guard
+        if (requestIdRef.current !== currentRequestId) return;
+
         const fetched = response?.data?.data?.products || [];
         const paginationData = response?.data?.data?.pagination;
 
         setHasMore(Boolean(paginationData?.hasNextPage) && fetched.length > 0);
 
         if (fetched.length > 0) {
-          revealStaggered(fetched);
+          revealStaggered(fetched, currentRequestId);
         }
 
         return fetched;
@@ -89,14 +96,17 @@ const GetRelatedProducts = ({
           console.error("GetRelatedProducts fetch error:", error);
         }
       } finally {
-        setLoading(false);
-        setLoadingMore(false);
+        if (requestIdRef.current === currentRequestId) {
+          setLoading(false);
+          setLoadingMore(false);
+        }
         fetchingRef.current = false;
       }
     },
     [id, slug, category, subCategory, hasQuery]
   );
 
+  // ---------------- Initial / query-change fetch ----------------
   useEffect(() => {
     if (!hasQuery) return;
 
@@ -105,30 +115,49 @@ const GetRelatedProducts = ({
     setPage(1);
     setHasMore(true);
     fetchProducts(1);
+
+    return () => {
+      requestIdRef.current += 1; // is effect ko invalidate karo (StrictMode / query change)
+      clearStaggerTimeouts();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, slug, category, subCategory]);
 
+  // ---------------- Pagination fetch ----------------
   useEffect(() => {
     if (page === 1) return;
     fetchProducts(page);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page]);
 
+  // ---------------- IntersectionObserver (stable — sirf ek baar create) ----------------
   useEffect(() => {
-    if (observerRef.current) observerRef.current.disconnect();
+    if (!hasQuery) return;
 
     observerRef.current = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting && hasMore && !fetchingRef.current && !loading) {
+        if (entry.isIntersecting && hasMore && !fetchingRef.current) {
+          // fetch shuru hote hi turant unobserve — jab tak naya batch na aaye tab tak dobara fire na ho
+          observerRef.current?.unobserve(entry.target);
           setPage((prev) => prev + 1);
         }
       },
-      { root: null, rootMargin: "300px", threshold: 0 }
+      { root: null, rootMargin: "150px", threshold: 0 }
     );
 
     if (sentinelRef.current) observerRef.current.observe(sentinelRef.current);
+
     return () => observerRef.current?.disconnect();
-  }, [hasMore, loading, visibleProducts.length]);
+    // sirf hasQuery pe depend — products/loading pe nahi, taaki observer baar baar recreate na ho
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasQuery]);
+
+  // jab naya batch load complete ho jaye, sentinel ko wapas observe karo (agar aur data baaki hai)
+  useEffect(() => {
+    if (!loading && !loadingMore && hasMore && sentinelRef.current && observerRef.current) {
+      observerRef.current.observe(sentinelRef.current);
+    }
+  }, [loading, loadingMore, hasMore]);
 
   useEffect(() => {
     return () => clearStaggerTimeouts();

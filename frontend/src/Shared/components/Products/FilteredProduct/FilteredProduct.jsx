@@ -29,7 +29,7 @@ function FilteredProducts() {
   const appliedFiltersRef = useRef(filters);
   const isFirstRun = useRef(true);
 
-  const [visibleProducts, setVisibleProducts] = useState([]); // staggered reveal
+  const [visibleProducts, setVisibleProducts] = useState([]);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [loading, setLoading] = useState(true);
@@ -44,13 +44,15 @@ function FilteredProducts() {
   const sentinelRef = useRef(null);
   const fetchingRef = useRef(false);
   const staggerTimeouts = useRef([]);
+  const requestIdRef = useRef(0); // stale fetch calls ko ignore karne ke liye
 
   const categories = GetCategories();
 
   // ---------------- Staggered reveal ----------------
-  const revealStaggered = (batch) => {
+  const revealStaggered = (batch, requestId) => {
     batch.forEach((product, i) => {
       const timeoutId = setTimeout(() => {
+        if (requestIdRef.current !== requestId) return; // stale check
         setVisibleProducts((prev) => [...prev, product]);
       }, i * STAGGER_DELAY);
       staggerTimeouts.current.push(timeoutId);
@@ -66,6 +68,8 @@ function FilteredProducts() {
     if (fetchingRef.current) return;
     fetchingRef.current = true;
 
+    const currentRequestId = ++requestIdRef.current;
+
     if (abortRef.current) abortRef.current.abort();
     const controller = new AbortController();
     abortRef.current = controller;
@@ -78,6 +82,9 @@ function FilteredProducts() {
         signal: controller.signal,
       });
 
+      // stale response guard
+      if (requestIdRef.current !== currentRequestId) return;
+
       const fetched = response?.data?.data?.products || [];
       const totalPages = response?.data?.data?.pagination?.totalPages || 1;
 
@@ -87,7 +94,7 @@ function FilteredProducts() {
       }
 
       if (fetched.length > 0) {
-        revealStaggered(fetched);
+        revealStaggered(fetched, currentRequestId);
       }
 
       setHasMore(pageToFetch < totalPages && fetched.length > 0);
@@ -96,12 +103,15 @@ function FilteredProducts() {
         console.error("Fetch error:", error);
       }
     } finally {
-      setLoading(false);
-      setLoadingMore(false);
+      if (requestIdRef.current === currentRequestId) {
+        setLoading(false);
+        setLoadingMore(false);
+      }
       fetchingRef.current = false;
     }
   }, []);
 
+  // ---------------- Filter / category / search change fetch ----------------
   useEffect(() => {
     const newFilters = {
       ...appliedFiltersRef.current,
@@ -122,29 +132,45 @@ function FilteredProducts() {
 
     fetchProducts(1, newFilters);
 
+    return () => {
+      requestIdRef.current += 1; // is effect ko invalidate karo
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [category, searchQuery]);
 
+  // ---------------- Pagination fetch ----------------
   useEffect(() => {
     if (page === 1) return;
     fetchProducts(page, appliedFiltersRef.current);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page]);
 
+  // ---------------- IntersectionObserver (stable — sirf ek baar create) ----------------
   useEffect(() => {
-    if (observerRef.current) observerRef.current.disconnect();
-
     observerRef.current = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting && hasMore && !fetchingRef.current && !loading) {
+        if (entry.isIntersecting && hasMore && !fetchingRef.current) {
+          // fetch shuru hote hi turant unobserve — jab tak naya batch na aaye tab tak dobara fire na ho
+          observerRef.current?.unobserve(entry.target);
           setPage((prev) => prev + 1);
         }
       },
-      { root: null, rootMargin: "300px", threshold: 0 }
+      { root: null, rootMargin: "150px", threshold: 0 }
     );
 
     if (sentinelRef.current) observerRef.current.observe(sentinelRef.current);
+
     return () => observerRef.current?.disconnect();
-  }, [hasMore, loading, visibleProducts.length]);
+    // dependency intentionally khali — observer sirf ek baar banega, baar baar recreate nahi hoga
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // jab naya batch load complete ho jaye, sentinel ko wapas observe karo (agar aur data baaki hai)
+  useEffect(() => {
+    if (!loading && !loadingMore && hasMore && sentinelRef.current && observerRef.current) {
+      observerRef.current.observe(sentinelRef.current);
+    }
+  }, [loading, loadingMore, hasMore]);
 
   useEffect(() => {
     return () => clearStaggerTimeouts();
