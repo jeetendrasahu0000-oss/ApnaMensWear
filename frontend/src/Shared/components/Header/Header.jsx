@@ -70,7 +70,7 @@ const Header = () => {
     "Dress Shirts": "👔",
     "Formal Shirts": "👔",
     "Casual Shirts": "👕",
-    
+
     // Hoodies & Sweaters
     "Hoodie": "🧥",
     "Hoodies": "🧥",
@@ -78,7 +78,7 @@ const Header = () => {
     "Sweatshirts": "🧶",
     "Sweater": "🧶",
     "Sweaters": "🧶",
-    
+
     // Jackets & Outerwear
     "Jacket": "🧥",
     "Jackets": "🧥",
@@ -92,10 +92,10 @@ const Header = () => {
     "Waistcoat": "🦺",
     "Winter Wear": "🧣",
     "Coats": "🧥",
-    
+
     // Bottoms
     "Jeans": "👖",
-  
+
     "Trouser": "👖",
     "Trousers": "👖",
     "Pants": "👖",
@@ -107,12 +107,12 @@ const Header = () => {
     "Joggers": "🏃",
     "Track Pants": "🏃",
     "Trackpants": "🏃",
-    
+
     // Kurtas & Ethnic
     "Kurta": "🥻",
     "Kurtas": "🥻",
     "Ethnic": "🥻",
-    
+
     // Footwear - Sports
     "Shoe": "👟",
     "Shoes": "👟",
@@ -121,7 +121,7 @@ const Header = () => {
     "Sports Shoes": "👟",
     "Running Shoes": "👟",
     "Casual Shoes": "👟",
-    
+
     // Footwear - Formal
     "Formal": "👞",
     "Formals": "👞",
@@ -131,14 +131,14 @@ const Header = () => {
     "Loafer": "👞",
     "Loafers": "👞",
     "Derby": "👞",
-    
+
     // Footwear - Other
     "Boot": "🥾",
     "Boots": "🥾",
     "Sandals": "🩴",
     "Flip Flops": "🩴",
     "Slippers": "🩴",
-    
+
     // Accessories
     "Accessories": "🎒",
     "Watch": "⌚",
@@ -180,12 +180,12 @@ const Header = () => {
 
   const getCategoryEmoji = (category) => {
     if (!category) return "🏷️";
-    
+
     // Direct match
     if (categoryEmojis[category]) {
       return categoryEmojis[category];
     }
-    
+
     // Case insensitive match
     const lowerCategory = category.toLowerCase();
     for (const [key, emoji] of Object.entries(categoryEmojis)) {
@@ -193,7 +193,7 @@ const Header = () => {
         return emoji;
       }
     }
-    
+
     // Partial match - check if category contains any keyword
     for (const [key, emoji] of Object.entries(categoryEmojis)) {
       const lowerKey = key.toLowerCase();
@@ -201,7 +201,7 @@ const Header = () => {
         return emoji;
       }
     }
-    
+
     // Default fallback
     return "🏷️";
   };
@@ -240,11 +240,14 @@ const Header = () => {
           {menuOpen ? <FiX /> : <FiMenu />}
         </button>
 
-        {/* Logo */}
+        {/* Logo (PNG from public folder) */}
 
         <div className={styles.logo} onClick={() => navigate("/")}>
-          <h1>Apna</h1>
-          <p>MEN&apos;S WEAR</p>
+          <img
+            src="/logo.png"
+            alt="Apna Men's Wear"
+            className={styles.logoImg}
+          />
         </div>
 
         {/* =====================================================
@@ -346,8 +349,11 @@ const Header = () => {
 
         <div className={styles.drawerHeader}>
           <div className={styles.logo}>
-            <h1>Apna</h1>
-            <p>MEN&apos;S WEAR</p>
+            <img
+              src="/logo.png"
+              alt="Apna Men's Wear"
+              className={styles.logoImg}
+            />
           </div>
 
           <button
@@ -383,7 +389,7 @@ const Header = () => {
 
         {categories.map((item, index) => {
           const emoji = getCategoryEmoji(item);
-          
+
           return (
             <a
               href={`/filtered/${item}`}
