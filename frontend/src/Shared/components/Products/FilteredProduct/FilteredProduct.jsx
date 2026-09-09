@@ -7,7 +7,7 @@ import styles from "./FilteredProduct.module.css";
 import { GetCategories } from "../../../../StataicData/StaticData";
 import { FiFilter, FiX, FiSearch, FiChevronDown } from "react-icons/fi";
 
-const LIMIT = 6;
+const LIMIT = 10;
 const STAGGER_DELAY = 150;
 
 function FilteredProducts() {
@@ -42,6 +42,9 @@ function FilteredProducts() {
   const fetchingRef = useRef(false);
   const staggerTimeouts = useRef([]);
   const requestIdRef = useRef(0);
+
+  // ---------------- Infinite scroll sentinel ----------------
+  const sentinelRef = useRef(null);
 
   const categories = GetCategories();
 
@@ -133,7 +136,7 @@ function FilteredProducts() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [category, searchQuery]);
 
-  // ---------------- Pagination fetch (button click se trigger hoga) ----------------
+  // ---------------- Pagination fetch (scroll se trigger hoga) ----------------
   useEffect(() => {
     if (page === 1) return;
     fetchProducts(page, appliedFiltersRef.current);
@@ -144,10 +147,31 @@ function FilteredProducts() {
     return () => clearStaggerTimeouts();
   }, []);
 
-  const handleLoadMore = () => {
-    if (fetchingRef.current || loadingMore || !hasMore) return;
-    setPage((prev) => prev + 1);
-  };
+  // ---------------- Infinite scroll observer ----------------
+  useEffect(() => {
+    const node = sentinelRef.current;
+    if (!node) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        if (
+          entry.isIntersecting &&
+          hasMore &&
+          !loading &&
+          !loadingMore &&
+          !fetchingRef.current
+        ) {
+          setPage((prev) => prev + 1);
+        }
+      },
+      { rootMargin: "300px" }
+    );
+
+    observer.observe(node);
+
+    return () => observer.disconnect();
+  }, [hasMore, loading, loadingMore]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -371,13 +395,8 @@ function FilteredProducts() {
                   ))}
               </div>
 
-              {hasMore && !loadingMore && (
-                <div className={styles.loadMoreWrap}>
-                  <button className={styles.loadMoreBtn} onClick={handleLoadMore}>
-                    Load More
-                  </button>
-                </div>
-              )}
+              {/* Infinite scroll sentinel - jaise ye screen pe aayega, agla page auto fetch hoga */}
+              <div ref={sentinelRef} className={styles.sentinel} />
 
               {!hasMore && visibleProducts.length > 0 && (
                 <div className={styles.endMessage}>
