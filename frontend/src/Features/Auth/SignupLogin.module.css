@@ -1,14 +1,16 @@
 /* SignupLogin.module.css */
+
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.55);
+  background: rgba(15, 15, 20, 0.65);
+  backdrop-filter: blur(6px);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 2000;
-  backdrop-filter: blur(8px);
-  animation: fadeIn 0.3s ease;
+  z-index: 1000;
+  padding: 20px;
+  animation: fadeIn 0.25s ease;
 }
 
 @keyframes fadeIn {
@@ -21,321 +23,300 @@
 }
 
 .modal {
-  width: 960px;
-  max-height: 88vh;
-  background: #ffffff;
-  border-radius: 24px;
-  display: flex;
-  overflow: hidden;
   position: relative;
-  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.3);
-  animation: slideUp 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  width: 100%;
+  max-width: 920px;
+  max-height: 92vh;
+  overflow-y: auto;
+  background: #ffffff;
+  border-radius: 20px;
+  display: grid;
+  grid-template-columns: 0.9fr 1.1fr;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.35);
+  animation: slideUp 0.3s ease;
 }
 
 @keyframes slideUp {
   from {
+    transform: translateY(24px);
     opacity: 0;
-    transform: translateY(30px) scale(0.96);
   }
   to {
+    transform: translateY(0);
     opacity: 1;
-    transform: translateY(0) scale(1);
   }
 }
 
 .close {
   position: absolute;
-  right: 16px;
   top: 16px;
-  border: none;
-  background: rgba(0, 0, 0, 0.05);
-  border-radius: 50%;
-  width: 44px;
-  height: 44px;
+  right: 16px;
+  z-index: 5;
+  width: 38px;
+  height: 38px;
   display: flex;
   align-items: center;
   justify-content: center;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.9);
+  color: #111;
   cursor: pointer;
-  z-index: 5;
-  transition: all 0.2s ease;
-  color: #666;
+  transition:
+    background 0.2s,
+    transform 0.2s;
 }
 
 .close:hover {
-  background: rgba(0, 0, 0, 0.1);
+  background: #fff;
   transform: rotate(90deg);
 }
 
-/* ============ IMAGE SECTION ============ */
+/* ---------------- Left image panel ---------------- */
+
 .imageBox {
-  width: 50%;
   position: relative;
-  overflow: hidden;
+  display: none;
 }
 
 .imageBox img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  display: block;
 }
 
 .imageOverlay {
   position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 40px 30px;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent);
-  color: white;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.1) 0%,
+    rgba(0, 0, 0, 0.75) 100%
+  );
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 32px;
+  color: #fff;
 }
 
 .imageOverlay h2 {
-  font-size: 28px;
+  font-size: 26px;
   font-weight: 700;
-  margin: 0 0 4px 0;
+  margin-bottom: 6px;
 }
 
 .imageOverlay p {
   font-size: 14px;
-  opacity: 0.8;
-  margin: 0;
+  opacity: 0.85;
 }
 
-/* ============ FORM SECTION ============ */
+@media (min-width: 720px) {
+  .imageBox {
+    display: block;
+  }
+}
+
+/* ---------------- Right form panel ---------------- */
+
 .formSection {
-  width: 50%;
-  padding: 40px 36px;
-  overflow-y: auto;
+  padding: 40px 32px;
   display: flex;
   flex-direction: column;
 }
 
-.formSection::-webkit-scrollbar {
-  width: 4px;
-}
-
-.formSection::-webkit-scrollbar-thumb {
-  background: #ddd;
-  border-radius: 4px;
-}
-
-/* ============ TOGGLE ============ */
 .toggle {
   display: flex;
-  background: #f0efeb;
-  border-radius: 30px;
+  background: #f2f2f5;
+  border-radius: 999px;
   padding: 4px;
+  margin-bottom: 24px;
   width: fit-content;
-  margin: 0 auto;
 }
 
 .toggle button {
-  padding: 10px 32px;
   border: none;
-  border-radius: 26px;
-  background: none;
-  cursor: pointer;
-  font-size: 14px;
+  background: transparent;
+  padding: 8px 22px;
+  border-radius: 999px;
   font-weight: 600;
+  font-size: 14px;
   color: #666;
-  transition: all 0.3s ease;
+  cursor: pointer;
+  transition: all 0.25s ease;
 }
 
 .toggle button.active {
-  background: #1a1a1a;
-  color: white;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  background: #111;
+  color: #fff;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
 }
 
-.toggle button:not(.active):hover {
-  color: #1a1a1a;
-}
-
-/* ============ HEADER ============ */
 .formSection h1 {
-  font-size: 32px;
-  font-weight: 700;
-  margin: 24px 0 4px;
-  color: #1a1a1a;
-  text-align: center;
+  font-size: 26px;
+  font-weight: 800;
+  color: #111;
+  margin-bottom: 4px;
 }
 
 .subtitle {
-  color: #888;
   font-size: 14px;
-  text-align: center;
-  margin: 0 0 24px 0;
+  color: #777;
+  margin-bottom: 24px;
 }
 
-/* ============ FIELDS ============ */
+.apiError {
+  background: #fdecea;
+  color: #b3261e;
+  border: 1px solid #f5c6c3;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  margin-bottom: 16px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px 14px;
+}
+
+@media (max-width: 480px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---------------- Fields ---------------- */
+
 .field {
-  margin-bottom: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .fieldWrapper {
   position: relative;
-  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
 }
 
 .fieldIcon {
   position: absolute;
-  left: 14px;
-  top: 50%;
-  transform: translateY(-50%);
+  left: 12px;
   color: #999;
+  display: flex;
+  align-items: center;
   pointer-events: none;
-  transition: color 0.2s ease;
 }
 
 .fieldInput {
   width: 100%;
-  padding: 14px 14px 14px 44px;
+  padding: 13px 14px 13px 38px;
   border-radius: 12px;
-  border: 1.5px solid #e8e6e1;
+  border: 1.5px solid #e2e2e6;
   font-size: 14px;
-  background: #faf9f6;
-  transition: all 0.2s ease;
-  color: #1a1a1a;
+  outline: none;
+  background: #fafafa;
+  transition:
+    border-color 0.2s,
+    background 0.2s;
 }
 
 .fieldInput:focus {
-  outline: none;
-  border-color: #b8862f;
-  background: white;
-  box-shadow: 0 0 0 3px rgba(184, 134, 47, 0.08);
+  border-color: #111;
+  background: #fff;
 }
 
-.fieldInput:focus + label,
-.fieldInput:not(:placeholder-shown) + label {
-  top: -8px;
-  left: 38px;
-  font-size: 11px;
-  background: white;
-  padding: 0 6px;
-  color: #b8862f;
-}
-
-.fieldInput.inputError {
-  border-color: #e02424;
-}
-
-.fieldInput.inputError:focus {
-  box-shadow: 0 0 0 3px rgba(224, 36, 36, 0.1);
-}
-
-.field label {
+.fieldWrapper label {
   position: absolute;
-  left: 44px;
+  left: 38px;
   top: 50%;
   transform: translateY(-50%);
-  color: #999;
   font-size: 14px;
-  transition: all 0.2s ease;
-  cursor: text;
+  color: #999;
   pointer-events: none;
+  transition: 0.2s ease all;
   background: transparent;
+  padding: 0 4px;
 }
 
 .fieldInput:focus + label,
 .fieldInput:not(:placeholder-shown) + label {
-  top: -8px;
-  left: 38px;
-  font-size: 11px;
-  background: white;
-  padding: 0 6px;
-  color: #b8862f;
+  top: 0;
+  transform: translateY(-50%) scale(0.85);
+  color: #111;
+  background: #fff;
+  left: 30px;
 }
 
-/* ============ PASSWORD FIELD ============ */
+.inputError {
+  border-color: #e04b4b !important;
+}
+
+.errorText {
+  color: #e04b4b;
+  font-size: 12px;
+  margin-top: 2px;
+}
+
+/* ---------------- Password field ---------------- */
+
 .passwordField {
-  margin-bottom: 4px;
-}
-
-.passwordField .field {
   position: relative;
 }
 
 .passwordToggle {
   position: absolute;
-  right: 14px;
-  top: 50%;
-  transform: translateY(-50%);
-  cursor: pointer;
+  right: 12px;
+  top: 22px;
   color: #999;
-  transition: color 0.2s ease;
-  z-index: 2;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
 }
 
 .passwordToggle:hover {
-  color: #1a1a1a;
+  color: #111;
 }
 
-/* ============ GRID ============ */
-.grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px 16px;
-}
+/* ---------------- OTP ---------------- */
 
-.grid .field {
-  margin-bottom: 0;
-}
-
-/* ============ OTP ============ */
 .otpWrapper {
   grid-column: 1 / -1;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  margin: 4px 0 8px;
+  gap: 10px;
+  background: #f7f7f9;
+  border-radius: 14px;
+  padding: 14px;
 }
 
 .otpSendBtn {
-  width: 100%;
-  padding: 13px;
-  border-radius: 12px;
-  border: 1.5px solid #1a1a1a;
-  background: transparent;
-  color: #1a1a1a;
-  font-size: 14px;
+  align-self: flex-start;
+  border: none;
+  background: #111;
+  color: #fff;
+  padding: 9px 18px;
+  border-radius: 999px;
+  font-size: 13px;
   font-weight: 600;
-  text-align: center;
   cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.otpSendBtn:hover:not(:disabled) {
-  background: #1a1a1a;
-  color: white;
+  transition: opacity 0.2s;
 }
 
 .otpSendBtn:disabled {
+  opacity: 0.6;
   cursor: not-allowed;
-  opacity: 0.7;
-}
-
-.otpBtnUnverified {
-  border-color: #e02424;
-  color: #e02424;
-  background: #fdeaea;
-}
-
-.otpBtnUnverified:hover:not(:disabled) {
-  background: #e02424;
-  color: white;
 }
 
 .otpBtnVerified {
-  border-color: #16a34a;
-  color: white;
-  background: #16a34a;
-  cursor: default;
+  background: #1f9d55;
 }
 
-.otpBtnVerified:hover {
-  background: #16a34a;
-  color: white;
+.otpBtnUnverified {
+  background: #d68b00;
 }
 
 .otpTimer {
@@ -345,227 +326,88 @@
 
 .otpContainer {
   display: flex;
-  gap: 10px;
-  margin: 4px 0;
+  gap: 8px;
 }
 
 .otpBox {
-  width: 44px;
-  height: 50px;
+  width: 42px;
+  height: 46px;
   text-align: center;
   font-size: 18px;
-  font-weight: 600;
+  font-weight: 700;
   border-radius: 10px;
-  border: 1.5px solid #e8e6e1;
-  background: #faf9f6;
+  border: 1.5px solid #e2e2e6;
   outline: none;
-  transition: all 0.2s ease;
+  background: #fff;
 }
 
 .otpBox:focus {
-  border-color: #b8862f;
-  background: white;
-  box-shadow: 0 0 0 3px rgba(184, 134, 47, 0.08);
+  border-color: #111;
 }
 
 .otpVerifyBtn {
-  padding: 10px 30px;
-  border-radius: 25px;
+  align-self: flex-start;
   border: none;
-  background: #1a1a1a;
-  color: white;
+  background: #111;
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 999px;
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
 }
 
-.otpVerifyBtn:hover {
-  background: #333;
-  transform: translateY(-1px);
-}
+/* ---------------- Submit ---------------- */
 
-/* ============ ERRORS ============ */
-.errorText {
-  margin: 4px 0 0;
-  font-size: 12px;
-  color: #e02424;
-}
-
-.apiError {
-  margin-bottom: 12px;
-  padding: 10px 14px;
-  border-radius: 10px;
-  background: #fdeaea;
-  color: #b91c1c;
-  font-size: 13px;
-  text-align: center;
-}
-
-/* ============ SUBMIT ============ */
 .submit {
-  width: 100%;
-  padding: 15px;
-  border-radius: 12px;
+  grid-column: 1 / -1;
+  margin-top: 24px;
+  padding: 14px;
   border: none;
-  background: #1a1a1a;
-  color: white;
-  font-size: 16px;
-  font-weight: 600;
-  margin-top: 16px;
+  border-radius: 12px;
+  background: #111;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition:
+    transform 0.15s ease,
+    opacity 0.2s;
 }
 
-.submit:hover:not(:disabled) {
-  background: #333;
+.submit:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
 }
 
 .submit:disabled {
-  background: #888;
+  opacity: 0.6;
   cursor: not-allowed;
+  transform: none;
 }
 
-/* ============ FORGOT PASSWORD ============ */
 .forgotPassword {
+  margin-top: 14px;
   text-align: center;
-  margin-top: 12px;
 }
 
 .forgotPassword a {
-  color: #888;
   font-size: 13px;
+  color: #666;
   text-decoration: none;
-  transition: color 0.2s ease;
 }
 
 .forgotPassword a:hover {
-  color: #1a1a1a;
+  color: #111;
+  text-decoration: underline;
 }
 
-/* ============ RESPONSIVE ============ */
-@media (max-width: 900px) {
-  .modal {
-    width: 95%;
-    max-height: 90vh;
-  }
-
-  .imageBox {
-    display: none;
-  }
-
-  .formSection {
-    width: 100%;
-    padding: 32px 24px;
-  }
+/* Scrollbar polish for the modal */
+.modal::-webkit-scrollbar {
+  width: 6px;
 }
 
-@media (max-width: 768px) {
-  .modal {
-    width: 98%;
-    border-radius: 16px;
-  }
-
-  .formSection {
-    padding: 24px 18px;
-  }
-
-  .formSection h1 {
-    font-size: 26px;
-    margin: 16px 0 2px;
-  }
-
-  .grid {
-    grid-template-columns: 1fr;
-    gap: 8px;
-  }
-
-  .otpBox {
-    width: 38px;
-    height: 44px;
-    font-size: 16px;
-  }
-
-  .toggle button {
-    padding: 8px 24px;
-    font-size: 13px;
-  }
-
-  .close {
-    width: 36px;
-    height: 36px;
-    right: 12px;
-    top: 12px;
-  }
-
-  .close svg {
-    width: 20px;
-    height: 20px;
-  }
-
-  .fieldInput {
-    padding: 12px 12px 12px 40px;
-    font-size: 13px;
-  }
-
-  .fieldIcon {
-    left: 12px;
-  }
-
-  .field label {
-    left: 40px;
-    font-size: 13px;
-  }
-
-  .fieldInput:focus + label,
-  .fieldInput:not(:placeholder-shown) + label {
-    left: 34px;
-    font-size: 10px;
-  }
-
-  .submit {
-    padding: 13px;
-    font-size: 15px;
-  }
-}
-
-@media (max-width: 480px) {
-  .formSection {
-    padding: 20px 14px;
-  }
-
-  .formSection h1 {
-    font-size: 22px;
-  }
-
-  .subtitle {
-    font-size: 13px;
-  }
-
-  .toggle button {
-    padding: 6px 16px;
-    font-size: 12px;
-  }
-
-  .otpBox {
-    width: 32px;
-    height: 38px;
-    font-size: 14px;
-  }
-
-  .otpContainer {
-    gap: 6px;
-  }
-
-  .otpSendBtn {
-    padding: 11px;
-    font-size: 13px;
-  }
-
-  .otpVerifyBtn {
-    padding: 8px 20px;
-    font-size: 12px;
-  }
+.modal::-webkit-scrollbar-thumb {
+  background: #ddd;
+  border-radius: 10px;
 }

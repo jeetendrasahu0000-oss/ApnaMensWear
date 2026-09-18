@@ -1,7 +1,7 @@
 // Header.jsx
 import React, { useState, useEffect } from "react";
 import styles from "./Header.module.css";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
 import {
   FiMenu,
@@ -10,6 +10,7 @@ import {
   FiChevronRight,
   FiHome,
   FiSearch,
+  FiLogOut,
 } from "react-icons/fi";
 
 import { BsCart3, BsBoxSeam } from "react-icons/bs";
@@ -19,6 +20,9 @@ import ViewCartProduct from "../CartComponents/ViewCartProduct";
 
 import { GetCategories } from "../../../StataicData/StaticData";
 import SearchBar from "./SearchBar";
+
+// NAYA IMPORT
+import { useAuth } from "../../../context/AuthContext";
 
 const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -30,7 +34,16 @@ const Header = () => {
   const navigate = useNavigate();
   const categories = GetCategories();
 
+  // NAYA: global auth state
+  const { isLoggedIn, user, logout } = useAuth();
+
   const onCloseForm = () => setIsFormOpen(false);
+
+  const handleLogout = () => {
+    logout();
+    setMenuOpen(false);
+    navigate("/");
+  };
 
   useEffect(() => {
     document.body.style.overflow = menuOpen ? "hidden" : "";
@@ -60,7 +73,6 @@ const Header = () => {
   // =====================================================
 
   const categoryEmojis = {
-    // Tops
     "Shirt": "👔",
     "Shirts": "👔",
     "T-Shirt": "👕",
@@ -70,16 +82,12 @@ const Header = () => {
     "Dress Shirts": "👔",
     "Formal Shirts": "👔",
     "Casual Shirts": "👕",
-
-    // Hoodies & Sweaters
     "Hoodie": "🧥",
     "Hoodies": "🧥",
     "Sweatshirt": "🧶",
     "Sweatshirts": "🧶",
     "Sweater": "🧶",
     "Sweaters": "🧶",
-
-    // Jackets & Outerwear
     "Jacket": "🧥",
     "Jackets": "🧥",
     "Blazer": "🤵",
@@ -92,10 +100,7 @@ const Header = () => {
     "Waistcoat": "🦺",
     "Winter Wear": "🧣",
     "Coats": "🧥",
-
-    // Bottoms
     "Jeans": "👖",
-
     "Trouser": "👖",
     "Trousers": "👖",
     "Pants": "👖",
@@ -107,13 +112,9 @@ const Header = () => {
     "Joggers": "🏃",
     "Track Pants": "🏃",
     "Trackpants": "🏃",
-
-    // Kurtas & Ethnic
     "Kurta": "🥻",
     "Kurtas": "🥻",
     "Ethnic": "🥻",
-
-    // Footwear - Sports
     "Shoe": "👟",
     "Shoes": "👟",
     "Sneaker": "👟",
@@ -121,8 +122,6 @@ const Header = () => {
     "Sports Shoes": "👟",
     "Running Shoes": "👟",
     "Casual Shoes": "👟",
-
-    // Footwear - Formal
     "Formal": "👞",
     "Formals": "👞",
     "Formal Shoes": "👞",
@@ -131,15 +130,11 @@ const Header = () => {
     "Loafer": "👞",
     "Loafers": "👞",
     "Derby": "👞",
-
-    // Footwear - Other
     "Boot": "🥾",
     "Boots": "🥾",
     "Sandals": "🩴",
     "Flip Flops": "🩴",
     "Slippers": "🩴",
-
-    // Accessories
     "Accessories": "🎒",
     "Watch": "⌚",
     "Watches": "⌚",
@@ -174,19 +169,13 @@ const Header = () => {
     "Suspenders": "🔗",
   };
 
-  // =====================================================
-  // GET CATEGORY EMOJI - WITH CASE INSENSITIVE MATCHING
-  // =====================================================
-
   const getCategoryEmoji = (category) => {
     if (!category) return "🏷️";
 
-    // Direct match
     if (categoryEmojis[category]) {
       return categoryEmojis[category];
     }
 
-    // Case insensitive match
     const lowerCategory = category.toLowerCase();
     for (const [key, emoji] of Object.entries(categoryEmojis)) {
       if (key.toLowerCase() === lowerCategory) {
@@ -194,7 +183,6 @@ const Header = () => {
       }
     }
 
-    // Partial match - check if category contains any keyword
     for (const [key, emoji] of Object.entries(categoryEmojis)) {
       const lowerKey = key.toLowerCase();
       if (lowerCategory.includes(lowerKey) || lowerKey.includes(lowerCategory)) {
@@ -202,16 +190,12 @@ const Header = () => {
       }
     }
 
-    // Default fallback
     return "🏷️";
   };
 
   return (
     <>
-      {/* =====================================================
-          ANNOUNCEMENT BAR
-      ===================================================== */}
-
+      {/* ANNOUNCEMENT BAR */}
       <div className={styles.announcementBar}>
         <div className={styles.announcementTrack}>
           {[...announcements, ...announcements].map((text, index) => (
@@ -220,17 +204,12 @@ const Header = () => {
         </div>
       </div>
 
-      {/* =====================================================
-          HEADER
-      ===================================================== */}
-
+      {/* HEADER */}
       <header
         className={`${styles.header} ${
           scrolled ? styles.headerScrolled : ""
         }`}
       >
-        {/* Mobile Menu Button */}
-
         <button
           className={styles.mobileMenuBtn}
           onClick={() => setMenuOpen(!menuOpen)}
@@ -240,8 +219,6 @@ const Header = () => {
           {menuOpen ? <FiX /> : <FiMenu />}
         </button>
 
-        {/* Logo (PNG from public folder) */}
-
         <div className={styles.logo} onClick={() => navigate("/")}>
           <img
             src="/logo.png"
@@ -250,40 +227,25 @@ const Header = () => {
           />
         </div>
 
-        {/* =====================================================
-            DESKTOP NAV
-        ===================================================== */}
-
+        {/* DESKTOP NAV - FIX: <a href> -> <Link to> (full page reload band ho gaya) */}
         <nav className={styles.nav}>
-          <a href="/">
-            🏠 Home
-          </a>
+          <Link to="/">🏠 Home</Link>
 
           {categories.map((item) => (
-            <a
-              href={`/filtered/${item}`}
-              key={item}
-            >
+            <Link to={`/filtered/${item}`} key={item}>
               <span className={styles.categoryEmoji}>
                 {getCategoryEmoji(item)}
               </span>
-
               <span>{item}</span>
-            </a>
+            </Link>
           ))}
 
-          <a href="/contact">📞 Contact</a>
-          <a href="/about">👤 About Us</a>
-
+          <Link to="/contact">📞 Contact</Link>
+          <Link to="/about">👤 About Us</Link>
         </nav>
-
-        {/* =====================================================
-            HEADER ACTIONS
-        ===================================================== */}
 
         <div className={styles.actions}>
 
-          {/* Search */}
           <button
             className={styles.iconBtn}
             onClick={() => setShowSearch((prev) => !prev)}
@@ -292,18 +254,26 @@ const Header = () => {
             <FiSearch />
           </button>
 
-
-          {/* Account */}
-
-          <button
-            className={styles.iconBtn}
-            onClick={() => setIsFormOpen(true)}
-            aria-label="Account"
-          >
-            <FiUser />
-          </button>
-
-          {/* Cart */}
+          {/* Account - FIX: login hone ke baad ye button gayab ho jaata hai,
+              uski jagah logout button aa jaata hai */}
+          {isLoggedIn ? (
+            <button
+              className={styles.iconBtn}
+              onClick={handleLogout}
+              aria-label={`Logout${user?.firstName ? ` (${user.firstName})` : ""}`}
+              title={user?.firstName ? `Logout (${user.firstName})` : "Logout"}
+            >
+              <FiLogOut />
+            </button>
+          ) : (
+            <button
+              className={styles.iconBtn}
+              onClick={() => setIsFormOpen(true)}
+              aria-label="Account"
+            >
+              <FiUser />
+            </button>
+          )}
 
           <button
             className={styles.iconBtn}
@@ -312,8 +282,6 @@ const Header = () => {
           >
             <BsCart3 />
           </button>
-
-          {/* Orders */}
 
           <button
             className={styles.iconBtn}
@@ -325,10 +293,6 @@ const Header = () => {
         </div>
       </header>
 
-      {/* =====================================================
-          OVERLAY
-      ===================================================== */}
-
       <div
         className={`${styles.overlay} ${
           menuOpen ? styles.showOverlay : ""
@@ -336,17 +300,12 @@ const Header = () => {
         onClick={() => setMenuOpen(false)}
       />
 
-      {/* =====================================================
-          MOBILE DRAWER
-      ===================================================== */}
-
+      {/* MOBILE DRAWER - FIX: <a href> -> <Link to> */}
       <div
         className={`${styles.mobileDrawer} ${
           menuOpen ? styles.showDrawer : ""
         }`}
       >
-        {/* Drawer Header */}
-
         <div className={styles.drawerHeader}>
           <div className={styles.logo}>
             <img
@@ -365,34 +324,24 @@ const Header = () => {
           </button>
         </div>
 
-        {/* =====================================================
-            HOME
-        ===================================================== */}
-
-        <a
-          href="/"
+        <Link
+          to="/"
           className={styles.drawerLink}
           onClick={() => setMenuOpen(false)}
         >
           <span className={styles.drawerLinkContent}>
             <FiHome className={styles.drawerIcon} />
-
             <span>Home</span>
           </span>
-
           <FiChevronRight className={styles.arrow} />
-        </a>
-
-        {/* =====================================================
-            CATEGORIES - WITH UNIQUE EMOJIS
-        ===================================================== */}
+        </Link>
 
         {categories.map((item, index) => {
           const emoji = getCategoryEmoji(item);
 
           return (
-            <a
-              href={`/filtered/${item}`}
+            <Link
+              to={`/filtered/${item}`}
               key={item}
               className={styles.drawerLink}
               style={{
@@ -401,45 +350,60 @@ const Header = () => {
               onClick={() => setMenuOpen(false)}
             >
               <span className={styles.drawerLinkContent}>
-                {/* UNIQUE CATEGORY EMOJI */}
-
-                <span className={styles.drawerEmoji}>
-                  {emoji}
-                </span>
-
-                {/* CATEGORY NAME */}
-
+                <span className={styles.drawerEmoji}>{emoji}</span>
                 <span>{item}</span>
               </span>
-
               <FiChevronRight className={styles.arrow} />
-            </a>
+            </Link>
           );
         })}
 
-        <a href="/contact" className={styles.drawerLink}>📞 Contact</a>
-        <a href="/about" className={styles.drawerLink}>👤 About Us</a>
+        <Link to="/contact" className={styles.drawerLink} onClick={() => setMenuOpen(false)}>
+          📞 Contact
+        </Link>
+        <Link to="/about" className={styles.drawerLink} onClick={() => setMenuOpen(false)}>
+          👤 About Us
+        </Link>
+
+        {/* Mobile drawer mein bhi login/logout ka same behaviour */}
+        {isLoggedIn ? (
+          <button
+            className={styles.drawerLink}
+            onClick={handleLogout}
+            style={{ width: "100%", textAlign: "left", background: "none", border: "none", cursor: "pointer" }}
+          >
+            <span className={styles.drawerLinkContent}>
+              <FiLogOut className={styles.drawerIcon} />
+              <span>Logout</span>
+            </span>
+          </button>
+        ) : (
+          <button
+            className={styles.drawerLink}
+            onClick={() => {
+              setMenuOpen(false);
+              setIsFormOpen(true);
+            }}
+            style={{ width: "100%", textAlign: "left", background: "none", border: "none", cursor: "pointer" }}
+          >
+            <span className={styles.drawerLinkContent}>
+              <FiUser className={styles.drawerIcon} />
+              <span>Login / Signup</span>
+            </span>
+          </button>
+        )}
       </div>
 
-      {/* =====================================================
-          LOGIN MODAL
-      ===================================================== */}
-
+      {/* LOGIN MODAL */}
       {isFormOpen && <SignupLogin close={onCloseForm} />}
 
-      {/* =====================================================
-          CART
-      ===================================================== */}
-
+      {/* CART */}
       {isCartOpen && (
-        <ViewCartProduct
-          onClose={() => setIsCartOpen(false)}
-        />
+        <ViewCartProduct onClose={() => setIsCartOpen(false)} />
       )}
-      {/* =====================================================
-          Search bar 
-      ===================================================== */}
-      {showSearch && (<SearchBar onClose={() => setShowSearch(false)} />)}
+
+      {/* SEARCH BAR */}
+      {showSearch && <SearchBar onClose={() => setShowSearch(false)} />}
     </>
   );
 };

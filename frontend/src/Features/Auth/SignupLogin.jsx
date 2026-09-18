@@ -5,8 +5,11 @@ import api from "../../Api/Axios";
 import styles from "./SignupLogin.module.css";
 import { Eye, EyeOff, X, Mail, Phone, User, Lock, MapPin, Home } from "lucide-react";
 import { FaFacebookF, FaGoogle } from "react-icons/fa";
-import { GetAccessToken, SetAccessToken } from "../../Api/TokenStore";
+import { SetAccessToken } from "../../Api/TokenStore";
 import { fetchUserProfile } from "../../Api/basicStore";
+
+// NAYA IMPORT
+import { useAuth } from "../../context/AuthContext";
 
 const FIELD_LABELS = {
   firstName: "First name",
@@ -22,10 +25,12 @@ const FIELD_LABELS = {
   city: "City",
 };
 
-function SignupLogin({ close }) {
+// NAYA PROP: initialMode -> /login route se "login" aur /signup route se "signup" milega
+function SignupLogin({ close, initialMode = "login" }) {
   const navigate = useNavigate();
+  const { login: setAuthUser } = useAuth(); // NAYA: global auth state update karne ke liye
 
-  const [mode, setMode] = useState("login");
+  const [mode, setMode] = useState(initialMode);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errors, setErrors] = useState({});
@@ -309,7 +314,11 @@ function SignupLogin({ close }) {
         }
 
         SetAccessToken(response?.data?.data?.AccessToken);
-        await fetchUserProfile();
+
+        // FIX: profile fetch karke global AuthContext update karo
+        // taaki Header turant re-render ho aur login button gayab ho jaaye
+        const profile = await fetchUserProfile();
+        setAuthUser(profile);
 
         alert(response.data.message);
         navigate("/");

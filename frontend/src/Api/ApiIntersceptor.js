@@ -4,6 +4,7 @@ import {
     GetAccessToken,
     SetAccessToken,
 } from "./TokenStore";
+import { navigateTo } from "./navigation";
 
 // ======================================================
 // REFRESH TOKEN MANAGEMENT
@@ -56,16 +57,14 @@ api.interceptors.response.use(
     async (error) => {
         const originalRequest = error.config;
 
-        // --------------------------------------------------
-        // Request config missing
-        // --------------------------------------------------
-
         if (!originalRequest) {
             return Promise.reject(error);
         }
 
         // --------------------------------------------------
         // Handle 403 FORBIDDEN
+        // FIX: window.location.href hard-reload karta tha (glitch).
+        // Ab SPA navigate use karte hain — koi full reload nahi.
         // --------------------------------------------------
 
         if (
@@ -74,7 +73,7 @@ api.interceptors.response.use(
         ) {
             console.log("Access Denied. Returning to home page.");
 
-            window.location.href = "/";
+            navigateTo("/");
 
             return Promise.reject(error);
         }
@@ -145,7 +144,6 @@ api.interceptors.response.use(
             console.log("AccessToken expired/missing.");
             console.log("Hit refresh API...");
 
-            // Refresh token is stored in HTTP-only cookie
             const response = await api.get(
                 "/v1/user/refresh-token"
             );
@@ -154,10 +152,6 @@ api.interceptors.response.use(
                 "Refresh API response:",
                 response.data
             );
-
-            // --------------------------------------------------
-            // Get new access token
-            // --------------------------------------------------
 
             const newAccessToken =
                 response.data?.data?.AccessToken;
@@ -168,25 +162,13 @@ api.interceptors.response.use(
                 );
             }
 
-            // --------------------------------------------------
-            // Save new access token
-            // --------------------------------------------------
-
             SetAccessToken(newAccessToken);
 
             console.log(
                 "New AccessToken saved successfully"
             );
 
-            // --------------------------------------------------
-            // Resolve pending requests
-            // --------------------------------------------------
-
             resolveQueue(null, newAccessToken);
-
-            // --------------------------------------------------
-            // Retry original request
-            // --------------------------------------------------
 
             originalRequest.headers =
                 originalRequest.headers || {};
@@ -202,48 +184,17 @@ api.interceptors.response.use(
                 refreshError
             );
 
-            // --------------------------------------------------
-            // Reject pending requests
-            // --------------------------------------------------
-
             resolveQueue(refreshError, null);
-
-            // --------------------------------------------------
-            // Remove old access token
-            // --------------------------------------------------
 
             ClearAccessToken();
 
-            const errorCode =
-                refreshError.response?.data?.error;
-
-            const status =
-                refreshError.response?.status;
-
-            console.log(
-                "Refresh status:",
-                status
-            );
-
-            console.log(
-                "Refresh error code:",
-                errorCode
-            );
-
             // --------------------------------------------------
-            // Refresh token invalid / missing / revoked
+            // FIX (root cause of "cart click -> random redirect"):
+            // Pehle yahan window.location.href = "/signup" tha, jo
+            // GUEST users ke liye bhi chal jaata tha aur poora page
+            // force-redirect + reload ho jaata tha. Ab hum sirf token
+            // clear karke reject karte hain — koi forced redirect nahi.
             // --------------------------------------------------
-
-            if (
-                status === 401 &&
-                [
-                    "REFRESHTOKEN_MISSING",
-                    "REFRESH_TOKEN_REVOKED",
-                    "INVALID_REFRESH_TOKEN",
-                ].includes(errorCode)
-            ) {
-                window.location.href = "/signup";
-            }
 
             return Promise.reject(refreshError);
 

@@ -1,6 +1,6 @@
 import './App.css'
 import { Routes, Route, useNavigate } from "react-router-dom";
-import { useState } from 'react';
+import { useEffect } from 'react';
 
 import Layout from './Layouts/Layout'
 import About from './Shared/Pages/About/About'
@@ -20,15 +20,23 @@ import CategoryNavbar from './Shared/components/CategoryNavBar/CategoryNavBar';
 import MyOrder from './Shared/components/Order/MyOrder';
 import ViewCartProduct from './Shared/components/CartComponents/ViewCartProduct';
 
+// NAYE IMPORTS
+import { AuthProvider } from './context/AuthContext';
+import { setNavigate } from './Api/navigation';
 
 
-function App() {
+function AppRoutes() {
   const navigate = useNavigate()
+
+  // Interceptor ko navigate function de dete hain taaki wo bhi
+  // SPA-style navigate kar sake (hard reload nahi)
+  useEffect(() => {
+    setNavigate(navigate);
+  }, [navigate]);
 
   const OnClose = () => {
     navigate('/')
   }
-
 
   return (
     <>
@@ -38,7 +46,15 @@ function App() {
           <Route path='/' element={<Home />} ></Route>
           <Route path='/about' element={<About />}></Route>
           <Route path='/contact' element={<ContactUs />}></Route>
-          <Route path='/signup' element={<SignupLogin close={OnClose} />} ></Route>
+
+          {/* Login aur Signup ab alag-alag routes hain, same component,
+              bas initialMode alag pass kar rahe hain */}
+          <Route path='/login' element={<SignupLogin close={OnClose} initialMode="login" />} ></Route>
+          <Route path='/signup' element={<SignupLogin close={OnClose} initialMode="signup" />} ></Route>
+
+          {/* Cart ka apna route bhi ab hai - direct link/refresh par bhi khulega */}
+          <Route path='/cart' element={<ViewCartProduct onClose={OnClose} />} ></Route>
+
           <Route path='/product/:slug' element={<>
             <ProductDetailes />
             <GetRelatedProducts></GetRelatedProducts>
@@ -50,13 +66,18 @@ function App() {
           <Route path='/order' element={<MyOrder></MyOrder>} ></Route>
         </Route>
 
-
-
         <Route path='/admin-dashbord' element={<AdminDashboard></AdminDashboard>} ></Route>
       </Routes>
     </>
   )
 }
 
-export default App
+function App() {
+  return (
+    <AuthProvider>
+      <AppRoutes />
+    </AuthProvider>
+  )
+}
 
+export default App

@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import api from "../../../Api/Axios";
 import styles from "./ViewCartProduct.module.css";
 import CreateOrder from "../Order/CreateOrder";
-import { FiX, FiShoppingBag, FiTrash2, FiCreditCard, FiMinus, FiPlus } from "react-icons/fi";
+import { FiX, FiShoppingBag, FiTrash2, FiCreditCard, FiMinus, FiPlus, FiAlertTriangle } from "react-icons/fi";
 
 const ViewCartProduct = ({ onClose }) => {
   const [cartItems, setCartItems] = useState([]);
@@ -33,6 +33,22 @@ const ViewCartProduct = ({ onClose }) => {
     } finally {
       setLoading(false);
     }
+  };
+
+  // FIX: sirf wahi items rakho jinka product data (populate) actually mila hai.
+  // Agar product delete ho gaya ho ya backend se populate na hua ho, to
+  // pehle ye crash karta tha (blank screen). Ab aise items ko safely alag
+  // karke user ko dikha dete hain ki kuch items unavailable hain.
+  const validItems = cartItems.filter(
+    (item) => item?.productId && typeof item.productId === "object"
+  );
+  const unavailableCount = cartItems.length - validItems.length;
+
+  const getSelectedVariant = (item) => {
+    const variants = item?.productId?.variants || [];
+    return variants.find(
+      (variant) => variant?._id?.toString() === item?.variantId?.toString()
+    );
   };
 
   const HandleRemove = async (variantId) => {
@@ -76,9 +92,9 @@ const ViewCartProduct = ({ onClose }) => {
   };
 
   const HandleBuyNow = (item) => {
-    const selectedVariant = item.productId.variants.find(
-      (variant) => variant._id.toString() === item.variantId.toString()
-    );
+    if (!item?.productId) return;
+
+    const selectedVariant = getSelectedVariant(item);
 
     setOrderProducts([
       {
@@ -92,28 +108,28 @@ const ViewCartProduct = ({ onClose }) => {
   };
 
   const HandleBuyAll = () => {
-    const products = cartItems.map((item) => ({
+    const products = validItems.map((item) => ({
       product: item.productId,
       quantity: item.quantity,
-      selectedVariant: item.productId.variants.find(
-        (variant) => variant._id.toString() === item.variantId.toString()
-      ),
+      selectedVariant: getSelectedVariant(item),
     }));
 
     setOrderProducts(products);
     setCreateOrderOpen(true);
   };
 
-  const totalProducts = cartItems.reduce((total, item) => total + item.quantity, 0);
-  const totalAmount = cartItems.reduce(
-    (total, item) => total + (item.productId.salePrice || item.productId.price) * item.quantity,
-    0
-  );
-  const totalSavings = cartItems.reduce(
-    (total, item) =>
-      total + (item.productId.price - item.productId.salePrice) * item.quantity,
-    0
-  );
+  const totalProducts = validItems.reduce((total, item) => total + (item.quantity || 0), 0);
+
+  const totalAmount = validItems.reduce((total, item) => {
+    const price = item.productId?.salePrice ?? item.productId?.price ?? 0;
+    return total + price * (item.quantity || 0);
+  }, 0);
+
+  const totalSavings = validItems.reduce((total, item) => {
+    const original = item.productId?.price ?? 0;
+    const sale = item.productId?.salePrice ?? original;
+    return total + (original - sale) * (item.quantity || 0);
+  }, 0);
 
   return (
     <div className={styles.overlay} onClick={onClose}>
@@ -123,8 +139,8 @@ const ViewCartProduct = ({ onClose }) => {
           <div className={styles.headerLeft}>
             <FiShoppingBag className={styles.headerIcon} />
             <h2 className={styles.heading}>My Cart</h2>
-            {!loading && cartItems.length > 0 && (
-              <span className={styles.itemCount}>{cartItems.length} items</span>
+            {!loading && validItems.length > 0 && (
+              <span className={styles.itemCount}>{validItems.length} items</span>
             )}
           </div>
           <button className={styles.closeBtn} onClick={onClose}>
@@ -147,7 +163,17 @@ const ViewCartProduct = ({ onClose }) => {
           </div>
         )}
 
-        {!loading && !error && cartItems.length === 0 && (
+        {!loading && !error && unavailableCount > 0 && (
+          <div className={styles.error}>
+            <FiAlertTriangle className={styles.errorIcon} />
+            <p>
+              {unavailableCount} item{unavailableCount > 1 ? "s" : ""} in your cart{" "}
+              {unavailableCount > 1 ? "are" : "is"} no longer available and won't be shown.
+            </p>
+          </div>
+        )}
+
+        {!loading && !error && validItems.length === 0 && (
           <div className={styles.empty}>
             <div className={styles.emptyIcon}>🛒</div>
             <h3>Your cart is empty</h3>
@@ -158,29 +184,30 @@ const ViewCartProduct = ({ onClose }) => {
           </div>
         )}
 
-        {!loading && !error && cartItems.length > 0 && (
+        {!loading && !error && validItems.length > 0 && (
           <>
             <div className={styles.products}>
-              {cartItems.map((item) => {
+              {validItems.map((item) => {
                 const product = item.productId;
-                const selectedVariant = product.variants.find(
-                  (variant) => variant._id.toString() === item.variantId.toString()
-                );
+                const selectedVariant = getSelectedVariant(item);
                 const isUpdating = updatingQuantity === item.variantId;
+
+                const price = product.salePrice ?? product.price ?? 0;
+                const originalPrice = product.price ?? price;
 
                 return (
                   <div key={item._id} className={styles.card}>
                     <div className={styles.imageWrapper}>
                       <img
-                        src={product.coverImage?.url || product.coverImage}
-                        alt={product.productName}
+                        src={product.coverImage?.url || product.coverImage || ""}
+                        alt={product.productName || "Product"}
                         className={styles.image}
                       />
                     </div>
 
                     <div className={styles.content}>
                       <div className={styles.contentHeader}>
-                        <h3 className={styles.productName}>{product.productName}</h3>
+                        <h3 className={styles.productName}>{product.productName || "Unnamed product"}</h3>
                         <button
                           className={styles.removeBtn}
                           onClick={() => setRemoveItem(item)}
@@ -199,13 +226,13 @@ const ViewCartProduct = ({ onClose }) => {
                       </div>
 
                       <div className={styles.priceRow}>
-                        <span className={styles.salePrice}>₹{product.salePrice}</span>
-                        {product.price > product.salePrice && (
-                          <span className={styles.originalPrice}>₹{product.price}</span>
+                        <span className={styles.salePrice}>₹{price}</span>
+                        {originalPrice > price && (
+                          <span className={styles.originalPrice}>₹{originalPrice}</span>
                         )}
-                        {product.price > product.salePrice && (
+                        {originalPrice > price && (
                           <span className={styles.discountTag}>
-                            {Math.round(((product.price - product.salePrice) / product.price) * 100)}% OFF
+                            {Math.round(((originalPrice - price) / originalPrice) * 100)}% OFF
                           </span>
                         )}
                       </div>
@@ -235,7 +262,7 @@ const ViewCartProduct = ({ onClose }) => {
                           </button>
                         </div>
                         <span className={styles.itemTotal}>
-                          ₹{product.salePrice * item.quantity}
+                          ₹{price * item.quantity}
                         </span>
                       </div>
 
