@@ -47,13 +47,15 @@ function AppRoutes() {
           <Route path='/about' element={<About />}></Route>
           <Route path='/contact' element={<ContactUs />}></Route>
 
+          {/* Cart ka apna route bhi ab hai - direct link/refresh par bhi khulega */}
+          <Route path='/cart' element={<ViewCartProduct onClose={OnClose} />} ></Route>
+
           {/* Login aur Signup ab alag-alag routes hain, same component,
               bas initialMode alag pass kar rahe hain */}
           <Route path='/login' element={<SignupLogin close={OnClose} initialMode="login" />} ></Route>
           <Route path='/signup' element={<SignupLogin close={OnClose} initialMode="signup" />} ></Route>
 
-          {/* Cart ka apna route bhi ab hai - direct link/refresh par bhi khulega */}
-          <Route path='/cart' element={<ViewCartProduct onClose={OnClose} />} ></Route>
+         
 
           <Route path='/product/:slug' element={<>
             <ProductDetailes />

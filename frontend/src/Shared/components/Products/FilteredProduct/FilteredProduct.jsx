@@ -11,13 +11,22 @@ const LIMIT = 10;
 const STAGGER_DELAY = 150;
 
 function FilteredProducts() {
-
   const { category } = useParams();
   const [searchParams] = useSearchParams();
   const searchQuery = searchParams.get("search") || "";
 
+  return (
+    <FilteredProductsPage
+      key={`${category || "all"}:${searchQuery}`}
+      category={category}
+      searchQuery={searchQuery}
+    />
+  );
+}
+
+function FilteredProductsPage({ category, searchQuery }) {
   const [filters, setFilters] = useState({
-    category: category || "",
+    category: category === "all" ? "" : category || "",
     search: searchQuery,
     minPrice: "",
     maxPrice: "",
@@ -64,14 +73,12 @@ function FilteredProducts() {
   };
 
   const fetchProducts = useCallback(async (pageToFetch, activeFilters) => {
-    if (fetchingRef.current) return;
-    fetchingRef.current = true;
-
     const currentRequestId = ++requestIdRef.current;
 
-    if (abortRef.current) abortRef.current.abort();
+    abortRef.current?.abort();
     const controller = new AbortController();
     abortRef.current = controller;
+    fetchingRef.current = true;
 
     pageToFetch === 1 ? setLoading(true) : setLoadingMore(true);
 
@@ -104,37 +111,25 @@ function FilteredProducts() {
       if (requestIdRef.current === currentRequestId) {
         setLoading(false);
         setLoadingMore(false);
+        fetchingRef.current = false;
+        abortRef.current = null;
       }
-      fetchingRef.current = false;
     }
   }, []);
 
-  // ---------------- Filter / category / search change fetch ----------------
+  // Fetch the route's initial category/search filters automatically.
   useEffect(() => {
-    const newFilters = {
-      ...appliedFiltersRef.current,
-      category: category === "all" ? "" : category || "",
-      search: searchQuery,
-    };
-
-    setFilters((prev) => ({
-      ...prev,
-      category: category === "all" ? "" : category || "",
-      search: searchQuery,
-    }));
-
-    appliedFiltersRef.current = newFilters;
-
-    setPage(1);
-    setHasMore(true);
-
-    fetchProducts(1, newFilters);
+    const timeoutId = setTimeout(
+      () => fetchProducts(1, appliedFiltersRef.current),
+      0
+    );
 
     return () => {
+      clearTimeout(timeoutId);
       requestIdRef.current += 1;
+      abortRef.current?.abort();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [category, searchQuery]);
+  }, [fetchProducts]);
 
   // ---------------- Pagination fetch (scroll se trigger hoga) ----------------
   useEffect(() => {
@@ -191,7 +186,7 @@ function FilteredProducts() {
 
   const clearFilters = () => {
     const resetFilters = {
-      category: category || "",
+      category: category === "all" ? "" : category || "",
       search: "",
       minPrice: "",
       maxPrice: "",
