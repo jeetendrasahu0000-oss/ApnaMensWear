@@ -1,5 +1,5 @@
 // Header.jsx
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import styles from "./Header.module.css";
 import { useNavigate, Link } from "react-router-dom";
 
@@ -17,8 +17,7 @@ import { BsCart3, BsBoxSeam } from "react-icons/bs";
 
 import SignupLogin from "../../../Features/Auth/SignupLogin";
 import ViewCartProduct from "../CartComponents/ViewCartProduct";
-
-import { GetCategories } from "../../../StataicData/StaticData";
+import { fetchCategories } from "../../../Api/categories";
 import SearchBar from "./SearchBar";
 
 // NAYA IMPORT
@@ -30,9 +29,9 @@ const Header = () => {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
+  const [categories, setCategories] = useState([]);
 
   const navigate = useNavigate();
-  const categories = GetCategories();
 
   // NAYA: global auth state
   const { isLoggedIn, user, logout } = useAuth();
@@ -59,6 +58,24 @@ const Header = () => {
     window.addEventListener("scroll", onScroll);
 
     return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+
+    fetchCategories()
+      .then((loadedCategories) => {
+        if (active) {
+          setCategories(loadedCategories.map(({ name }) => name));
+        }
+      })
+      .catch((error) => {
+        console.error("Failed to load categories:", error);
+      });
+
+    return () => {
+      active = false;
+    };
   }, []);
 
   const announcements = [

@@ -2,9 +2,9 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import api from "../../../../Api/Axios";
+import { fetchCategories } from "../../../../Api/categories";
 import ProductDesign from "../ProductDesign";
 import styles from "./FilteredProduct.module.css";
-import { GetCategories } from "../../../../StataicData/StaticData";
 import { FiFilter, FiX, FiSearch, FiChevronDown } from "react-icons/fi";
 
 const LIMIT = 10;
@@ -55,7 +55,23 @@ function FilteredProductsPage({ category, searchQuery }) {
   // ---------------- Infinite scroll sentinel ----------------
   const sentinelRef = useRef(null);
 
-  const categories = GetCategories();
+  const [categories, setCategories] = useState([]);
+
+  useEffect(() => {
+    let active = true;
+
+    fetchCategories()
+      .then((loadedCategories) => {
+        if (active) setCategories(loadedCategories);
+      })
+      .catch((error) => {
+        console.error("Failed to load categories:", error);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const revealStaggered = (batch, requestId) => {
     batch.forEach((product, i) => {
@@ -223,8 +239,8 @@ function FilteredProductsPage({ category, searchQuery }) {
         <select name="category" value={filters.category} onChange={handleChange} className={styles.selectInput}>
           <option value="">All Categories</option>
           {categories.map((cat) => (
-            <option key={cat} value={cat}>
-              {cat}
+            <option key={cat.name} value={cat.name}>
+              {cat.name}
             </option>
           ))}
         </select>

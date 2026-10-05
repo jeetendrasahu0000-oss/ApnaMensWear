@@ -9,6 +9,7 @@ import OrderDashbord from "./OrderDashbord/OrderDashbord";
 import UserDashbord from "./UserDashbord/UserDashbord";
 import ProductDashboard from "./ProductDashbord/ProductDashbord";
 import PaymentDashbord from "./PaymentDashbord/PaymentDashbord";
+import CategoryDashboard from "./CategoryDashboard/CategoryDashboard";
 
 
 
@@ -37,6 +38,9 @@ function AdminDashbord() {
       case "products":
         return <ProductDashboard />;
 
+      case "categories":
+        return <CategoryDashboard />;
+
       default:
         return <SalesReport />;
     }
@@ -64,4 +68,3 @@ function AdminDashbord() {
 }
 
 export default AdminDashbord;
-

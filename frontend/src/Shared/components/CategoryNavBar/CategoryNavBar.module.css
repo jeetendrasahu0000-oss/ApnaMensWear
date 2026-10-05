@@ -119,6 +119,21 @@
   border: #b8862f 1 px solid ;
 }
 
+.imagePlaceholder {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #b8862f;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #252525, #b8862f);
+  color: #fff;
+  font-family: "Fraunces", serif;
+  font-size: 64px;
+  text-transform: uppercase;
+}
+
 .category:hover .image {
   transform: scale(1.05);
 }

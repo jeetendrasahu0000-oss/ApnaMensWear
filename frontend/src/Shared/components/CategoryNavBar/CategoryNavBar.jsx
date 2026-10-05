@@ -3,13 +3,12 @@ import { useRef, useState, useEffect, useCallback } from "react";
 import styles from "./CategoryNavBar.module.css";
 import { useNavigate } from "react-router-dom";
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
-import { GetCategoryCards } from "../../../StataicData/StaticData";
-
-const categories = GetCategoryCards();
+import { fetchCategories } from "../../../Api/categories";
 
 const CategoryNavbar = () => {
   const navigate = useNavigate();
   const trackRef = useRef(null);
+  const [categories, setCategories] = useState([]);
   const [atStart, setAtStart] = useState(true);
   const [atEnd, setAtEnd] = useState(false);
 
@@ -19,6 +18,22 @@ const CategoryNavbar = () => {
     const threshold = 4;
     setAtStart(el.scrollLeft <= threshold);
     setAtEnd(el.scrollLeft + el.clientWidth >= el.scrollWidth - threshold);
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+
+    fetchCategories()
+      .then((loadedCategories) => {
+        if (active) setCategories(loadedCategories);
+      })
+      .catch((error) => {
+        console.error("Failed to load categories:", error);
+      });
+
+    return () => {
+      active = false;
+    };
   }, []);
 
   useEffect(() => {
@@ -78,15 +93,21 @@ const CategoryNavbar = () => {
             <div
               key={category.name}
               className={styles.category}
-              onClick={() => handleCategoryClick(category.value)}
+              onClick={() => handleCategoryClick(category.name)}
             >
               <div className={styles.imageBox}>
-                <img
-                  src={category.image}
-                  alt={category.name}
-                  className={styles.image}
-                  loading="lazy"
-                />
+                {category.imageUrl ? (
+                  <img
+                    src={category.imageUrl}
+                    alt={category.name}
+                    className={styles.image}
+                    loading="lazy"
+                  />
+                ) : (
+                  <span className={styles.imagePlaceholder}>
+                    {category.name.charAt(0).toUpperCase()}
+                  </span>
+                )}
               </div>
               <span className={styles.categoryName}>{category.name}</span>
             </div>

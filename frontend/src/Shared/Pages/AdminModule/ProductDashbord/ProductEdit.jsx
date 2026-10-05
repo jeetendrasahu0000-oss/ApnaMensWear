@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { X, Plus, Trash2, CheckCircle, AlertCircle, Loader } from "lucide-react";
 import api from "../../../../Api/Axios";
+import { fetchCategories } from "../../../../Api/categories";
 import styles from "./ProductEdit.module.css";
 import UploadImage from "../../../components/Cloudinary/UploadImage";
-import { GetCategories } from "../../../../StataicData/StaticData";
 
 
 
@@ -36,7 +36,28 @@ function ProductEdit({ onClose,product,onUpdated }) {
   const [errors, setErrors] = useState({});
   const [apiError, setApiError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [categories, setCategories] = useState([]);
+  const [categoryLoadError, setCategoryLoadError] = useState("");
 
+  useEffect(() => {
+    let active = true;
+
+    fetchCategories()
+      .then((loadedCategories) => {
+        if (active) setCategories(loadedCategories);
+      })
+      .catch((error) => {
+        if (active) {
+          setCategoryLoadError(
+            error.response?.data?.message || error.message || "Failed to load categories"
+          );
+        }
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   useEffect(() => {
   if (!product) return;
@@ -82,8 +103,9 @@ function ProductEdit({ onClose,product,onUpdated }) {
   };
 
 
-  const categoies =  GetCategories()
-  console.log('Categories',categoies)
+  const selectedCategory = categories.find(
+    (category) => category.name === form.category
+  );
 
   // ---- variant handlers ----
   const updateVariant = (index, key, value) => {
@@ -135,6 +157,7 @@ function ProductEdit({ onClose,product,onUpdated }) {
     const e = {};
     if (!form.productName.trim()) e.productName = "Product name is required";
     if (!form.category.trim()) e.category = "Category is required";
+    if (!form.subCategory.trim()) e.subCategory = "Sub-category is required";
     if (!form.price || Number(form.price) <= 0) e.price = "Enter a valid price";
     if (form.salePrice && Number(form.salePrice) > Number(form.price)) {
       e.salePrice = "Sale price can't be higher than the regular price";
@@ -306,7 +329,10 @@ function ProductEdit({ onClose,product,onUpdated }) {
               <label>Category <span className={styles.required}>*</span></label>
               <input
                 value={form.category}
-                onChange={(e) => updateForm("category", e.target.value)}
+                onChange={(e) => {
+                  updateForm("category", e.target.value);
+                  updateForm("subCategory", "");
+                }}
                 className={errors.category ? styles.inputError : ""}
                 placeholder="e.g. Electronics"
               />
@@ -325,25 +351,43 @@ function ProductEdit({ onClose,product,onUpdated }) {
                 >
                   <option value="">Select Category</option>
   
-                  {categoies.map((category) => (
-                    <option key={category} value={category}>
-                      {category}
+                  {categories.map((category) => (
+                    <option key={category.name} value={category.name}>
+                      {category.name}
                     </option>
                   ))}
+                  {form.category && !categories.some((category) => category.name === form.category) && (
+                    <option value={form.category}>{form.category}</option>
+                  )}
                 </select>
-  
-              {errors.category && (
-                <p className={styles.errorText}>{errors.category}</p>
-              )}
+
+                {categoryLoadError && <p className={styles.errorText}>{categoryLoadError}</p>}
+                {errors.category && (
+                  <p className={styles.errorText}>{errors.category}</p>
+                )}
             </div>
 
             <div className={styles.fieldWrap}>
-              <label>Sub‑category</label>
-              <input
+              <label>
+                Sub‑category <span className={styles.required}>*</span>
+              </label>
+              <select
                 value={form.subCategory}
                 onChange={(e) => updateForm("subCategory", e.target.value)}
-                placeholder="e.g. Headphones"
-              />
+                className={styles.select}
+                disabled={!form.category || !selectedCategory?.subCategories?.length}
+              >
+                <option value="">Select Sub-category</option>
+                {selectedCategory?.subCategories?.map((subCategory) => (
+                  <option key={subCategory} value={subCategory}>
+                    {subCategory}
+                  </option>
+                ))}
+                {form.subCategory &&
+                  !selectedCategory?.subCategories?.includes(form.subCategory) && (
+                    <option value={form.subCategory}>{form.subCategory}</option>
+                  )}
+              </select>
               {errors.subCategory && <p className={styles.errorText}>{errors.subCategory}</p>}
             </div>
 
@@ -592,6 +636,4 @@ function ProductEdit({ onClose,product,onUpdated }) {
 }
 
 export default ProductEdit;
-
-
 

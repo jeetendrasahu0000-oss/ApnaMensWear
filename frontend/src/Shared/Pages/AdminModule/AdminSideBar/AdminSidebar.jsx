@@ -48,12 +48,15 @@ function AdminSidebar({
         <button onClick={() => handleClick("products")}>
           Products
         </button>
+
+        <button onClick={() => handleClick("categories")}>
+          Categories
+        </button>
       </aside>
     </>
   );
 }
 
 export default AdminSidebar;
-
 
 
