@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import ProductModel from "../../products/models/ProductModel.js";
 import OrderModel from "../models/OrderModel.js";
 import PaymentModel from "../../payment/Model/PaymentModel.js";
+import CategoryModel from "../../categories/models/CategoryModel.js";
 
 
 
@@ -163,7 +164,10 @@ const CreateOrder = async (req, res) => {
             }
 
             console.log('productId',item.productId)
-            const product = await ProductModel.findOne({_id:item.productId});
+            const product = await ProductModel.findOne({
+                _id: item.productId,
+                isActive: true,
+            });
             console.log('product',product)
 
             if (!product) {
@@ -172,6 +176,19 @@ const CreateOrder = async (req, res) => {
                     message: "Product not found",
                     data: null,
                     error: `Product not found : ${item.productId}`
+                });
+            }
+
+            const categoryIsEnabled = await CategoryModel.exists({
+                name: product.category,
+                isEnabled: { $ne: false },
+            });
+            if (!categoryIsEnabled) {
+                return res.status(409).json({
+                    success: false,
+                    message: `${product.productName} is unavailable`,
+                    data: null,
+                    error: "CATEGORY_UNAVAILABLE",
                 });
             }
 

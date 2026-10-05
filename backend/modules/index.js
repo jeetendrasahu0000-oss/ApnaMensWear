@@ -10,6 +10,7 @@ import imageRoutes from "./cloudinery/routes/Basic.Routes.js";
 import orderRoutes from "./order/routes/Order.routes.js";
 import UserAdminRoutes from "./user/routes/UserAdmin.Routes.js";
 import PaymentRoutes from "./payment/Routes/Payment.Routes.js";
+import CategoryRoutes from "./categories/routes/CategoryRoutes.js";
 
 
 
@@ -18,6 +19,7 @@ const Router = express.Router()
 Router.use('/api/v1/otp',OtpRouter)
 
 Router.use('/api/v1/products',ProductRouter)
+Router.use('/api/v1/categories',CategoryRoutes)
 
 Router.use('/api/v1/images',imageRoutes)
 

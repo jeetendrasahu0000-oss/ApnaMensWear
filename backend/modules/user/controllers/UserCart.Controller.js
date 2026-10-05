@@ -1,5 +1,6 @@
 import UserCartModel from "../models/UserCartModel.js";
 import Product from "../../products/models/ProductModel.js";
+import CategoryModel from "../../categories/models/CategoryModel.js";
 
 
 
@@ -42,7 +43,7 @@ const AddToCart = async (req, res) => {
       });
     }
 
-    const product = await Product.findById(productId);
+    const product = await Product.findOne({ _id: productId, isActive: true });
 
     if (!product) {
       return res.status(404).json({
@@ -51,6 +52,21 @@ const AddToCart = async (req, res) => {
         data: null,
         error: {
           code: "PRODUCT_NOT_FOUND",
+        },
+      });
+    }
+
+    const categoryIsEnabled = await CategoryModel.exists({
+      name: product.category,
+      isEnabled: { $ne: false },
+    });
+    if (!categoryIsEnabled) {
+      return res.status(409).json({
+        success: false,
+        message: "This product's category is unavailable",
+        data: null,
+        error: {
+          code: "CATEGORY_UNAVAILABLE",
         },
       });
     }
@@ -153,9 +169,18 @@ const GetCart = async (req, res) => {
     console.log('Hit GetCart api...')
     const userId = req.user.userId;
 
+    const enabledCategories = await CategoryModel.distinct("name", {
+      isEnabled: { $ne: false },
+    });
     const cart = await UserCartModel.findOne({
       userId,
-    }).populate("items.productId");
+    }).populate({
+      path: "items.productId",
+      match: {
+        isActive: true,
+        category: { $in: enabledCategories },
+      },
+    });
 
     console.log('succesfully get cart item',cart)
 

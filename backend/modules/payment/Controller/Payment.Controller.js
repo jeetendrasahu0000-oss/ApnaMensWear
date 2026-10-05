@@ -4,6 +4,7 @@ import crypto from "crypto";
 import PaymentModel from "../Model/PaymentModel.js";
 import ProductModel from "../../products/models/ProductModel.js";
 import OrderModel from "../../order/models/OrderModel.js";
+import CategoryModel from "../../categories/models/CategoryModel.js";
 
 
 
@@ -53,7 +54,10 @@ const CreateRazorpayOrder = async (req, res) => {
     let totalAmount = 0;
 
     for (const item of products) {
-      const product = await ProductModel.findById(item.product._id);
+      const product = await ProductModel.findOne({
+        _id: item.product._id,
+        isActive: true,
+      });
 
       if (!product) {
         console.log('Product not found invalid product not found in db')
@@ -62,6 +66,19 @@ const CreateRazorpayOrder = async (req, res) => {
             message: "Product not found",
             data:null,
             error:null
+        });
+      }
+
+      const categoryIsEnabled = await CategoryModel.exists({
+        name: product.category,
+        isEnabled: { $ne: false },
+      });
+      if (!categoryIsEnabled) {
+        return res.status(409).json({
+          success: false,
+          message: `${product.productName} is unavailable`,
+          data: null,
+          error: "CATEGORY_UNAVAILABLE",
         });
       }
 

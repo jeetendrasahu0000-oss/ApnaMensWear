@@ -15,9 +15,33 @@ app.use(compression());
 
 app.use(
   cors({
-    origin: ["https://apnamenswear.shop","http://localhost:5173"],
+    origin(origin, callback) {
+      if (!origin) {
+        callback(null, true);
+        return;
+      }
+
+      let parsedOrigin;
+      try {
+        parsedOrigin = new URL(origin);
+      } catch {
+        callback(null, false);
+        return;
+      }
+
+      const isLocalDevelopment =
+        parsedOrigin.protocol === "http:" &&
+        ["localhost", "127.0.0.1"].includes(parsedOrigin.hostname);
+      const isProduction =
+        parsedOrigin.protocol === "https:" &&
+        ["apnamenswear.shop", "www.apnamenswear.shop"].includes(
+          parsedOrigin.hostname
+        );
+
+      callback(null, isLocalDevelopment || isProduction);
+    },
     credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );

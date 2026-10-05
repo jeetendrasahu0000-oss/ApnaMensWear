@@ -1,5 +1,8 @@
 import ProductModel from "../models/ProductModel.js";
+import CategoryModel from "../../categories/models/CategoryModel.js";
 
+const getEnabledCategoryNames = () =>
+    CategoryModel.distinct("name", { isEnabled: { $ne: false } });
 
 
 
@@ -8,10 +11,12 @@ const GetProductDetails = async (req, res) => {
     try {
 
         const { slug } = req.params;
+        const enabledCategories = await getEnabledCategoryNames();
 
         const product = await ProductModel.findOne({
             slug,
-            isActive: true
+            isActive: true,
+            category: { $in: enabledCategories }
         }).lean();
 
         if (!product) {
@@ -50,17 +55,19 @@ const GetProductsByCategory = async (req,res)=>{
         const category = req.params.category;
         const page = Number(req.query.page) || 1;
         const limit = Number(req.query.limit) || 10;
+        const enabledCategories = await getEnabledCategoryNames();
 
         const skip = (page - 1) * limit;
 
-        const products = await ProductModel.find({
-            category,
-            isActive:true
-        })
+        const query = {
+            category: { $in: enabledCategories, $eq: category },
+            isActive: true
+        };
+        const products = await ProductModel.find(query)
         .skip(skip)
         .limit(limit);
 
-        const totalProducts = await ProductModel.countDocuments({category,isActive:true });
+        const totalProducts = await ProductModel.countDocuments(query);
 
         return res.status(200).json({
             success:true,
@@ -87,7 +94,11 @@ const GetProductsByCategory = async (req,res)=>{
 const GetTopReatedProduct = async(req,res)=>{
     try{
         console.log('hit GetTopReatedProduct api...')
-        const products = await ProductModel.find().limit(10)
+        const enabledCategories = await getEnabledCategoryNames();
+        const products = await ProductModel.find({
+            category: { $in: enabledCategories },
+            isActive: true
+        }).limit(10)
 
         return res.status(200).json({
             success:true,
@@ -121,6 +132,7 @@ const GetRelatedProducts = async (req, res) => {
         const page = Math.max(Number(req.query.page) || 1, 1);
         const limit = Math.max(Number(req.query.limit) || 10, 1);
         const skip = (page - 1) * limit;
+        const enabledCategories = await getEnabledCategoryNames();
 
         if (!id && !slug && !category && !subCategory) {
             return res.status(400).json({
@@ -154,14 +166,17 @@ const GetRelatedProducts = async (req, res) => {
         const effectiveCategory = category || refProduct?.category;
         const effectiveSubCategory = subCategory || refProduct?.subCategory;
 
-        const baseMatch = { isActive: true };
+        const baseMatch = {
+            isActive: true,
+            category: { $in: enabledCategories }
+        };
 
         if (refProduct?._id) {
             baseMatch._id = { $ne: refProduct._id };
         }
 
         if (effectiveCategory) {
-            baseMatch.category = effectiveCategory;
+            baseMatch.category.$eq = effectiveCategory;
         }
 
         // step 3: priority scoring only makes sense when we have both fields to weigh
@@ -335,14 +350,16 @@ const GetFillterdProducts = async (req, res) => {
             size,
             sort = "newest"
         } = req.query;
+        const enabledCategories = await getEnabledCategoryNames();
 
         const query = {
-            isActive: true
+            isActive: true,
+            category: { $in: enabledCategories }
         };
 
         // Category
         if (category) {
-            query.category = category;
+            query.category.$eq = category;
         }
 
         // Sub Category
@@ -535,6 +552,7 @@ const SearchProducts = async (req, res) => {
 
         const query = {
             isActive: true,
+            category: { $in: await getEnabledCategoryNames() },
             $or: [
                 { productName: { $regex: search, $options: "i" } },
                 { brand: { $regex: search, $options: "i" } },
