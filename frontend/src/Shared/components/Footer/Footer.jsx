@@ -1,12 +1,7 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import styles from "./Footer.module.css";
-
-import {
-  FaInstagram,
-  FaFacebookF,
-  FaTwitter,
-  FaYoutube,
-} from "react-icons/fa";
+import { FaInstagram, FaFacebookF, FaTwitter, FaYoutube } from "react-icons/fa";
 import { FiArrowUp, FiSend } from "react-icons/fi";
 
 const Footer = () => {
@@ -16,7 +11,7 @@ const Footer = () => {
   const handleSubscribe = (e) => {
     e.preventDefault();
     if (!email.trim()) return;
-    // TODO: wire this up to your newsletter API
+    // TODO: wire to newsletter API
     setSubscribed(true);
     setEmail("");
     setTimeout(() => setSubscribed(false), 3000);
@@ -34,50 +29,49 @@ const Footer = () => {
         {/* Brand */}
         <div className={styles.brand}>
           <h2>Apna Mens Wear</h2>
-
           <p>
             Premium men&apos;s fashion designed for modern lifestyles.
             Quality clothing with timeless style.
           </p>
 
           <div className={styles.socialIcons}>
-            <a href="#" aria-label="Instagram">
-              <FaInstagram />
-            </a>
-            <a href="#" aria-label="Facebook">
-              <FaFacebookF />
-            </a>
-            <a href="#" aria-label="Twitter">
-              <FaTwitter />
-            </a>
-            <a href="#" aria-label="YouTube">
-              <FaYoutube />
-            </a>
+            <a href="#" aria-label="Instagram"><FaInstagram /></a>
+            <a href="#" aria-label="Facebook"><FaFacebookF /></a>
+            <a href="#" aria-label="Twitter"><FaTwitter /></a>
+            <a href="#" aria-label="YouTube"><FaYoutube /></a>
           </div>
         </div>
 
-        {/* Shop Links */}
+        {/* Shop */}
         <div className={styles.links}>
           <h3>Shop</h3>
-          <a href="#">New Arrivals</a>
-          <a href="#">T-Shirts</a>
-          <a href="#">Jackets</a>
-          <a href="#">Accessories</a>
+          <Link to="/new-arrivals">New Arrivals</Link>
+          <Link to="/filtered/t-shirts">T-Shirts</Link>
+          <Link to="/filtered/jeans">Jeans</Link>
+          <Link to="/filtered/accessories">Accessories</Link>
         </div>
 
-        {/* Company Links */}
+        {/* Company */}
         <div className={styles.links}>
           <h3>Company</h3>
-          <a href="#">About Us</a>
-          <a href="#">Contact</a>
-          <a href="#">Privacy Policy</a>
-          <a href="#">Terms</a>
+          <Link to="/about">About Us</Link>
+          <Link to="/contact">Contact</Link>
+          <Link to="/privacy-policy">Privacy Policy</Link>
+          <Link to="/terms">Terms</Link>
+        </div>
+
+        {/* Help */}
+        <div className={styles.links}>
+          <h3>Help</h3>
+          <Link to="/shipping-policy">Shipping</Link>
+          <Link to="/return-policy">Returns</Link>
+          <Link to="/size-guide">Size Guide</Link>
+          <Link to="/faq">FAQ</Link>
         </div>
 
         {/* Newsletter */}
         <div className={styles.newsletter}>
           <h3>Join Our Newsletter</h3>
-
           <p>Get updates about new collections and offers.</p>
 
           <form className={styles.inputBox} onSubmit={handleSubscribe}>
@@ -88,7 +82,6 @@ const Footer = () => {
               onChange={(e) => setEmail(e.target.value)}
               required
             />
-
             <button type="submit" aria-label="Subscribe">
               <FiSend />
               <span>Join</span>
@@ -96,19 +89,18 @@ const Footer = () => {
           </form>
 
           <p className={`${styles.subscribeMsg} ${subscribed ? styles.subscribeMsgShow : ""}`}>
-            You&apos;re on the list — welcome to MENOVA.
+            You&apos;re on the list — welcome to Apna Mens Wear.
           </p>
         </div>
       </div>
 
-      {/* Bottom Bar */}
       <div className={styles.bottom}>
-        <p>&copy; {new Date().getFullYear()} MENOVA. All rights reserved.</p>
+        <p>&copy; {new Date().getFullYear()} Apna Mens Wear. All rights reserved.</p>
 
         <div className={styles.bottomLinks}>
-          <a href="#">Privacy Policy</a>
+          <Link to="/privacy-policy">Privacy Policy</Link>
           <span className={styles.dot} />
-          <a href="#">Terms of Service</a>
+          <Link to="/terms">Terms of Service</Link>
         </div>
 
         <button className={styles.toTop} onClick={scrollToTop} aria-label="Back to top">

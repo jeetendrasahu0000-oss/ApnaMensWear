@@ -1,57 +1,72 @@
 .sidebar {
-  width: 260px;
-  height: calc(100vh - 70px);
-
-  position: fixed;
-  left: 0;
-  top: 70px;
-
-  background: #1f2937;
-  color: white;
-
-  padding: 20px;
-
+  width: 230px;
+  min-height: 100vh;
+  background: #111;
+  color: #fff;
+  padding: 22px 14px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-
-  overflow-y: auto;
+  gap: 6px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 50;
+  transition: transform 0.25s ease;
 }
 
 .logo {
-  margin-bottom: 20px;
+  font-size: 1.15rem;
+  font-weight: 800;
+  margin: 0 0 18px;
+  padding-left: 10px;
+  letter-spacing: 2px;
+  color: #fff;
 }
 
-.sidebar button {
-  border: none;
-  background: transparent;
-  color: white;
-  text-align: left;
-  padding: 12px;
+.navLink {
+  display: block;
+  padding: 10px 14px;
+  color: #cfcfcf;
+  text-decoration: none;
   border-radius: 8px;
-  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background 0.15s, color 0.15s;
 }
 
-.sidebar button:hover {
-  background: rgba(255, 255, 255, 0.1);
+.navLink:hover {
+  background: #1f1f1f;
+  color: #fff;
+}
+
+.active {
+  background: #fff;
+  color: #111;
+  font-weight: 600;
+}
+
+.active:hover {
+  background: #f0f0f0;
+  color: #111;
 }
 
 .overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.4);
-  z-index: 998;
+  display: none;
 }
 
 @media (max-width: 768px) {
   .sidebar {
-    top: 70px;
-    left: -260px;
-    transition: 0.3s;
-    z-index: 999;
+    transform: translateX(-100%);
   }
 
-  .open {
-    left: 0;
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  .overlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 40;
   }
 }

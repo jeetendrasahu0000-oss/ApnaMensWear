@@ -1,14 +1,12 @@
 // SignupLogin.jsx
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import api from "../../Api/Axios";
 import styles from "./SignupLogin.module.css";
 import { Eye, EyeOff, X, Mail, Phone, User, Lock, MapPin, Home } from "lucide-react";
 import { FaFacebookF, FaGoogle } from "react-icons/fa";
 import { SetAccessToken } from "../../Api/TokenStore";
 import { fetchUserProfile } from "../../Api/basicStore";
-
-// NAYA IMPORT
 import { useAuth } from "../../context/AuthContext";
 
 const FIELD_LABELS = {
@@ -25,10 +23,28 @@ const FIELD_LABELS = {
   city: "City",
 };
 
-// NAYA PROP: initialMode -> /login route se "login" aur /signup route se "signup" milega
+const EMPTY_SIGNUP_FORM = {
+  firstName: "",
+  lastName: "",
+  email: "",
+  phone: "",
+  password: "",
+  confirmPassword: "",
+  country: "",
+  state: "",
+  city: "",
+  pinCode: "",
+  addressLine1: "",
+  addressLine2: "",
+};
+
 function SignupLogin({ close, initialMode = "login" }) {
   const navigate = useNavigate();
-  const { login: setAuthUser } = useAuth(); // NAYA: global auth state update karne ke liye
+  const location = useLocation();
+  const { login: setAuthUser } = useAuth();
+
+  // Login ke baad wapas wahi page jahan user tha (ProtectedRoute se aaya)
+  const redirectTo = location.state?.from || "/";
 
   const [mode, setMode] = useState(initialMode);
   const [showPassword, setShowPassword] = useState(false);
@@ -41,26 +57,16 @@ function SignupLogin({ close, initialMode = "login" }) {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [timer, setTimer] = useState(0);
 
-  const [form, setForm] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    phone: "",
-    password: "",
-    confirmPassword: "",
-    country: "",
-    state: "",
-    city: "",
-    pinCode: "",
-    addressLine1: "",
-    addressLine2: "",
-  });
+  const [form, setForm] = useState(EMPTY_SIGNUP_FORM);
 
   const [login, setLogin] = useState({
     identifier: "",
     password: "",
   });
 
+  // ------------------------------------------------------------------
+  // Timer for OTP resend
+  // ------------------------------------------------------------------
   useEffect(() => {
     if (!timer) return;
     const interval = setInterval(() => {
@@ -69,6 +75,30 @@ function SignupLogin({ close, initialMode = "login" }) {
     return () => clearInterval(interval);
   }, [timer]);
 
+  // ------------------------------------------------------------------
+  // Mode change hone par errors reset + form clear (optional)
+  // ------------------------------------------------------------------
+  useEffect(() => {
+    setErrors({});
+  }, [mode]);
+
+  // ------------------------------------------------------------------
+  // FIX: agar user phone number change kare OTP verify hone ke baad,
+  // to verification reset karo — warna wo naya phone bina verify kar
+  // hi signup submit kar dega.
+  // ------------------------------------------------------------------
+  useEffect(() => {
+    if (otpVerified) {
+      setOtpVerified(false);
+      setOtpSent(false);
+      setOtp(["", "", "", "", "", ""]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form.phone]);
+
+  // ------------------------------------------------------------------
+  // Field error clearing
+  // ------------------------------------------------------------------
   const clearFieldError = (name) => {
     setErrors((prev) => {
       if (!prev[name]) return prev;
@@ -82,14 +112,17 @@ function SignupLogin({ close, initialMode = "login" }) {
     const { name, value } = e.target;
 
     if (mode === "signup") {
-      setForm({ ...form, [name]: value });
+      setForm((prev) => ({ ...prev, [name]: value }));
     } else {
-      setLogin({ ...login, [name]: value });
+      setLogin((prev) => ({ ...prev, [name]: value }));
     }
 
     clearFieldError(name);
   };
 
+  // ------------------------------------------------------------------
+  // OTP input handlers
+  // ------------------------------------------------------------------
   const handleOtpChange = (index, value) => {
     const digit = value.replace(/[^0-9]/g, "").slice(-1);
     const next = [...otp];
@@ -111,6 +144,9 @@ function SignupLogin({ close, initialMode = "login" }) {
     }
   };
 
+  // ------------------------------------------------------------------
+  // API error handler
+  // ------------------------------------------------------------------
   const handleApiError = (error, fallbackField = "api") => {
     const message =
       error?.response?.data?.message ||
@@ -146,6 +182,9 @@ function SignupLogin({ close, initialMode = "login" }) {
     }));
   };
 
+  // ------------------------------------------------------------------
+  // Validation
+  // ------------------------------------------------------------------
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const phoneRegex = /^[6-9]\d{9}$/;
 
@@ -188,6 +227,9 @@ function SignupLogin({ close, initialMode = "login" }) {
     return e;
   };
 
+  // ------------------------------------------------------------------
+  // OTP — Send
+  // ------------------------------------------------------------------
   const sendOtp = async () => {
     if (!form.phone.trim()) {
       setErrors((prev) => ({ ...prev, otp: "Enter your phone number before requesting an OTP" }));
@@ -203,8 +245,9 @@ function SignupLogin({ close, initialMode = "login" }) {
         identifier: form.phone,
       });
 
-      console.log("OTP => ", response.data?.data?.otp);
-      alert(`OTP => ${response.data?.data?.otp}`);
+      // NOTE: Production mein OTP console/alert mein mat dikhao.
+      // Backend SMS bhejta hai to yeh log hata do.
+      console.log("OTP (dev only) => ", response.data?.data?.otp);
 
       setOtpSent(true);
       setOtpVerified(false);
@@ -216,6 +259,9 @@ function SignupLogin({ close, initialMode = "login" }) {
     }
   };
 
+  // ------------------------------------------------------------------
+  // OTP — Verify
+  // ------------------------------------------------------------------
   const verifyOtp = async () => {
     const code = otp.join("");
 
@@ -244,6 +290,9 @@ function SignupLogin({ close, initialMode = "login" }) {
     }
   };
 
+  // ------------------------------------------------------------------
+  // Submit — Signup / Login
+  // ------------------------------------------------------------------
   const submit = async () => {
     const validationErrors = mode === "signup" ? validateSignup() : validateLogin();
 
@@ -283,22 +332,11 @@ function SignupLogin({ close, initialMode = "login" }) {
           return;
         }
 
-        alert(response.data.message);
+        alert(response.data.message || "Account created. Please login.");
+
+        // Reset signup state + switch to login
         setMode("login");
-        setForm({
-          firstName: "",
-          lastName: "",
-          email: "",
-          phone: "",
-          password: "",
-          confirmPassword: "",
-          country: "",
-          state: "",
-          city: "",
-          pinCode: "",
-          addressLine1: "",
-          addressLine2: "",
-        });
+        setForm(EMPTY_SIGNUP_FORM);
         setOtpVerified(false);
         setOtpSent(false);
         setOtp(["", "", "", "", "", ""]);
@@ -315,14 +353,13 @@ function SignupLogin({ close, initialMode = "login" }) {
 
         SetAccessToken(response?.data?.data?.AccessToken);
 
-        // FIX: profile fetch karke global AuthContext update karo
-        // taaki Header turant re-render ho aur login button gayab ho jaaye
+        // Global auth state update
         const profile = await fetchUserProfile();
         setAuthUser(profile);
 
-        alert(response.data.message);
-        navigate("/");
+        // Close modal (agar open hai) aur intended page pe redirect
         close?.();
+        navigate(redirectTo, { replace: true });
       }
     } catch (error) {
       if (error?.response?.data && typeof error.response.data.success !== "undefined") {
@@ -342,10 +379,13 @@ function SignupLogin({ close, initialMode = "login" }) {
     .filter(Boolean)
     .join(" ");
 
+  // ------------------------------------------------------------------
+  // Render
+  // ------------------------------------------------------------------
   return (
     <div className={styles.overlay} onClick={close}>
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-        <button className={styles.close} onClick={close} type="button">
+        <button className={styles.close} onClick={close} type="button" aria-label="Close">
           <X size={24} />
         </button>
 
@@ -403,7 +443,6 @@ function SignupLogin({ close, initialMode = "login" }) {
                 error={errors.firstName}
                 icon={<User size={18} />}
               />
-
               <Field
                 name="lastName"
                 label="Last name"
@@ -412,7 +451,6 @@ function SignupLogin({ close, initialMode = "login" }) {
                 error={errors.lastName}
                 icon={<User size={18} />}
               />
-
               <Field
                 name="email"
                 label="Email"
@@ -421,7 +459,6 @@ function SignupLogin({ close, initialMode = "login" }) {
                 error={errors.email}
                 icon={<Mail size={18} />}
               />
-
               <Field
                 name="phone"
                 label="Phone"
@@ -458,6 +495,7 @@ function SignupLogin({ close, initialMode = "login" }) {
                           onChange={(e) => handleOtpChange(index, e.target.value)}
                           onKeyDown={(e) => handleOtpKeyDown(index, e)}
                           className={styles.otpBox}
+                          aria-label={`OTP digit ${index + 1}`}
                         />
                       ))}
                     </div>
@@ -484,7 +522,6 @@ function SignupLogin({ close, initialMode = "login" }) {
                 setShow={setShowPassword}
                 error={errors.password}
               />
-
               <PasswordField
                 value={form.confirmPassword}
                 name="confirmPassword"
@@ -503,7 +540,6 @@ function SignupLogin({ close, initialMode = "login" }) {
                 error={errors.country}
                 icon={<MapPin size={18} />}
               />
-
               <Field
                 name="state"
                 label="State"
@@ -512,7 +548,6 @@ function SignupLogin({ close, initialMode = "login" }) {
                 error={errors.state}
                 icon={<MapPin size={18} />}
               />
-
               <Field
                 name="city"
                 label="City"
@@ -521,7 +556,6 @@ function SignupLogin({ close, initialMode = "login" }) {
                 error={errors.city}
                 icon={<MapPin size={18} />}
               />
-
               <Field
                 name="pinCode"
                 label="Pin Code"
@@ -530,7 +564,6 @@ function SignupLogin({ close, initialMode = "login" }) {
                 error={errors.pinCode}
                 icon={<MapPin size={18} />}
               />
-
               <Field
                 name="addressLine1"
                 label="Address Line 1"
@@ -539,7 +572,6 @@ function SignupLogin({ close, initialMode = "login" }) {
                 error={errors.addressLine1}
                 icon={<Home size={18} />}
               />
-
               <Field
                 name="addressLine2"
                 label="Address Line 2"
@@ -572,21 +604,48 @@ function SignupLogin({ close, initialMode = "login" }) {
             </>
           )}
 
-          <button className={styles.submit} onClick={submit} disabled={submitting} type="button">
-            {submitting ? "Please wait..." : mode === "signup" ? "Create Account" : "Login"}
+          <button
+            className={styles.submit}
+            onClick={submit}
+            disabled={submitting}
+            type="button"
+          >
+            {submitting
+              ? "Please wait..."
+              : mode === "signup"
+                ? "Create Account"
+                : "Login"}
           </button>
 
           {mode === "login" && (
             <div className={styles.forgotPassword}>
-              <a href="#">Forgot Password?</a>
+              <a href="/forgot-password">Forgot Password?</a>
             </div>
           )}
+
+          {/* Optional social login section */}
+          {/* 
+          <div className={styles.socialDivider}>
+            <span>or continue with</span>
+          </div>
+          <div className={styles.socialRow}>
+            <button type="button" className={styles.socialBtn}>
+              <FaGoogle /> Google
+            </button>
+            <button type="button" className={styles.socialBtn}>
+              <FaFacebookF /> Facebook
+            </button>
+          </div>
+          */}
         </div>
       </div>
     </div>
   );
 }
 
+// ------------------------------------------------------------------
+// Reusable field components
+// ------------------------------------------------------------------
 function Field({ name, label, value, onChange, type = "text", error, icon }) {
   return (
     <div className={styles.field}>
@@ -627,7 +686,12 @@ function PasswordField({ name, label, value, onChange, show, setShow, error }) {
           />
           <label htmlFor={name}>{label}</label>
         </div>
-        <span className={styles.passwordToggle} onClick={() => setShow(!show)}>
+        <span
+          className={styles.passwordToggle}
+          onClick={() => setShow(!show)}
+          role="button"
+          aria-label={show ? "Hide password" : "Show password"}
+        >
           {show ? <EyeOff size={20} /> : <Eye size={20} />}
         </span>
       </div>

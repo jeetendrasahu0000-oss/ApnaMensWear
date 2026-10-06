@@ -1,23 +1,28 @@
-.dashboard {
-  min-height: 100vh;
-  background: #f5f5f5;
-}
-
-.mainContainer {
+.adminWrapper {
   display: flex;
-  margin-top: 70px;
+  min-height: 100vh;
+  background: #f6f7f9;
 }
 
-.content {
+.mainArea {
   flex: 1;
-  padding: 20px;
-  margin-left: 260px;
-  min-height: calc(100vh - 70px);
+  margin-left: 230px;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.contentArea {
+  padding: 22px;
+  flex: 1;
 }
 
 @media (max-width: 768px) {
-  .content {
+  .mainArea {
     margin-left: 0;
-    padding: 15px;
+  }
+
+  .contentArea {
+    padding: 14px;
   }
 }

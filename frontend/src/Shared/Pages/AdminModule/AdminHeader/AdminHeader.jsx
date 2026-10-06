@@ -1,13 +1,4 @@
-
-
-import {
-  Menu,
-  Search,
-  Bell,
-  CalendarDays,
-  ChevronDown,
-} from "lucide-react";
-
+import { Menu, Search, Bell, CalendarDays, ChevronDown } from "lucide-react";
 import styles from "./AdminHeader.module.css";
 
 function AdminHeader({ toggleSidebar }) {
@@ -23,25 +14,21 @@ function AdminHeader({ toggleSidebar }) {
         <button
           className={styles.menuBtn}
           onClick={toggleSidebar}
+          aria-label="Toggle sidebar"
         >
           <Menu size={22} />
         </button>
 
         <div>
           <h2 className={styles.title}>Admin Dashboard</h2>
-          <p className={styles.subtitle}>
-            Welcome back, Apna Mens Wear 👋
-          </p>
+          <p className={styles.subtitle}>Welcome back, Apna Mens Wear 👋</p>
         </div>
       </div>
 
       <div className={styles.right}>
         <div className={styles.search}>
           <Search size={18} />
-          <input
-            type="text"
-            placeholder="Search products, orders..."
-          />
+          <input type="text" placeholder="Search products, orders..." />
         </div>
 
         <div className={styles.date}>
@@ -49,7 +36,7 @@ function AdminHeader({ toggleSidebar }) {
           <span>{today}</span>
         </div>
 
-        <button className={styles.notification}>
+        <button className={styles.notification} aria-label="Notifications">
           <Bell size={20} />
           <span className={styles.badge}>3</span>
         </button>
@@ -71,4 +58,3 @@ function AdminHeader({ toggleSidebar }) {
 }
 
 export default AdminHeader;
-

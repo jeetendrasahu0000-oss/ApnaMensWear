@@ -1,5 +1,5 @@
 // Header.jsx
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import styles from "./Header.module.css";
 import { useNavigate, Link } from "react-router-dom";
 
@@ -11,6 +11,9 @@ import {
   FiHome,
   FiSearch,
   FiLogOut,
+  FiHeart,
+  FiPackage,
+  FiSettings,
 } from "react-icons/fi";
 
 import { BsCart3, BsBoxSeam } from "react-icons/bs";
@@ -19,8 +22,6 @@ import SignupLogin from "../../../Features/Auth/SignupLogin";
 import ViewCartProduct from "../CartComponents/ViewCartProduct";
 import { fetchCategories } from "../../../Api/categories";
 import SearchBar from "./SearchBar";
-
-// NAYA IMPORT
 import { useAuth } from "../../../context/AuthContext";
 
 const Header = () => {
@@ -30,36 +31,56 @@ const Header = () => {
   const [scrolled, setScrolled] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [categories, setCategories] = useState([]);
+  const [accountMenuOpen, setAccountMenuOpen] = useState(false);
 
   const navigate = useNavigate();
+  const accountMenuRef = useRef(null);
 
-  // NAYA: global auth state
   const { isLoggedIn, user, logout } = useAuth();
 
   const onCloseForm = () => setIsFormOpen(false);
 
+  // ---------------- Logout ----------------
   const handleLogout = () => {
     logout();
+    // localStorage se user bhi clear karo
+    localStorage.removeItem("user");
     setMenuOpen(false);
+    setAccountMenuOpen(false);
     navigate("/");
   };
 
+  // ---------------- Body scroll lock when drawer/cart open ----------------
   useEffect(() => {
-    document.body.style.overflow = menuOpen ? "hidden" : "";
-
+    const shouldLock = menuOpen || isCartOpen;
+    document.body.style.overflow = shouldLock ? "hidden" : "";
     return () => {
       document.body.style.overflow = "";
     };
-  }, [menuOpen]);
+  }, [menuOpen, isCartOpen]);
 
+  // ---------------- Sticky header shadow on scroll ----------------
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 4);
-
     window.addEventListener("scroll", onScroll);
-
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  // ---------------- Close account dropdown when clicking outside ----------------
+  useEffect(() => {
+    if (!accountMenuOpen) return;
+
+    const handleClickOutside = (e) => {
+      if (accountMenuRef.current && !accountMenuRef.current.contains(e.target)) {
+        setAccountMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [accountMenuOpen]);
+
+  // ---------------- Load categories ----------------
   useEffect(() => {
     let active = true;
 
@@ -86,127 +107,61 @@ const Header = () => {
   ];
 
   // =====================================================
-  // CATEGORY EMOJIS - UNIQUE FOR EACH CATEGORY
+  // CATEGORY EMOJIS
   // =====================================================
-
   const categoryEmojis = {
-    "Shirt": "👔",
-    "Shirts": "👔",
-    "T-Shirt": "👕",
-    "T-Shirts": "👕",
-    "Polo": "🏌️",
-    "Polo Shirts": "🏌️",
-    "Dress Shirts": "👔",
-    "Formal Shirts": "👔",
-    "Casual Shirts": "👕",
-    "Hoodie": "🧥",
-    "Hoodies": "🧥",
-    "Sweatshirt": "🧶",
-    "Sweatshirts": "🧶",
-    "Sweater": "🧶",
-    "Sweaters": "🧶",
-    "Jacket": "🧥",
-    "Jackets": "🧥",
-    "Blazer": "🤵",
-    "Blazers": "🤵",
-    "Suits": "🤵",
-    "Suit": "🤵",
-    "Tuxedo": "🤵",
-    "Vest": "🦺",
-    "Vests": "🦺",
-    "Waistcoat": "🦺",
-    "Winter Wear": "🧣",
-    "Coats": "🧥",
-    "Jeans": "👖",
-    "Trouser": "👖",
-    "Trousers": "👖",
-    "Pants": "👖",
-    "Chinos": "👖",
-    "Cargo": "👖",
-    "Cargo Pants": "👖",
-    "Shorts": "🩳",
-    "Jogger": "🏃",
-    "Joggers": "🏃",
-    "Track Pants": "🏃",
-    "Trackpants": "🏃",
-    "Kurta": "🥻",
-    "Kurtas": "🥻",
-    "Ethnic": "🥻",
-    "Shoe": "👟",
-    "Shoes": "👟",
-    "Sneaker": "👟",
-    "Sneakers": "👟",
-    "Sports Shoes": "👟",
-    "Running Shoes": "👟",
-    "Casual Shoes": "👟",
-    "Formal": "👞",
-    "Formals": "👞",
-    "Formal Shoes": "👞",
-    "Oxford": "👞",
-    "Oxford Shoes": "👞",
-    "Loafer": "👞",
-    "Loafers": "👞",
-    "Derby": "👞",
-    "Boot": "🥾",
-    "Boots": "🥾",
-    "Sandals": "🩴",
-    "Flip Flops": "🩴",
-    "Slippers": "🩴",
-    "Accessories": "🎒",
-    "Watch": "⌚",
-    "Watches": "⌚",
-    "Bag": "👜",
-    "Bags": "👜",
-    "Backpack": "🎒",
-    "Backpacks": "🎒",
-    "Wallet": "👛",
-    "Wallets": "👛",
-    "Belt": "🥋",
-    "Belts": "🥋",
-    "Tie": "👔",
-    "Ties": "👔",
-    "Bow Tie": "🎀",
-    "Bowtie": "🎀",
-    "Cap": "🧢",
-    "Caps": "🧢",
-    "Hat": "🎩",
-    "Hats": "🎩",
-    "Sunglasses": "🕶️",
-    "Sunglass": "🕶️",
-    "Gloves": "🧤",
-    "Scarf": "🧣",
-    "Scarves": "🧣",
-    "Socks": "🧦",
-    "Underwear": "🩲",
-    "Sleepwear": "🛌",
-    "Swimwear": "🏊",
-    "Activewear": "🏋️",
-    "Cufflinks": "💎",
-    "Pocket Square": "🧣",
-    "Suspenders": "🔗",
+    Shirt: "👔", Shirts: "👔",
+    "T-Shirt": "👕", "T-Shirts": "👕",
+    Polo: "🏌️", "Polo Shirts": "🏌️",
+    "Dress Shirts": "👔", "Formal Shirts": "👔", "Casual Shirts": "👕",
+    Hoodie: "🧥", Hoodies: "🧥",
+    Sweatshirt: "🧶", Sweatshirts: "🧶",
+    Sweater: "🧶", Sweaters: "🧶",
+    Jacket: "🧥", Jackets: "🧥",
+    Blazer: "🤵", Blazers: "🤵", Suits: "🤵", Suit: "🤵", Tuxedo: "🤵",
+    Vest: "🦺", Vests: "🦺", Waistcoat: "🦺",
+    "Winter Wear": "🧣", Coats: "🧥",
+    Jeans: "👖", Trouser: "👖", Trousers: "👖",
+    Pants: "👖", Chinos: "👖", Cargo: "👖", "Cargo Pants": "👖",
+    Shorts: "🩳", Jogger: "🏃", Joggers: "🏃",
+    "Track Pants": "🏃", Trackpants: "🏃",
+    Kurta: "🥻", Kurtas: "🥻", Ethnic: "🥻",
+    Shoe: "👟", Shoes: "👟", Sneaker: "👟", Sneakers: "👟",
+    "Sports Shoes": "👟", "Running Shoes": "👟", "Casual Shoes": "👟",
+    Formal: "👞", Formals: "👞", "Formal Shoes": "👞",
+    Oxford: "👞", "Oxford Shoes": "👞",
+    Loafer: "👞", Loafers: "👞", Derby: "👞",
+    Boot: "🥾", Boots: "🥾",
+    Sandals: "🩴", "Flip Flops": "🩴", Slippers: "🩴",
+    Accessories: "🎒",
+    Watch: "⌚", Watches: "⌚",
+    Bag: "👜", Bags: "👜",
+    Backpack: "🎒", Backpacks: "🎒",
+    Wallet: "👛", Wallets: "👛",
+    Belt: "🥋", Belts: "🥋",
+    Tie: "👔", Ties: "👔", "Bow Tie": "🎀", Bowtie: "🎀",
+    Cap: "🧢", Caps: "🧢", Hat: "🎩", Hats: "🎩",
+    Sunglasses: "🕶️", Sunglass: "🕶️",
+    Gloves: "🧤", Scarf: "🧣", Scarves: "🧣",
+    Socks: "🧦", Underwear: "🩲",
+    Sleepwear: "🛌", Swimwear: "🏊", Activewear: "🏋️",
+    Cufflinks: "💎", "Pocket Square": "🧣", Suspenders: "🔗",
   };
 
   const getCategoryEmoji = (category) => {
     if (!category) return "🏷️";
-
-    if (categoryEmojis[category]) {
-      return categoryEmojis[category];
-    }
+    if (categoryEmojis[category]) return categoryEmojis[category];
 
     const lowerCategory = category.toLowerCase();
     for (const [key, emoji] of Object.entries(categoryEmojis)) {
-      if (key.toLowerCase() === lowerCategory) {
-        return emoji;
-      }
+      if (key.toLowerCase() === lowerCategory) return emoji;
     }
-
     for (const [key, emoji] of Object.entries(categoryEmojis)) {
       const lowerKey = key.toLowerCase();
       if (lowerCategory.includes(lowerKey) || lowerKey.includes(lowerCategory)) {
         return emoji;
       }
     }
-
     return "🏷️";
   };
 
@@ -222,11 +177,7 @@ const Header = () => {
       </div>
 
       {/* HEADER */}
-      <header
-        className={`${styles.header} ${
-          scrolled ? styles.headerScrolled : ""
-        }`}
-      >
+      <header className={`${styles.header} ${scrolled ? styles.headerScrolled : ""}`}>
         <button
           className={styles.mobileMenuBtn}
           onClick={() => setMenuOpen(!menuOpen)}
@@ -237,22 +188,16 @@ const Header = () => {
         </button>
 
         <div className={styles.logo} onClick={() => navigate("/")}>
-          <img
-            src="/logo.png"
-            alt="Apna Men's Wear"
-            className={styles.logoImg}
-          />
+          <img src="/logo.png" alt="Apna Men's Wear" className={styles.logoImg} />
         </div>
 
-        {/* DESKTOP NAV - FIX: <a href> -> <Link to> (full page reload band ho gaya) */}
+        {/* DESKTOP NAV */}
         <nav className={styles.nav}>
           <Link to="/">🏠 Home</Link>
 
           {categories.map((item) => (
             <Link to={`/filtered/${item}`} key={item}>
-              <span className={styles.categoryEmoji}>
-                {getCategoryEmoji(item)}
-              </span>
+              <span className={styles.categoryEmoji}>{getCategoryEmoji(item)}</span>
               <span>{item}</span>
             </Link>
           ))}
@@ -262,7 +207,7 @@ const Header = () => {
         </nav>
 
         <div className={styles.actions}>
-
+          {/* Search */}
           <button
             className={styles.iconBtn}
             onClick={() => setShowSearch((prev) => !prev)}
@@ -271,17 +216,82 @@ const Header = () => {
             <FiSearch />
           </button>
 
-          {/* Account - FIX: login hone ke baad ye button gayab ho jaata hai,
-              uski jagah logout button aa jaata hai */}
+          {/* Wishlist */}
+          <button
+            className={styles.iconBtn}
+            onClick={() => navigate("/wishlist")}
+            aria-label="Wishlist"
+            title="Wishlist"
+          >
+            <FiHeart />
+          </button>
+
+          {/* Account — dropdown if logged in */}
           {isLoggedIn ? (
-            <button
-              className={styles.iconBtn}
-              onClick={handleLogout}
-              aria-label={`Logout${user?.firstName ? ` (${user.firstName})` : ""}`}
-              title={user?.firstName ? `Logout (${user.firstName})` : "Logout"}
-            >
-              <FiLogOut />
-            </button>
+            <div className={styles.accountWrap} ref={accountMenuRef}>
+              <button
+                className={styles.iconBtn}
+                onClick={() => setAccountMenuOpen((p) => !p)}
+                aria-label="Account menu"
+                aria-expanded={accountMenuOpen}
+              >
+                <FiUser />
+              </button>
+
+              {accountMenuOpen && (
+                <div className={styles.accountMenu}>
+                  <div className={styles.accountMenuHeader}>
+                    <p className={styles.accountName}>
+                      Hi, {user?.firstName || "User"} 👋
+                    </p>
+                    <p className={styles.accountEmail}>{user?.email || ""}</p>
+                  </div>
+
+                  <button
+                    className={styles.accountMenuItem}
+                    onClick={() => {
+                      navigate("/account");
+                      setAccountMenuOpen(false);
+                    }}
+                  >
+                    <FiSettings size={15} />
+                    My Account
+                  </button>
+
+                  <button
+                    className={styles.accountMenuItem}
+                    onClick={() => {
+                      navigate("/order");
+                      setAccountMenuOpen(false);
+                    }}
+                  >
+                    <FiPackage size={15} />
+                    My Orders
+                  </button>
+
+                  <button
+                    className={styles.accountMenuItem}
+                    onClick={() => {
+                      navigate("/wishlist");
+                      setAccountMenuOpen(false);
+                    }}
+                  >
+                    <FiHeart size={15} />
+                    Wishlist
+                  </button>
+
+                  <div className={styles.accountMenuDivider} />
+
+                  <button
+                    className={`${styles.accountMenuItem} ${styles.logoutItem}`}
+                    onClick={handleLogout}
+                  >
+                    <FiLogOut size={15} />
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
           ) : (
             <button
               className={styles.iconBtn}
@@ -292,6 +302,7 @@ const Header = () => {
             </button>
           )}
 
+          {/* Cart */}
           <button
             className={styles.iconBtn}
             onClick={() => setIsCartOpen(true)}
@@ -300,6 +311,7 @@ const Header = () => {
             <BsCart3 />
           </button>
 
+          {/* Orders */}
           <button
             className={styles.iconBtn}
             onClick={() => navigate("/order")}
@@ -311,27 +323,16 @@ const Header = () => {
       </header>
 
       <div
-        className={`${styles.overlay} ${
-          menuOpen ? styles.showOverlay : ""
-        }`}
+        className={`${styles.overlay} ${menuOpen ? styles.showOverlay : ""}`}
         onClick={() => setMenuOpen(false)}
       />
 
-      {/* MOBILE DRAWER - FIX: <a href> -> <Link to> */}
-      <div
-        className={`${styles.mobileDrawer} ${
-          menuOpen ? styles.showDrawer : ""
-        }`}
-      >
+      {/* MOBILE DRAWER */}
+      <div className={`${styles.mobileDrawer} ${menuOpen ? styles.showDrawer : ""}`}>
         <div className={styles.drawerHeader}>
           <div className={styles.logo}>
-            <img
-              src="/logo.png"
-              alt="Apna Men's Wear"
-              className={styles.logoImg}
-            />
+            <img src="/logo.png" alt="Apna Men's Wear" className={styles.logoImg} />
           </div>
-
           <button
             className={styles.drawerCloseBtn}
             onClick={() => setMenuOpen(false)}
@@ -341,11 +342,7 @@ const Header = () => {
           </button>
         </div>
 
-        <Link
-          to="/"
-          className={styles.drawerLink}
-          onClick={() => setMenuOpen(false)}
-        >
+        <Link to="/" className={styles.drawerLink} onClick={() => setMenuOpen(false)}>
           <span className={styles.drawerLinkContent}>
             <FiHome className={styles.drawerIcon} />
             <span>Home</span>
@@ -355,15 +352,12 @@ const Header = () => {
 
         {categories.map((item, index) => {
           const emoji = getCategoryEmoji(item);
-
           return (
             <Link
               to={`/filtered/${item}`}
               key={item}
               className={styles.drawerLink}
-              style={{
-                animationDelay: `${index * 0.05}s`,
-              }}
+              style={{ animationDelay: `${index * 0.05}s` }}
               onClick={() => setMenuOpen(false)}
             >
               <span className={styles.drawerLinkContent}>
@@ -382,18 +376,36 @@ const Header = () => {
           👤 About Us
         </Link>
 
-        {/* Mobile drawer mein bhi login/logout ka same behaviour */}
+        {/* Mobile wishlist + account */}
+        <Link to="/wishlist" className={styles.drawerLink} onClick={() => setMenuOpen(false)}>
+          <span className={styles.drawerLinkContent}>
+            <FiHeart className={styles.drawerIcon} />
+            <span>Wishlist</span>
+          </span>
+          <FiChevronRight className={styles.arrow} />
+        </Link>
+
         {isLoggedIn ? (
-          <button
-            className={styles.drawerLink}
-            onClick={handleLogout}
-            style={{ width: "100%", textAlign: "left", background: "none", border: "none", cursor: "pointer" }}
-          >
-            <span className={styles.drawerLinkContent}>
-              <FiLogOut className={styles.drawerIcon} />
-              <span>Logout</span>
-            </span>
-          </button>
+          <>
+            <Link to="/account" className={styles.drawerLink} onClick={() => setMenuOpen(false)}>
+              <span className={styles.drawerLinkContent}>
+                <FiUser className={styles.drawerIcon} />
+                <span>My Account</span>
+              </span>
+              <FiChevronRight className={styles.arrow} />
+            </Link>
+
+            <button
+              className={styles.drawerLink}
+              onClick={handleLogout}
+              style={{ width: "100%", textAlign: "left", background: "none", border: "none", cursor: "pointer" }}
+            >
+              <span className={styles.drawerLinkContent}>
+                <FiLogOut className={styles.drawerIcon} />
+                <span>Logout</span>
+              </span>
+            </button>
+          </>
         ) : (
           <button
             className={styles.drawerLink}
@@ -414,10 +426,8 @@ const Header = () => {
       {/* LOGIN MODAL */}
       {isFormOpen && <SignupLogin close={onCloseForm} />}
 
-      {/* CART */}
-      {isCartOpen && (
-        <ViewCartProduct onClose={() => setIsCartOpen(false)} />
-      )}
+      {/* CART MODAL */}
+      {isCartOpen && <ViewCartProduct onClose={() => setIsCartOpen(false)} />}
 
       {/* SEARCH BAR */}
       {showSearch && <SearchBar onClose={() => setShowSearch(false)} />}

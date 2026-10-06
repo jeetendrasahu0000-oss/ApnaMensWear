@@ -1,0 +1,21 @@
+.wrapper {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 60px 20px;
+}
+
+.title {
+  font-size: 2rem;
+  margin-bottom: 24px;
+  border-bottom: 2px solid #eee;
+  padding-bottom: 14px;
+}
+
+.content {
+  line-height: 1.7;
+  color: #333;
+}
+
+.content h3 { margin-top: 26px; }
+.content p { margin: 10px 0; }
+.content li { margin: 6px 0; }

@@ -1,70 +1,42 @@
 import { useState } from "react";
-import styles from "./AdminDashbord.module.css";
-
+import { Routes, Route, Navigate } from "react-router-dom";
 import AdminHeader from "./AdminHeader/AdminHeader";
 import AdminSidebar from "./AdminSideBar/AdminSidebar";
-
 import SalesReport from "./SalesReport/SalesReport";
-import OrderDashbord from "./OrderDashbord/OrderDashbord";
-import UserDashbord from "./UserDashbord/UserDashbord";
-import ProductDashboard from "./ProductDashbord/ProductDashbord";
-import PaymentDashbord from "./PaymentDashbord/PaymentDashbord";
-import CategoryDashboard from "./CategoryDashboard/CategoryDashboard";
+import ProductDashbord from "../AdminModule/ProductDashbord/ProductDashbord";
+import styles from "./AdminDashbord.module.css";
 
-
-
-
-
-function AdminDashbord() {
-    
+function AdminDashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [activePage, setActivePage] = useState("orders");
-
-  const renderPage = () => {
-    switch (activePage) {
-      case "sales":
-        return <SalesReport />;
-
-      case "orders":
-        return <OrderDashbord />;
-      
-      case "payments":
-        return <PaymentDashbord/>;
-
-
-      case "users":
-        return <UserDashbord />;
-
-      case "products":
-        return <ProductDashboard />;
-
-      case "categories":
-        return <CategoryDashboard />;
-
-      default:
-        return <SalesReport />;
-    }
-  };
 
   return (
-    <div className={styles.dashboard}>
-      <AdminHeader
-        toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+    <div className={styles.adminWrapper}>
+      <AdminSidebar
+        sidebarOpen={sidebarOpen}
+        setSidebarOpen={setSidebarOpen}
       />
 
-      <div className={styles.mainContainer}>
-        <AdminSidebar
-          sidebarOpen={sidebarOpen}
-          setSidebarOpen={setSidebarOpen}
-          setActivePage={setActivePage}
-        />
+      <div className={styles.mainArea}>
+        <AdminHeader toggleSidebar={() => setSidebarOpen((p) => !p)} />
 
-        <main className={styles.content}>
-          {renderPage()}
-        </main>
+        <div className={styles.contentArea}>
+          <Routes>
+            <Route index element={<Navigate to="sales" replace />} />
+            <Route path="sales" element={<SalesReport />} />
+            <Route path="products" element={<ProductDashbord />} />
+            <Route path="users" element={<div style={{ padding: 24 }}>Users — coming soon</div>} />
+
+            {/* Ye 3 routes abhi placeholder hain — jab unki files ban jaayengi to uncomment kar do */}
+            {/* <Route path="orders" element={<OrderDashbord />} /> */}
+            {/* <Route path="payments" element={<PaymentDashbord />} /> */}
+            {/* <Route path="categories" element={<CategoryDashboard />} /> */}
+
+            <Route path="*" element={<Navigate to="sales" replace />} />
+          </Routes>
+        </div>
       </div>
     </div>
   );
 }
 
-export default AdminDashbord;
+export default AdminDashboard;
