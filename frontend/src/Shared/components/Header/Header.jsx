@@ -1,7 +1,7 @@
 // Header.jsx
 import { useState, useEffect, useRef } from "react";
 import styles from "./Header.module.css";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 
 import {
   FiMenu,
@@ -18,7 +18,6 @@ import {
 
 import { BsCart3, BsBoxSeam } from "react-icons/bs";
 
-import SignupLogin from "../../../Features/Auth/SignupLogin";
 import ViewCartProduct from "../CartComponents/ViewCartProduct";
 import { fetchCategories } from "../../../Api/categories";
 import SearchBar from "./SearchBar";
@@ -26,7 +25,6 @@ import { useAuth } from "../../../context/AuthContext";
 
 const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [isFormOpen, setIsFormOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
@@ -34,23 +32,25 @@ const Header = () => {
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
 
   const navigate = useNavigate();
+  const location = useLocation();
   const accountMenuRef = useRef(null);
 
   const { isLoggedIn, user, logout } = useAuth();
 
-  const onCloseForm = () => setIsFormOpen(false);
-
-  // ---------------- Logout ----------------
+  // --------------------------------------------------
+  // Logout
+  // --------------------------------------------------
   const handleLogout = () => {
     logout();
-    // localStorage se user bhi clear karo
     localStorage.removeItem("user");
     setMenuOpen(false);
     setAccountMenuOpen(false);
     navigate("/");
   };
 
-  // ---------------- Body scroll lock when drawer/cart open ----------------
+  // --------------------------------------------------
+  // Body scroll lock when drawer/cart open
+  // --------------------------------------------------
   useEffect(() => {
     const shouldLock = menuOpen || isCartOpen;
     document.body.style.overflow = shouldLock ? "hidden" : "";
@@ -59,28 +59,46 @@ const Header = () => {
     };
   }, [menuOpen, isCartOpen]);
 
-  // ---------------- Sticky header shadow on scroll ----------------
+  // --------------------------------------------------
+  // Sticky shadow on scroll
+  // --------------------------------------------------
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 4);
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // ---------------- Close account dropdown when clicking outside ----------------
+  // --------------------------------------------------
+  // Close account dropdown on route change
+  // --------------------------------------------------
+  useEffect(() => {
+    setAccountMenuOpen(false);
+    setMenuOpen(false);
+  }, [location.pathname]);
+
+  // --------------------------------------------------
+  // Close account dropdown on outside click
+  // --------------------------------------------------
   useEffect(() => {
     if (!accountMenuOpen) return;
 
     const handleClickOutside = (e) => {
-      if (accountMenuRef.current && !accountMenuRef.current.contains(e.target)) {
+      if (
+        accountMenuRef.current &&
+        !accountMenuRef.current.contains(e.target)
+      ) {
         setAccountMenuOpen(false);
       }
     };
 
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    return () =>
+      document.removeEventListener("mousedown", handleClickOutside);
   }, [accountMenuOpen]);
 
-  // ---------------- Load categories ----------------
+  // --------------------------------------------------
+  // Load categories
+  // --------------------------------------------------
   useEffect(() => {
     let active = true;
 
@@ -107,7 +125,7 @@ const Header = () => {
   ];
 
   // =====================================================
-  // CATEGORY EMOJIS
+  // Category emojis
   // =====================================================
   const categoryEmojis = {
     Shirt: "👔", Shirts: "👔",
@@ -158,7 +176,10 @@ const Header = () => {
     }
     for (const [key, emoji] of Object.entries(categoryEmojis)) {
       const lowerKey = key.toLowerCase();
-      if (lowerCategory.includes(lowerKey) || lowerKey.includes(lowerCategory)) {
+      if (
+        lowerCategory.includes(lowerKey) ||
+        lowerKey.includes(lowerCategory)
+      ) {
         return emoji;
       }
     }
@@ -177,7 +198,9 @@ const Header = () => {
       </div>
 
       {/* HEADER */}
-      <header className={`${styles.header} ${scrolled ? styles.headerScrolled : ""}`}>
+      <header
+        className={`${styles.header} ${scrolled ? styles.headerScrolled : ""}`}
+      >
         <button
           className={styles.mobileMenuBtn}
           onClick={() => setMenuOpen(!menuOpen)}
@@ -188,7 +211,11 @@ const Header = () => {
         </button>
 
         <div className={styles.logo} onClick={() => navigate("/")}>
-          <img src="/logo.png" alt="Apna Men's Wear" className={styles.logoImg} />
+          <img
+            src="/logo.png"
+            alt="Apna Men's Wear"
+            className={styles.logoImg}
+          />
         </div>
 
         {/* DESKTOP NAV */}
@@ -197,7 +224,9 @@ const Header = () => {
 
           {categories.map((item) => (
             <Link to={`/filtered/${item}`} key={item}>
-              <span className={styles.categoryEmoji}>{getCategoryEmoji(item)}</span>
+              <span className={styles.categoryEmoji}>
+                {getCategoryEmoji(item)}
+              </span>
               <span>{item}</span>
             </Link>
           ))}
@@ -226,7 +255,7 @@ const Header = () => {
             <FiHeart />
           </button>
 
-          {/* Account — dropdown if logged in */}
+          {/* Account — dropdown if logged in, else navigate to /login */}
           {isLoggedIn ? (
             <div className={styles.accountWrap} ref={accountMenuRef}>
               <button
@@ -244,7 +273,9 @@ const Header = () => {
                     <p className={styles.accountName}>
                       Hi, {user?.firstName || "User"} 👋
                     </p>
-                    <p className={styles.accountEmail}>{user?.email || ""}</p>
+                    <p className={styles.accountEmail}>
+                      {user?.email || ""}
+                    </p>
                   </div>
 
                   <button
@@ -295,8 +326,9 @@ const Header = () => {
           ) : (
             <button
               className={styles.iconBtn}
-              onClick={() => setIsFormOpen(true)}
-              aria-label="Account"
+              onClick={() => navigate("/login")}
+              aria-label="Login"
+              title="Login / Signup"
             >
               <FiUser />
             </button>
@@ -323,15 +355,25 @@ const Header = () => {
       </header>
 
       <div
-        className={`${styles.overlay} ${menuOpen ? styles.showOverlay : ""}`}
+        className={`${styles.overlay} ${
+          menuOpen ? styles.showOverlay : ""
+        }`}
         onClick={() => setMenuOpen(false)}
       />
 
       {/* MOBILE DRAWER */}
-      <div className={`${styles.mobileDrawer} ${menuOpen ? styles.showDrawer : ""}`}>
+      <div
+        className={`${styles.mobileDrawer} ${
+          menuOpen ? styles.showDrawer : ""
+        }`}
+      >
         <div className={styles.drawerHeader}>
           <div className={styles.logo}>
-            <img src="/logo.png" alt="Apna Men's Wear" className={styles.logoImg} />
+            <img
+              src="/logo.png"
+              alt="Apna Men's Wear"
+              className={styles.logoImg}
+            />
           </div>
           <button
             className={styles.drawerCloseBtn}
@@ -342,7 +384,11 @@ const Header = () => {
           </button>
         </div>
 
-        <Link to="/" className={styles.drawerLink} onClick={() => setMenuOpen(false)}>
+        <Link
+          to="/"
+          className={styles.drawerLink}
+          onClick={() => setMenuOpen(false)}
+        >
           <span className={styles.drawerLinkContent}>
             <FiHome className={styles.drawerIcon} />
             <span>Home</span>
@@ -369,15 +415,27 @@ const Header = () => {
           );
         })}
 
-        <Link to="/contact" className={styles.drawerLink} onClick={() => setMenuOpen(false)}>
+        <Link
+          to="/contact"
+          className={styles.drawerLink}
+          onClick={() => setMenuOpen(false)}
+        >
           📞 Contact
         </Link>
-        <Link to="/about" className={styles.drawerLink} onClick={() => setMenuOpen(false)}>
+        <Link
+          to="/about"
+          className={styles.drawerLink}
+          onClick={() => setMenuOpen(false)}
+        >
           👤 About Us
         </Link>
 
-        {/* Mobile wishlist + account */}
-        <Link to="/wishlist" className={styles.drawerLink} onClick={() => setMenuOpen(false)}>
+        {/* Mobile wishlist */}
+        <Link
+          to="/wishlist"
+          className={styles.drawerLink}
+          onClick={() => setMenuOpen(false)}
+        >
           <span className={styles.drawerLinkContent}>
             <FiHeart className={styles.drawerIcon} />
             <span>Wishlist</span>
@@ -385,9 +443,14 @@ const Header = () => {
           <FiChevronRight className={styles.arrow} />
         </Link>
 
+        {/* Mobile account section */}
         {isLoggedIn ? (
           <>
-            <Link to="/account" className={styles.drawerLink} onClick={() => setMenuOpen(false)}>
+            <Link
+              to="/account"
+              className={styles.drawerLink}
+              onClick={() => setMenuOpen(false)}
+            >
               <span className={styles.drawerLinkContent}>
                 <FiUser className={styles.drawerIcon} />
                 <span>My Account</span>
@@ -398,7 +461,13 @@ const Header = () => {
             <button
               className={styles.drawerLink}
               onClick={handleLogout}
-              style={{ width: "100%", textAlign: "left", background: "none", border: "none", cursor: "pointer" }}
+              style={{
+                width: "100%",
+                textAlign: "left",
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+              }}
             >
               <span className={styles.drawerLinkContent}>
                 <FiLogOut className={styles.drawerIcon} />
@@ -411,9 +480,15 @@ const Header = () => {
             className={styles.drawerLink}
             onClick={() => {
               setMenuOpen(false);
-              setIsFormOpen(true);
+              navigate("/login");
             }}
-            style={{ width: "100%", textAlign: "left", background: "none", border: "none", cursor: "pointer" }}
+            style={{
+              width: "100%",
+              textAlign: "left",
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+            }}
           >
             <span className={styles.drawerLinkContent}>
               <FiUser className={styles.drawerIcon} />
@@ -423,11 +498,10 @@ const Header = () => {
         )}
       </div>
 
-      {/* LOGIN MODAL */}
-      {isFormOpen && <SignupLogin close={onCloseForm} />}
-
       {/* CART MODAL */}
-      {isCartOpen && <ViewCartProduct onClose={() => setIsCartOpen(false)} />}
+      {isCartOpen && (
+        <ViewCartProduct onClose={() => setIsCartOpen(false)} />
+      )}
 
       {/* SEARCH BAR */}
       {showSearch && <SearchBar onClose={() => setShowSearch(false)} />}

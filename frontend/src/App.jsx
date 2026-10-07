@@ -1,24 +1,34 @@
 import './App.css'
-import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
+import { Routes, Route, Navigate, useNavigate, useLocation } from "react-router-dom";
 import { useEffect } from 'react';
 
+// Layout
 import Layout from './Layouts/Layout'
+
+// Pages
 import About from './Shared/Pages/About/About'
 import Home from './Shared/Pages/Home/Home'
 import ContactUs from './Shared/Pages/ContactUs/ContactUs';
 import SignupLogin from './Features/Auth/SignupLogin';
 import AdminDashboard from './Shared/Pages/AdminModule/AdminDashbord';
+
+// API / Interceptor
 import './Api/ApiIntersceptor'
+import { setNavigate } from './Api/navigation';
+
+// Products / Cart / Orders
 import ProductDetailes from './Shared/components/Products/ProductDetailes';
 import FilteredProducts from './Shared/components/Products/FilteredProduct/FilteredProduct';
 import GetTopRetedProducts from './Shared/components/Products/GetTopRatedProducts/GetTopRetedProducts';
 import GetRelatedProducts from './Shared/components/Products/GetRelatedProducts/GetRelatedProducts';
-import ScrollToTop from './Shared/components/ScrollToTop/ScrollToTop';
-import CategoryNavbar from './Shared/components/CategoryNavBar/CategoryNavBar';
 import MyOrder from './Shared/components/Order/MyOrder';
 import ViewCartProduct from './Shared/components/CartComponents/ViewCartProduct';
 
-// NAYE PAGES
+// Layout helpers
+import ScrollToTop from './Shared/components/ScrollToTop/ScrollToTop';
+import CategoryNavbar from './Shared/components/CategoryNavBar/CategoryNavBar';
+
+// New pages
 import NotFound from './Shared/Pages/NotFound/NotFound';
 import Wishlist from './Shared/Pages/Wishlist/Wishlist';
 import Account from './Shared/Pages/Account/Account';
@@ -29,12 +39,40 @@ import Terms from './Shared/Pages/Policies/Terms';
 import FAQ from './Shared/Pages/Policies/FAQ';
 import SizeGuide from './Shared/Pages/Policies/SizeGuide';
 
-// NAYE IMPORTS
+// Context
 import { AuthProvider } from './context/AuthContext';
-import { setNavigate } from './Api/navigation';
 import ProtectedRoute from './Shared/components/ProtectedRoute/ProtectedRoute';
 
 
+// ======================================================
+// AUTH ROUTE — /login aur /signup dono isko use karte hain
+// Home page background mein render hota hai, upar modal
+// ======================================================
+function AuthRoute() {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const authMode = location.pathname === "/signup" ? "signup" : "login";
+
+  // FIX: navigate(-1) ki jagah navigate("/", {replace:true})
+  // Kyun? login↔signup switch karte waqt navigate(-1) galat page
+  // pe le jaata tha aur modal turant band ho jaata tha.
+  const handleClose = () => {
+    navigate("/", { replace: true });
+  };
+
+  return (
+    <>
+      <Home />
+      <SignupLogin mode={authMode} onClose={handleClose} />
+    </>
+  );
+}
+
+
+// ======================================================
+// MAIN APP ROUTES
+// ======================================================
 function AppRoutes() {
   const navigate = useNavigate()
 
@@ -50,23 +88,19 @@ function AppRoutes() {
     <>
       <ScrollToTop />
       <Routes>
-        {/* ================= MAIN LAYOUT ================= */}
         <Route element={<Layout />}>
+
           {/* ---- Home ---- */}
           <Route path='/' element={<Home />} />
 
-          {/* ---- Static Info Pages ---- */}
+          {/* ---- Static Pages ---- */}
           <Route path='/about' element={<About />} />
           <Route path='/contact' element={<ContactUs />} />
 
-          {/* ---- Auth Routes ---- */}
-          <Route path='/login' element={<SignupLogin close={OnClose} initialMode="login" />} />
-          <Route path='/signup' element={<SignupLogin close={OnClose} initialMode="signup" />} />
-
-          {/* ---- Cart (public, but user-specific) ---- */}
+          {/* ---- Cart ---- */}
           <Route path='/cart' element={<ViewCartProduct onClose={OnClose} />} />
 
-          {/* ---- Wishlist (protected) ---- */}
+          {/* ---- Protected routes ---- */}
           <Route
             path='/wishlist'
             element={
@@ -75,8 +109,6 @@ function AppRoutes() {
               </ProtectedRoute>
             }
           />
-
-          {/* ---- Account (protected) ---- */}
           <Route
             path='/account'
             element={
@@ -85,8 +117,6 @@ function AppRoutes() {
               </ProtectedRoute>
             }
           />
-
-          {/* ---- Orders (protected) ---- */}
           <Route
             path='/order'
             element={
@@ -109,15 +139,15 @@ function AppRoutes() {
             }
           />
 
-          {/* ---- Category filter & search ---- */}
+          {/* ---- Category / Search ---- */}
           <Route path='/filtered/:category' element={<FilteredProducts />} />
 
-          {/* ---- Quick routes (map to filtered) ---- */}
+          {/* ---- Quick routes ---- */}
           <Route path='/new-arrivals' element={<Navigate to="/filtered/all?sort=newest" replace />} />
           <Route path='/sale' element={<Navigate to="/filtered/all?sort=priceAsc" replace />} />
           <Route path='/best-sellers' element={<Navigate to="/filtered/all?sort=rating" replace />} />
 
-          {/* ---- Policy Pages (SEO) ---- */}
+          {/* ---- Policy Pages ---- */}
           <Route path='/shipping-policy' element={<ShippingPolicy />} />
           <Route path='/return-policy' element={<ReturnPolicy />} />
           <Route path='/privacy-policy' element={<PrivacyPolicy />} />
@@ -125,16 +155,21 @@ function AppRoutes() {
           <Route path='/faq' element={<FAQ />} />
           <Route path='/size-guide' element={<SizeGuide />} />
 
-          {/* ---- 404 — must be LAST inside layout ---- */}
+          {/* ================= AUTH ROUTES (MODAL) ================= */}
+          <Route path='/login' element={<AuthRoute />} />
+          <Route path='/signup' element={<AuthRoute />} />
+
+          {/* ---- 404 ---- */}
           <Route path='*' element={<NotFound />} />
         </Route>
 
-        {/* ================= ADMIN (own layout) ================= */}
+        {/* ================= ADMIN ================= */}
         <Route path='/admin/*' element={<AdminDashboard />} />
       </Routes>
     </>
   )
 }
+
 
 function App() {
   return (

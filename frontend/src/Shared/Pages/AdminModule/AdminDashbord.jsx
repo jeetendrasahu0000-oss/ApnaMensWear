@@ -3,7 +3,11 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import AdminHeader from "./AdminHeader/AdminHeader";
 import AdminSidebar from "./AdminSideBar/AdminSidebar";
 import SalesReport from "./SalesReport/SalesReport";
-import ProductDashbord from "../AdminModule/ProductDashbord/ProductDashbord";
+import ProductDashbord from "./ProductDashbord/ProductDashbord";
+import OrderDashbord from "./OrderDashbord/OrderDashbord";
+import PaymentDashbord from "./PaymentDashbord/PaymentDashbord";
+import CategoryDashboard from "./CategoryDashboard/CategoryDashboard";
+import UserDashboard from "./UserDashbord/UserDashbord";
 import styles from "./AdminDashbord.module.css";
 
 function AdminDashboard() {
@@ -21,16 +25,18 @@ function AdminDashboard() {
 
         <div className={styles.contentArea}>
           <Routes>
+            {/* Default → Sales */}
             <Route index element={<Navigate to="sales" replace />} />
+
+            {/* All tabs */}
             <Route path="sales" element={<SalesReport />} />
+            <Route path="orders" element={<OrderDashbord />} />
+            <Route path="payments" element={<PaymentDashbord />} />
             <Route path="products" element={<ProductDashbord />} />
-            <Route path="users" element={<div style={{ padding: 24 }}>Users — coming soon</div>} />
+            <Route path="categories" element={<CategoryDashboard />} />
+            <Route path="users" element={<UserDashboard />} />
 
-            {/* Ye 3 routes abhi placeholder hain — jab unki files ban jaayengi to uncomment kar do */}
-            {/* <Route path="orders" element={<OrderDashbord />} /> */}
-            {/* <Route path="payments" element={<PaymentDashbord />} /> */}
-            {/* <Route path="categories" element={<CategoryDashboard />} /> */}
-
+            {/* Fallback */}
             <Route path="*" element={<Navigate to="sales" replace />} />
           </Routes>
         </div>

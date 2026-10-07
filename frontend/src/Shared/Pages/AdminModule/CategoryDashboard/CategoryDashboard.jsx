@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
 import {
   Check,
   Pencil,
@@ -7,6 +7,11 @@ import {
   RefreshCw,
   Trash2,
   X,
+  Package,
+  Layers,
+  CheckCircle2,
+  AlertCircle,
+  Image as ImageIcon,
 } from "lucide-react";
 import api from "../../../../Api/Axios";
 import {
@@ -32,6 +37,17 @@ function CategoryDashboard() {
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
 
+  const noticeTimeoutRef = useRef(null);
+  const requestIdRef = useRef(0);
+
+  // Auto-clear notice after 3s
+  useEffect(() => {
+    if (!notice) return;
+    if (noticeTimeoutRef.current) clearTimeout(noticeTimeoutRef.current);
+    noticeTimeoutRef.current = setTimeout(() => setNotice(""), 3200);
+    return () => clearTimeout(noticeTimeoutRef.current);
+  }, [notice]);
+
   const refreshCategoriesFromServer = useCallback(async () => {
     const latestCategories = await fetchCategories({ includeDisabled: true });
     setCategories(latestCategories);
@@ -51,9 +67,16 @@ function CategoryDashboard() {
     }
   }, [refreshCategoriesFromServer]);
 
+  // FIX: requestId pattern — StrictMode double-invoke safe
   useEffect(() => {
-    const timeoutId = setTimeout(loadCategories, 0);
-    return () => clearTimeout(timeoutId);
+    const currentId = ++requestIdRef.current;
+    const timeoutId = setTimeout(() => {
+      if (requestIdRef.current === currentId) loadCategories();
+    }, 0);
+    return () => {
+      requestIdRef.current += 1;
+      clearTimeout(timeoutId);
+    };
   }, [loadCategories]);
 
   const applyCategoryUpdate = (currentCategory, changes, response) => {
@@ -87,9 +110,7 @@ function CategoryDashboard() {
         };
       }
 
-      return currentCategories.sort((first, second) =>
-        first.name.localeCompare(second.name)
-      );
+      return currentCategories.sort((a, b) => a.name.localeCompare(b.name));
     });
 
     return updatedCategory;
@@ -114,11 +135,9 @@ function CategoryDashboard() {
       });
 
       ensureMutationSucceeded(data, "Failed to create category");
-      const responseCategory = [
-        data?.data,
-        data?.data?.category,
-        data?.category,
-      ].find(isCategoryRecord);
+      const responseCategory = [data?.data, data?.data?.category, data?.category].find(
+        isCategoryRecord
+      );
       const createdCategory = responseCategory || {
         name: categoryName.trim(),
         imageUrl: imageUrl.trim(),
@@ -143,7 +162,6 @@ function CategoryDashboard() {
   const handleAddSubCategory = async (event, category) => {
     event.preventDefault();
     const subCategory = (subCategoryInputs[category] || "").trim();
-
     if (!subCategory) return;
 
     setError("");
@@ -163,19 +181,14 @@ function CategoryDashboard() {
       if (!existingCategory) {
         throw new Error("Category is no longer available. Refresh and try again.");
       }
-      const responseCategory = [
-        data?.data,
-        data?.data?.category,
-        data?.category,
-      ].find(isCategoryRecord);
+      const responseCategory = [data?.data, data?.data?.category, data?.category].find(
+        isCategoryRecord
+      );
       const subCategories =
         responseCategory?.subCategories ||
         [...(existingCategory.subCategories || []), subCategory];
       applyCategoryUpdate(existingCategory, { subCategories }, data);
-      setSubCategoryInputs((previous) => ({
-        ...previous,
-        [category]: "",
-      }));
+      setSubCategoryInputs((prev) => ({ ...prev, [category]: "" }));
       setNotice(data.message || "Sub-category added successfully");
     } catch (submitError) {
       setError(
@@ -216,11 +229,6 @@ function CategoryDashboard() {
       setNotice(data.message || "Category updated successfully");
       setEditingCategory(null);
     } catch (updateError) {
-      console.error("Category update request failed", {
-        status: updateError.response?.status,
-        response: updateError.response?.data,
-        message: updateError.message,
-      });
       setError(
         updateError.response?.data?.message ||
           updateError.message ||
@@ -247,10 +255,8 @@ function CategoryDashboard() {
     try {
       const { data } = await deleteCategory(category.name);
       ensureMutationSucceeded(data, "Failed to delete category");
-      setCategories((previous) =>
-        previous.filter(
-          (item) => isCategoryRecord(item) && item.name !== category.name
-        )
+      setCategories((prev) =>
+        prev.filter((item) => isCategoryRecord(item) && item.name !== category.name)
       );
       setNotice(data.message || "Category deleted successfully");
     } catch (deleteError) {
@@ -271,22 +277,13 @@ function CategoryDashboard() {
 
     try {
       const isEnabled = category.isEnabled === false;
-      const { data } = await setCategoryEnabled(
-        category,
-        isEnabled
-      );
+      const { data } = await setCategoryEnabled(category, isEnabled);
       ensureMutationSucceeded(data, "Failed to update category visibility");
       applyCategoryUpdate(category, { isEnabled }, data);
       setNotice(
-        data.message ||
-          `Category ${isEnabled ? "enabled" : "disabled"} successfully`
+        data.message || `Category ${isEnabled ? "enabled" : "disabled"} successfully`
       );
     } catch (toggleError) {
-      console.error("Category visibility request failed", {
-        status: toggleError.response?.status,
-        response: toggleError.response?.data,
-        message: toggleError.message,
-      });
       setError(
         toggleError.response?.data?.message ||
           toggleError.message ||
@@ -306,8 +303,7 @@ function CategoryDashboard() {
     try {
       const currentCategory = categories.find(
         (item) =>
-          isCategoryRecord(item) &&
-          item.name === editingSubCategory.category
+          isCategoryRecord(item) && item.name === editingSubCategory.category
       );
       if (!currentCategory) {
         throw new Error("Category is no longer available. Refresh and try again.");
@@ -319,12 +315,10 @@ function CategoryDashboard() {
         name,
       });
       ensureMutationSucceeded(data, "Failed to update sub-category");
-      const subCategories = (currentCategory.subCategories || []).map(
-        (subCategory) =>
-          subCategory.toLowerCase() ===
-          editingSubCategory.currentName.toLowerCase()
-            ? name
-            : subCategory
+      const subCategories = (currentCategory.subCategories || []).map((subCategory) =>
+        subCategory.toLowerCase() === editingSubCategory.currentName.toLowerCase()
+          ? name
+          : subCategory
       );
       applyCategoryUpdate(currentCategory, { subCategories }, data);
       setNotice(data.message || "Sub-category updated successfully");
@@ -378,114 +372,183 @@ function CategoryDashboard() {
     }
   };
 
+  const validCategories = categories.filter(isCategoryRecord);
+
   return (
     <section className={styles.dashboard}>
+      {/* ================ HEADER ================ */}
       <header className={styles.header}>
-        <div>
-          <p className={styles.eyebrow}>Catalog</p>
+        <div className={styles.headerText}>
+          <span className={styles.eyebrow}>
+            <Layers size={13} />
+            Catalog
+          </span>
           <h1>Categories</h1>
-          <p>Manage the categories and sub-categories used by your products.</p>
+          <p>Manage categories and sub-categories used by your products.</p>
         </div>
+
         <button
           type="button"
           className={styles.refreshButton}
           onClick={loadCategories}
           disabled={loading}
-          aria-label="Refresh categories"
         >
-          <RefreshCw size={17} />
-          Refresh
+          <RefreshCw size={16} className={loading ? styles.spinning : ""} />
+          {loading ? "Refreshing..." : "Refresh"}
         </button>
       </header>
 
-      {error && <p className={styles.error} role="alert">{error}</p>}
-      {notice && <p className={styles.notice} role="status">{notice}</p>}
+      {/* ================ BANNERS ================ */}
+      {error && (
+        <div className={styles.error} role="alert">
+          <AlertCircle size={16} />
+          <span>{error}</span>
+        </div>
+      )}
+      {notice && (
+        <div className={styles.notice} role="status">
+          <CheckCircle2 size={16} />
+          <span>{notice}</span>
+        </div>
+      )}
 
+      {/* ================ CREATE FORM ================ */}
       <form className={styles.createForm} onSubmit={handleCreateCategory}>
-        <h2>Add a category</h2>
+        <div className={styles.formHeader}>
+          <div className={styles.formIcon}>
+            <Plus size={18} />
+          </div>
+          <div>
+            <h2>Add New Category</h2>
+            <p>Create a new category to organize your products.</p>
+          </div>
+        </div>
+
         <div className={styles.formFields}>
           <label>
-            Category name
+            <span>Category Name</span>
             <input
               value={categoryName}
-              onChange={(event) => setCategoryName(event.target.value)}
-              placeholder="e.g. Jackets"
+              onChange={(e) => setCategoryName(e.target.value)}
+              placeholder="e.g. Jackets, Shirts, Jeans"
               required
               maxLength={80}
             />
           </label>
+
           <label>
-            Image URL <span>(optional)</span>
+            <span>
+              Image URL <em>(optional)</em>
+            </span>
             <input
               type="url"
               value={imageUrl}
-              onChange={(event) => setImageUrl(event.target.value)}
+              onChange={(e) => setImageUrl(e.target.value)}
               placeholder="https://example.com/category.jpg"
             />
           </label>
+
           <button type="submit" disabled={submitting || !categoryName.trim()}>
-            <Plus size={17} />
+            <Plus size={16} />
             Add Category
           </button>
         </div>
       </form>
 
+      {/* ================ CATEGORY LIST ================ */}
       <div className={styles.categoryList}>
-        <h2>Categories and sub-categories</h2>
-        <p className={styles.sourceNote}>
-          Categories and sub-categories are managed here. Disabled categories
-          are hidden from the store; permanently deleting a category also hides
-          its products until they are assigned to another category.
-        </p>
-        {loading ? (
-          <p className={styles.emptyState}>Loading categories...</p>
-        ) : categories.length === 0 ? (
-          <p className={styles.emptyState}>
-            No categories yet. Add a category above to get started.
+        <div className={styles.listHeader}>
+          <h2>
+            All Categories{" "}
+            {!loading && (
+              <span className={styles.count}>{validCategories.length}</span>
+            )}
+          </h2>
+          <p className={styles.sourceNote}>
+            Disabled categories are hidden from the store. Deleting a category
+            hides its products until reassigned.
           </p>
-        ) : (
-          categories.filter(isCategoryRecord).map((category) => (
-            <article className={styles.categoryCard} key={category.name}>
+        </div>
+
+        {/* Loading state */}
+        {loading && (
+          <div className={styles.skeletonList}>
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div
+                key={i}
+                className={styles.skeletonCard}
+                style={{ animationDelay: `${i * 80}ms` }}
+              >
+                <div className={styles.skeletonLine} style={{ width: 54, height: 54, borderRadius: 12 }} />
+                <div className={styles.skeletonBody}>
+                  <div className={styles.skeletonLine} style={{ width: "40%" }} />
+                  <div className={styles.skeletonLine} style={{ width: "70%" }} />
+                  <div className={styles.skeletonLine} style={{ width: "60%" }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Empty state */}
+        {!loading && validCategories.length === 0 && (
+          <div className={styles.emptyState}>
+            <div className={styles.emptyIcon}>
+              <Package size={26} />
+            </div>
+            <h3>No categories yet</h3>
+            <p>Add your first category above to get started.</p>
+          </div>
+        )}
+
+        {/* Category cards */}
+        {!loading &&
+          validCategories.map((category, index) => (
+            <article
+              className={styles.categoryCard}
+              key={category.name}
+              style={{ animationDelay: `${(index % 12) * 0.04}s` }}
+            >
               <div className={styles.categoryHeading}>
                 {editingCategory?.currentName === category.name ? (
                   <form
                     className={styles.editCategoryForm}
-                    onSubmit={(event) => handleUpdateCategory(event, category.name)}
+                    onSubmit={(e) => handleUpdateCategory(e, category.name)}
                   >
                     <label>
-                      Category name
+                      <span>Category name</span>
                       <input
                         value={editingCategory.name}
-                        onChange={(event) =>
-                          setEditingCategory((previous) => ({
-                            ...previous,
-                            name: event.target.value,
+                        onChange={(e) =>
+                          setEditingCategory((prev) => ({
+                            ...prev,
+                            name: e.target.value,
                           }))
                         }
                         required
                         maxLength={80}
+                        autoFocus
                       />
                     </label>
                     <label>
-                      Image URL
+                      <span>Image URL</span>
                       <input
                         type="url"
                         value={editingCategory.imageUrl}
-                        onChange={(event) =>
-                          setEditingCategory((previous) => ({
-                            ...previous,
-                            imageUrl: event.target.value,
+                        onChange={(e) =>
+                          setEditingCategory((prev) => ({
+                            ...prev,
+                            imageUrl: e.target.value,
                           }))
                         }
                       />
                     </label>
-                    <div className={styles.actions}>
+                    <div className={styles.editActions}>
                       <button
                         type="submit"
                         className={`${styles.iconButton} ${styles.saveAction}`}
                         disabled={submitting || !editingCategory.name.trim()}
-                        aria-label={`Save ${category.name}`}
-                        title="Save category"
+                        title="Save"
                       >
                         <Check size={16} />
                       </button>
@@ -493,7 +556,6 @@ function CategoryDashboard() {
                         type="button"
                         className={`${styles.iconButton} ${styles.cancelAction}`}
                         onClick={() => setEditingCategory(null)}
-                        aria-label="Cancel category edit"
                         title="Cancel"
                       >
                         <X size={16} />
@@ -502,43 +564,60 @@ function CategoryDashboard() {
                   </form>
                 ) : (
                   <>
-                    {category.imageUrl && (
+                    {category.imageUrl ? (
                       <img
                         className={styles.categoryImage}
                         src={category.imageUrl}
                         alt=""
+                        onError={(e) => {
+                          e.currentTarget.style.display = "none";
+                          e.currentTarget.nextElementSibling?.style?.setProperty(
+                            "display",
+                            "inline-grid"
+                          );
+                        }}
                       />
-                    )}
-                    {!category.imageUrl && (
-                      <span
-                        className={styles.categoryImagePlaceholder}
-                        aria-hidden="true"
-                      >
-                        {category.name.charAt(0).toUpperCase()}
-                      </span>
-                    )}
-                    <h3 className={styles.categoryTitle} title={category.name}>
-                      {category.name}
-                    </h3>
+                    ) : null}
+
                     <span
-                      className={`${styles.statusBadge} ${
-                        category.isEnabled === false
-                          ? styles.statusDisabled
-                          : styles.statusEnabled
-                      }`}
+                      className={styles.categoryImagePlaceholder}
+                      style={{ display: category.imageUrl ? "none" : "inline-grid" }}
+                      aria-hidden="true"
                     >
-                      {category.isEnabled === false ? "Hidden from store" : "Visible in store"}
+                      {category.name.charAt(0).toUpperCase()}
                     </span>
+
+                    <div className={styles.categoryMeta}>
+                      <h3 className={styles.categoryTitle} title={category.name}>
+                        {category.name}
+                      </h3>
+                      <span
+                        className={`${styles.statusBadge} ${
+                          category.isEnabled === false
+                            ? styles.statusDisabled
+                            : styles.statusEnabled
+                        }`}
+                      >
+                        <span className={styles.statusDot} />
+                        {category.isEnabled === false
+                          ? "Hidden"
+                          : "Visible"}
+                      </span>
+                    </div>
+
                     <div className={styles.actions}>
                       <button
                         type="button"
                         className={styles.toggleButton}
                         onClick={() => handleToggleCategory(category)}
                         disabled={submitting}
-                        aria-label={`${category.isEnabled === false ? "Enable" : "Disable"} ${category.name}`}
-                        title={`${category.isEnabled === false ? "Enable" : "Disable"} category`}
+                        title={
+                          category.isEnabled === false
+                            ? "Enable in store"
+                            : "Disable from store"
+                        }
                       >
-                        <Power size={16} />
+                        <Power size={14} />
                         {category.isEnabled === false ? "Enable" : "Disable"}
                       </button>
                       <button
@@ -551,137 +630,140 @@ function CategoryDashboard() {
                             imageUrl: category.imageUrl || "",
                           })
                         }
-                        aria-label={`Edit ${category.name}`}
                         title="Edit category"
                       >
-                        <Pencil size={16} />
+                        <Pencil size={15} />
                       </button>
                       <button
                         type="button"
                         className={`${styles.iconButton} ${styles.deleteButton}`}
                         onClick={() => handleDeleteCategory(category)}
                         disabled={submitting}
-                        aria-label={`Delete ${category.name}`}
                         title="Delete category"
                       >
-                        <Trash2 size={16} />
+                        <Trash2 size={15} />
                       </button>
                     </div>
                   </>
                 )}
               </div>
-              <div className={styles.subCategories}>
-                {category.subCategories?.length ? (
-                  category.subCategories.map((subCategory) => (
-                    editingSubCategory?.category === category.name &&
-                    editingSubCategory.currentName === subCategory ? (
-                      <form
-                        className={styles.editSubCategoryForm}
-                        key={subCategory}
-                        onSubmit={handleUpdateSubCategory}
-                      >
-                        <input
-                          value={editingSubCategory.name}
-                          onChange={(event) =>
-                            setEditingSubCategory((previous) => ({
-                              ...previous,
-                              name: event.target.value,
-                            }))
-                          }
-                          aria-label={`Edit ${subCategory}`}
-                          required
-                          maxLength={80}
-                          autoFocus
-                        />
-                        <button
-                          type="submit"
-                          className={`${styles.iconButton} ${styles.saveAction}`}
-                          disabled={submitting || !editingSubCategory.name.trim()}
-                          aria-label={`Save ${subCategory}`}
-                          title="Save sub-category"
+
+              {/* Sub-categories */}
+              <div className={styles.subCategoriesSection}>
+                <div className={styles.subCategoriesLabel}>
+                  Sub-categories
+                  {category.subCategories?.length > 0 && (
+                    <span className={styles.subCount}>
+                      {category.subCategories.length}
+                    </span>
+                  )}
+                </div>
+
+                <div className={styles.subCategories}>
+                  {category.subCategories?.length ? (
+                    category.subCategories.map((subCategory) =>
+                      editingSubCategory?.category === category.name &&
+                      editingSubCategory.currentName === subCategory ? (
+                        <form
+                          className={styles.editSubCategoryForm}
+                          key={subCategory}
+                          onSubmit={handleUpdateSubCategory}
                         >
-                          <Check size={15} />
-                        </button>
-                        <button
-                          type="button"
-                          className={`${styles.iconButton} ${styles.cancelAction}`}
-                          onClick={() => setEditingSubCategory(null)}
-                          aria-label="Cancel sub-category edit"
-                          title="Cancel"
-                        >
-                          <X size={15} />
-                        </button>
-                      </form>
-                    ) : (
-                      <span className={styles.subCategoryItem} key={subCategory}>
-                        {subCategory}
-                        <button
-                          type="button"
-                          className={`${styles.subCategoryAction} ${styles.editAction}`}
-                          onClick={() =>
-                            setEditingSubCategory({
-                              category: category.name,
-                              currentName: subCategory,
-                              name: subCategory,
-                            })
-                          }
-                          aria-label={`Edit ${subCategory}`}
-                          title="Edit sub-category"
-                        >
-                          <Pencil size={13} />
-                        </button>
-                        <button
-                          type="button"
-                          className={`${styles.subCategoryAction} ${styles.deleteTextButton}`}
-                          onClick={() =>
-                            handleDeleteSubCategory(category.name, subCategory)
-                          }
-                          disabled={submitting}
-                          aria-label={`Delete ${subCategory}`}
-                          title="Delete sub-category"
-                        >
-                          <Trash2 size={13} />
-                        </button>
-                      </span>
+                          <input
+                            value={editingSubCategory.name}
+                            onChange={(e) =>
+                              setEditingSubCategory((prev) => ({
+                                ...prev,
+                                name: e.target.value,
+                              }))
+                            }
+                            required
+                            maxLength={80}
+                            autoFocus
+                          />
+                          <button
+                            type="submit"
+                            className={`${styles.subCategoryAction} ${styles.saveAction}`}
+                            disabled={submitting || !editingSubCategory.name.trim()}
+                            title="Save"
+                          >
+                            <Check size={13} />
+                          </button>
+                          <button
+                            type="button"
+                            className={`${styles.subCategoryAction} ${styles.cancelAction}`}
+                            onClick={() => setEditingSubCategory(null)}
+                            title="Cancel"
+                          >
+                            <X size={13} />
+                          </button>
+                        </form>
+                      ) : (
+                        <span className={styles.subCategoryItem} key={subCategory}>
+                          {subCategory}
+                          <button
+                            type="button"
+                            className={`${styles.subCategoryAction} ${styles.editAction}`}
+                            onClick={() =>
+                              setEditingSubCategory({
+                                category: category.name,
+                                currentName: subCategory,
+                                name: subCategory,
+                              })
+                            }
+                            title="Edit"
+                          >
+                            <Pencil size={12} />
+                          </button>
+                          <button
+                            type="button"
+                            className={`${styles.subCategoryAction} ${styles.deleteTextButton}`}
+                            onClick={() =>
+                              handleDeleteSubCategory(category.name, subCategory)
+                            }
+                            disabled={submitting}
+                            title="Delete"
+                          >
+                            <Trash2 size={12} />
+                          </button>
+                        </span>
+                      )
                     )
-                  ))
-                ) : (
-                  <span className={styles.noSubCategories}>
-                    No sub-categories
-                  </span>
-                )}
-              </div>
-              <form
-                className={styles.subCategoryForm}
-                onSubmit={(event) => handleAddSubCategory(event, category.name)}
-              >
-                <label htmlFor={`subcategory-${category.name}`}>
-                  Add a sub-category
-                </label>
-                <input
-                  id={`subcategory-${category.name}`}
-                  value={subCategoryInputs[category.name] || ""}
-                  onChange={(event) =>
-                    setSubCategoryInputs((previous) => ({
-                      ...previous,
-                      [category.name]: event.target.value,
-                    }))
-                  }
-                  placeholder={`Add a sub-category to ${category.name}`}
-                  aria-label={`Sub-category for ${category.name}`}
-                  maxLength={80}
-                />
-                <button
-                  type="submit"
-                  disabled={submitting || !(subCategoryInputs[category.name] || "").trim()}
+                  ) : (
+                    <span className={styles.noSubCategories}>
+                      No sub-categories yet
+                    </span>
+                  )}
+                </div>
+
+                <form
+                  className={styles.subCategoryForm}
+                  onSubmit={(e) => handleAddSubCategory(e, category.name)}
                 >
-                  <Plus size={17} />
-                  Add sub-category
-                </button>
-              </form>
+                  <input
+                    value={subCategoryInputs[category.name] || ""}
+                    onChange={(e) =>
+                      setSubCategoryInputs((prev) => ({
+                        ...prev,
+                        [category.name]: e.target.value,
+                      }))
+                    }
+                    placeholder="Add a new sub-category..."
+                    maxLength={80}
+                  />
+                  <button
+                    type="submit"
+                    disabled={
+                      submitting || !(subCategoryInputs[category.name] || "").trim()
+                    }
+                  >
+                    <Plus size={15} />
+                    Add
+                  </button>
+                </form>
+              </div>
             </article>
-          ))
-        )}
+          ))}
       </div>
     </section>
   );

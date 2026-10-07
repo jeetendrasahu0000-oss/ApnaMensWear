@@ -1,74 +1,85 @@
+/* =====================================================
+   CONTAINER
+   ===================================================== */
 .container {
-  padding: 14px;
-  background: #f8fafc;
-  min-height: 100vh;
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
-/* Header */
-
 .header {
-  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
 }
 
 .header h2 {
   margin: 0;
-  font-size: 20px;
+  font-size: 1.4rem;
+  color: #111;
   font-weight: 700;
-  color: #111827;
+  letter-spacing: -0.3px;
 }
 
-/* Stats */
-
+/* =====================================================
+   STATS GRID
+   ===================================================== */
 .statsGrid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
-  margin-bottom: 14px;
+  gap: 14px;
 }
 
 .statCard {
-  background: white;
-  border-radius: 12px;
-  padding: 12px;
   display: flex;
   align-items: center;
-  gap: 10px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+  gap: 12px;
+  padding: 16px;
+  background: #fff;
+  border: 1px solid #eaeaea;
+  border-radius: 12px;
+  transition: all 0.15s;
 }
 
-.statCard svg {
+.statCard:hover {
+  border-color: #cfcfcf;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+}
+
+.statCard > svg {
+  color: #555;
   font-size: 22px;
-  color: #2563eb;
+  flex-shrink: 0;
 }
 
 .statCard span {
   display: block;
-  font-size: 11px;
-  color: #64748b;
+  font-size: 0.78rem;
+  color: #777;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
 }
 
 .statCard h3 {
-  margin: 2px 0 0;
-  font-size: 18px;
-  color: #111827;
+  margin: 4px 0 0;
+  font-size: 1.35rem;
+  color: #111;
+  font-weight: 700;
 }
 
-/* Loading */
-
-.loading {
-  text-align: center;
-  padding: 40px;
-  font-size: 14px;
-  color: #64748b;
-}
-
-/* Desktop Table */
-
+/* =====================================================
+   TABLES (desktop)
+   ===================================================== */
 .desktopTable {
-  background: white;
+  background: #fff;
+  border: 1px solid #eaeaea;
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  display: block;
 }
 
 .desktopTable table {
@@ -76,117 +87,145 @@
   border-collapse: collapse;
 }
 
-.desktopTable thead {
-  background: #111827;
-  color: white;
-}
-
-.desktopTable th {
-  padding: 12px;
-  font-size: 12px;
-  font-weight: 600;
+.desktopTable thead th {
   text-align: left;
+  padding: 12px 16px;
+  background: #f6f7f9;
+  font-size: 0.75rem;
+  color: #555;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid #eaeaea;
+  white-space: nowrap;
 }
 
-.desktopTable td {
-  padding: 10px 12px;
-  font-size: 12px;
-  border-bottom: 1px solid #f1f5f9;
+.desktopTable tbody td {
+  padding: 14px 16px;
+  border-top: 1px solid #f0f0f0;
+  font-size: 0.88rem;
+  color: #333;
+  vertical-align: middle;
 }
 
 .desktopTable tbody tr:hover {
-  background: #f8fafc;
+  background: #fafafa;
 }
 
-/* User */
-
+/* User cell */
 .userInfo {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
+  min-width: 160px;
 }
 
 .userInfo img {
-  width: 34px;
-  height: 34px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   object-fit: cover;
+  flex-shrink: 0;
+  background: #f0f0f0;
 }
 
 .userInfo span {
-  font-size: 12px;
   font-weight: 600;
+  color: #111;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 180px;
 }
 
-/* Status */
-
+/* Status badge */
 .active,
 .inactive {
-  padding: 3px 8px;
-  border-radius: 30px;
-  font-size: 10px;
-  font-weight: 600;
+  display: inline-block;
+  padding: 4px 10px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
 }
 
 .active {
-  background: #dcfce7;
-  color: #166534;
+  background: #e8f5e9;
+  color: #2e7d32;
 }
 
 .inactive {
-  background: #fee2e2;
-  color: #b91c1c;
+  background: #ffebee;
+  color: #c62828;
 }
 
-/* Actions */
-
+/* Row actions */
 .actions {
   display: flex;
   gap: 6px;
-}
-
-.actions button,
-.cardActions button {
-  width: 30px;
-  height: 30px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  background: #eff6ff;
-  color: #2563eb;
-  display: flex;
   align-items: center;
-  justify-content: center;
 }
 
-.actions button:hover,
-.cardActions button:hover {
-  opacity: 0.9;
+.actions button {
+  width: 32px;
+  height: 32px;
+  border: 1px solid #e5e5e5;
+  background: #fff;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  color: #555;
+  transition: all 0.15s;
+  padding: 0;
+}
+
+.actions button:hover {
+  background: #f5f5f5;
+  color: #111;
+  border-color: #ccc;
+}
+
+.actions button svg {
+  font-size: 14px;
 }
 
 .deleteBtn {
-  background: #fee2e2 !important;
-  color: #dc2626 !important;
+  color: #c62828 !important;
+  border-color: #ffcdd2 !important;
 }
 
-/* Mobile Cards */
+.deleteBtn:hover {
+  background: #ffebee !important;
+  color: #c62828 !important;
+  border-color: #ef9a9a !important;
+}
 
+/* =====================================================
+   MOBILE CARDS
+   ===================================================== */
 .mobileCards {
   display: none;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .userCard {
-  background: white;
+  background: #fff;
+  border: 1px solid #eaeaea;
   border-radius: 12px;
-  padding: 10px;
-  margin-bottom: 10px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .cardTop {
   display: flex;
-  gap: 10px;
   align-items: center;
+  gap: 12px;
 }
 
 .cardTop img {
@@ -194,151 +233,163 @@
   height: 46px;
   border-radius: 50%;
   object-fit: cover;
+  flex-shrink: 0;
+  background: #f0f0f0;
 }
 
 .cardTop h4 {
   margin: 0;
-  font-size: 13px;
-  color: #111827;
+  font-size: 0.95rem;
+  color: #111;
+  font-weight: 700;
 }
 
 .cardTop p {
-  margin: 2px 0;
-  font-size: 11px;
-  color: #64748b;
-  word-break: break-word;
+  margin: 3px 0 0;
+  font-size: 0.8rem;
+  color: #666;
+  word-break: break-all;
 }
 
 .cardMeta {
-  margin-top: 8px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #f0f0f0;
 }
 
-.cardMeta span:first-child {
-  font-size: 11px;
-  color: #374151;
+.cardMeta > span:first-child {
+  font-size: 0.8rem;
+  color: #666;
+  text-transform: capitalize;
 }
 
 .cardActions {
   display: flex;
-  gap: 6px;
-  margin-top: 10px;
+  gap: 8px;
+  padding-top: 4px;
 }
 
-/* Tablet */
+.cardActions button {
+  flex: 1;
+  height: 36px;
+  border: 1px solid #e5e5e5;
+  background: #fff;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  color: #555;
+  transition: all 0.15s;
+  padding: 0;
+}
 
-@media (max-width: 992px) {
+.cardActions button:hover {
+  background: #f5f5f5;
+  color: #111;
+}
+
+/* =====================================================
+   SKELETON LOADER
+   ===================================================== */
+.skeletonPulse {
+  animation: skeletonPulse 1.4s ease-in-out infinite;
+}
+
+@keyframes skeletonPulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.45; }
+}
+
+.skeletonLine {
+  height: 12px;
+  border-radius: 4px;
+  background: #eaeaea;
+}
+
+.skeletonBlock {
+  background: #eaeaea;
+  border-radius: 6px;
+}
+
+.skeletonRow {
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* =====================================================
+   ANIMATED ROWS / CARDS (stagger reveal)
+   ===================================================== */
+.animatedRow {
+  animation: slideUpFade 0.4s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+
+@keyframes slideUpFade {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* =====================================================
+   RESPONSIVE
+   ===================================================== */
+@media (max-width: 1100px) {
   .statsGrid {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
-/* Mobile */
-
 @media (max-width: 768px) {
   .container {
-    padding: 10px;
+    padding: 14px;
+    gap: 14px;
   }
 
   .header h2 {
-    font-size: 18px;
+    font-size: 1.15rem;
   }
 
+  /* Hide desktop table, show mobile cards */
   .desktopTable {
     display: none;
   }
 
   .mobileCards {
-    display: block;
+    display: flex;
   }
 
   .statsGrid {
     grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
+    gap: 10px;
   }
 
   .statCard {
-    padding: 10px;
-    gap: 8px;
-  }
-
-  .statCard svg {
-    font-size: 18px;
-  }
-
-  .statCard span {
-    font-size: 10px;
+    padding: 12px;
+    gap: 10px;
   }
 
   .statCard h3 {
-    font-size: 15px;
+    font-size: 1.15rem;
+  }
+
+  .statCard span {
+    font-size: 0.7rem;
   }
 }
 
-/* Small Mobile */
-
-@media (max-width: 480px) {
+@media (max-width: 420px) {
   .statsGrid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr;
   }
-
-  .userCard {
-    padding: 8px;
-  }
-
-  .cardTop img {
-    width: 40px;
-    height: 40px;
-  }
-
-  .cardTop h4 {
-    font-size: 12px;
-  }
-
-  .cardTop p {
-    font-size: 10px;
-  }
-}
-
-/* =========================
-   SKELETON SHIMMER
-========================= */
-.skeletonPulse {
-  background: linear-gradient(90deg, #eee 25%, #f5f5f5 50%, #eee 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.4s ease-in-out infinite;
-}
-
-.skeletonLine {
-  height: 11px;
-  border-radius: 4px;
-  display: block;
-}
-
-.skeletonBlock {
-  display: inline-block;
-}
-
-.skeletonRow td {
-  padding: 10px 12px;
-  border-bottom: 1px solid #f1f5f9;
-}
-
-@keyframes shimmer {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
-}
-
-/* =========================
-   ROW / CARD FADE-IN (staggered reveal)
-========================= */
-.animatedRow {
-  opacity: 0;
-  animation: rowFadeIn 0.35s ease forwards;
-}
-
-@keyframes rowFadeIn {
-  to { opacity: 1; }
 }

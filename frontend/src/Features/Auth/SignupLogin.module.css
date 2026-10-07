@@ -1,413 +1,599 @@
-/* SignupLogin.module.css */
-
+/* =====================================================
+   OVERLAY — Full screen backdrop
+   ===================================================== */
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(15, 15, 20, 0.65);
+  background: rgba(10, 10, 15, 0.65);
   backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
   padding: 20px;
-  animation: fadeIn 0.25s ease;
+  z-index: 9999;
+  animation: overlayFade 0.2s ease;
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+@keyframes overlayFade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 
+/* =====================================================
+   MODAL CARD
+   ===================================================== */
 .modal {
   position: relative;
-  width: 100%;
-  max-width: 920px;
-  max-height: 92vh;
-  overflow-y: auto;
-  background: #ffffff;
+  background: #fff;
   border-radius: 20px;
-  display: grid;
-  grid-template-columns: 0.9fr 1.1fr;
-  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.35);
-  animation: slideUp 0.3s ease;
+  width: 100%;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.25),
+    0 0 0 1px rgba(0, 0, 0, 0.04);
+  animation: modalSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-@keyframes slideUp {
+@keyframes modalSlideUp {
   from {
-    transform: translateY(24px);
     opacity: 0;
+    transform: translateY(20px) scale(0.97);
   }
   to {
-    transform: translateY(0);
     opacity: 1;
+    transform: translateY(0) scale(1);
   }
 }
 
-.close {
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  z-index: 5;
-  width: 38px;
-  height: 38px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  border: none;
-  background: rgba(255, 255, 255, 0.9);
-  color: #111;
-  cursor: pointer;
-  transition:
-    background 0.2s,
-    transform 0.2s;
+.modalLogin {
+  max-width: 440px;
 }
 
-.close:hover {
+.modalSignup {
+  max-width: 520px;
+}
+
+/* =====================================================
+   CLOSE BUTTON
+   ===================================================== */
+.closeBtn {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  color: #333;
+  z-index: 10;
+  transition: all 0.15s;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.closeBtn:hover {
   background: #fff;
+  color: #111;
   transform: rotate(90deg);
 }
 
-/* ---------------- Left image panel ---------------- */
-
-.imageBox {
+/* =====================================================
+   HEADER SECTION (gradient banner inside modal)
+   ===================================================== */
+.modalHeader {
+  padding: 28px 28px 24px;
+  background: linear-gradient(135deg, #0a0a0f 0%, #1f1f2e 100%);
+  color: #fff;
+  text-align: center;
+  flex-shrink: 0;
   position: relative;
-  display: none;
 }
 
-.imageBox img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-.imageOverlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    180deg,
-    rgba(0, 0, 0, 0.1) 0%,
-    rgba(0, 0, 0, 0.75) 100%
-  );
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  padding: 32px;
+.headerIconWrap {
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  display: grid;
+  place-items: center;
+  margin: 0 auto 12px;
   color: #fff;
 }
 
-.imageOverlay h2 {
-  font-size: 26px;
-  font-weight: 700;
-  margin-bottom: 6px;
-}
-
-.imageOverlay p {
-  font-size: 14px;
-  opacity: 0.85;
-}
-
-@media (min-width: 720px) {
-  .imageBox {
-    display: block;
-  }
-}
-
-/* ---------------- Right form panel ---------------- */
-
-.formSection {
-  padding: 40px 32px;
-  display: flex;
-  flex-direction: column;
-}
-
-.toggle {
-  display: flex;
-  background: #f2f2f5;
-  border-radius: 999px;
-  padding: 4px;
-  margin-bottom: 24px;
-  width: fit-content;
-}
-
-.toggle button {
-  border: none;
-  background: transparent;
-  padding: 8px 22px;
-  border-radius: 999px;
-  font-weight: 600;
-  font-size: 14px;
-  color: #666;
-  cursor: pointer;
-  transition: all 0.25s ease;
-}
-
-.toggle button.active {
-  background: #111;
-  color: #fff;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-}
-
-.formSection h1 {
-  font-size: 26px;
+.headerTitle {
+  font-size: 1.35rem;
   font-weight: 800;
-  color: #111;
-  margin-bottom: 4px;
+  margin: 0 0 6px;
+  letter-spacing: -0.3px;
 }
 
-.subtitle {
-  font-size: 14px;
-  color: #777;
-  margin-bottom: 24px;
+.headerSubtitle {
+  font-size: 0.85rem;
+  margin: 0;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* =====================================================
+   MODAL BODY (scrollable)
+   ===================================================== */
+.modalBody {
+  padding: 24px 28px 28px;
+  overflow-y: auto;
+  flex: 1;
+  scrollbar-width: thin;
+  scrollbar-color: #ddd transparent;
+}
+
+.modalBody::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modalBody::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.modalBody::-webkit-scrollbar-thumb {
+  background: #ddd;
+  border-radius: 999px;
+}
+
+.modalBody::-webkit-scrollbar-thumb:hover {
+  background: #bbb;
+}
+
+/* =====================================================
+   BANNERS
+   ===================================================== */
+.successBanner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: #e8f5e9;
+  border: 1px solid #a5d6a7;
+  color: #2e7d32;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  margin-bottom: 16px;
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 .apiError {
-  background: #fdecea;
-  color: #b3261e;
-  border: 1px solid #f5c6c3;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   padding: 10px 14px;
+  background: #fff2f2;
+  border: 1px solid #ffcdd2;
+  color: #c62828;
   border-radius: 10px;
-  font-size: 13px;
-  margin-bottom: 16px;
+  font-size: 0.84rem;
+  margin-bottom: 14px;
+  animation: shake 0.3s ease;
 }
 
-.grid {
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}
+
+/* =====================================================
+   FORM
+   ===================================================== */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 16px 14px;
+  gap: 12px;
 }
 
-@media (max-width: 480px) {
-  .grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* ---------------- Fields ---------------- */
-
+/* =====================================================
+   FIELD (floating label)
+   ===================================================== */
 .field {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 5px;
+  width: 100%;
 }
 
 .fieldWrapper {
   position: relative;
   display: flex;
   align-items: center;
+  background: #fafafa;
+  border: 1.5px solid #e8e8e8;
+  border-radius: 11px;
+  padding: 0 13px;
+  height: 50px;
+  transition: all 0.18s ease;
+}
+
+.fieldWrapper:hover {
+  border-color: #cfcfcf;
+}
+
+.fieldWrapper:focus-within {
+  border-color: #111;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(17, 17, 17, 0.06);
+}
+
+.inputError {
+  border-color: #e53935 !important;
+  background: #fffafa;
+}
+
+.inputError:focus-within {
+  box-shadow: 0 0 0 3px rgba(229, 57, 53, 0.1);
 }
 
 .fieldIcon {
-  position: absolute;
-  left: 12px;
-  color: #999;
+  color: #888;
   display: flex;
   align-items: center;
-  pointer-events: none;
+  margin-right: 9px;
+  flex-shrink: 0;
 }
 
-.fieldInput {
-  width: 100%;
-  padding: 13px 14px 13px 38px;
-  border-radius: 12px;
-  border: 1.5px solid #e2e2e6;
-  font-size: 14px;
+.fieldWrapper:focus-within .fieldIcon {
+  color: #111;
+}
+
+.fieldWrapper input {
+  flex: 1;
+  border: none;
+  background: transparent;
   outline: none;
-  background: #fafafa;
-  transition:
-    border-color 0.2s,
-    background 0.2s;
+  font-size: 0.92rem;
+  color: #111;
+  height: 100%;
+  padding-top: 13px;
+  font-family: inherit;
 }
 
-.fieldInput:focus {
-  border-color: #111;
-  background: #fff;
+.fieldWrapper input::placeholder {
+  color: transparent;
 }
 
 .fieldWrapper label {
   position: absolute;
-  left: 38px;
+  left: 39px;
   top: 50%;
   transform: translateY(-50%);
-  font-size: 14px;
   color: #999;
+  font-size: 0.92rem;
   pointer-events: none;
-  transition: 0.2s ease all;
+  transition: all 0.18s ease;
   background: transparent;
   padding: 0 4px;
 }
 
-.fieldInput:focus + label,
-.fieldInput:not(:placeholder-shown) + label {
-  top: 0;
-  transform: translateY(-50%) scale(0.85);
-  color: #111;
-  background: #fff;
-  left: 30px;
-}
-
-.inputError {
-  border-color: #e04b4b !important;
-}
-
-.errorText {
-  color: #e04b4b;
-  font-size: 12px;
-  margin-top: 2px;
-}
-
-/* ---------------- Password field ---------------- */
-
-.passwordField {
-  position: relative;
+.fieldWrapper input:focus ~ label,
+.fieldWrapper input:not(:placeholder-shown) ~ label {
+  top: 11px;
+  transform: translateY(-50%) scale(0.78);
+  color: #666;
+  left: 36px;
 }
 
 .passwordToggle {
-  position: absolute;
-  right: 12px;
-  top: 22px;
-  color: #999;
+  background: none;
+  border: none;
   cursor: pointer;
+  color: #888;
   display: flex;
   align-items: center;
+  padding: 4px;
+  border-radius: 6px;
+  transition: color 0.15s;
 }
 
 .passwordToggle:hover {
   color: #111;
 }
 
-/* ---------------- OTP ---------------- */
+.errorText {
+  color: #e53935;
+  font-size: 0.75rem;
+  margin: 0;
+  padding-left: 4px;
+}
 
-.otpWrapper {
-  grid-column: 1 / -1;
+/* =====================================================
+   OTP
+   ===================================================== */
+.phoneRow {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  align-items: start;
+}
+
+.otpBtn {
+  height: 50px;
+  padding: 0 16px;
+  border: 1.5px solid #111;
+  background: #111;
+  color: #fff;
+  border-radius: 11px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+  transition: all 0.18s;
+  font-family: inherit;
+}
+
+.otpBtn:hover:not(:disabled) {
+  background: #000;
+  transform: translateY(-1px);
+}
+
+.otpBtn:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.otpVerified {
+  background: #2e7d32;
+  border-color: #2e7d32;
+}
+
+.otpSent {
+  background: #fff;
+  color: #111;
+}
+
+.otpBlock {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  background: #f7f7f9;
-  border-radius: 14px;
   padding: 14px;
+  background: #f8f8f8;
+  border-radius: 11px;
+  border: 1px dashed #ddd;
+  animation: slideDown 0.25s ease;
 }
 
-.otpSendBtn {
-  align-self: flex-start;
-  border: none;
-  background: #111;
-  color: #fff;
-  padding: 9px 18px;
-  border-radius: 999px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: opacity 0.2s;
-}
-
-.otpSendBtn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.otpBtnVerified {
-  background: #1f9d55;
-}
-
-.otpBtnUnverified {
-  background: #d68b00;
-}
-
-.otpTimer {
-  font-size: 12px;
-  color: #888;
+.otpHint {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #666;
 }
 
 .otpContainer {
   display: flex;
-  gap: 8px;
+  gap: 7px;
+  justify-content: space-between;
 }
 
 .otpBox {
-  width: 42px;
-  height: 46px;
+  width: 100%;
+  aspect-ratio: 1;
+  max-width: 46px;
   text-align: center;
-  font-size: 18px;
+  font-size: 1.05rem;
   font-weight: 700;
-  border-radius: 10px;
-  border: 1.5px solid #e2e2e6;
-  outline: none;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 9px;
   background: #fff;
+  outline: none;
+  transition: all 0.18s;
+  font-family: inherit;
 }
 
 .otpBox:focus {
   border-color: #111;
+  box-shadow: 0 0 0 3px rgba(17, 17, 17, 0.08);
 }
 
-.otpVerifyBtn {
-  align-self: flex-start;
-  border: none;
+.verifyBtn {
+  padding: 9px;
   background: #111;
   color: #fff;
-  padding: 8px 16px;
-  border-radius: 999px;
-  font-size: 13px;
+  border: none;
+  border-radius: 9px;
   font-weight: 600;
   cursor: pointer;
+  font-size: 0.86rem;
+  transition: background 0.18s;
+  font-family: inherit;
 }
 
-/* ---------------- Submit ---------------- */
+.verifyBtn:hover {
+  background: #000;
+}
 
-.submit {
-  grid-column: 1 / -1;
-  margin-top: 24px;
-  padding: 14px;
-  border: none;
-  border-radius: 12px;
+/* =====================================================
+   PASSWORD STRENGTH
+   ===================================================== */
+.strengthWrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.strengthBars {
+  flex: 1;
+  display: flex;
+  gap: 4px;
+}
+
+.strengthBar {
+  flex: 1;
+  height: 4px;
+  border-radius: 999px;
+  transition: background 0.25s;
+}
+
+.strengthLabel {
+  font-size: 0.72rem;
+  font-weight: 600;
+  min-width: 42px;
+  text-align: right;
+}
+
+/* =====================================================
+   SECTION TITLE
+   ===================================================== */
+.sectionTitle {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #111;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin: 8px 0 0;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #eee;
+}
+
+/* =====================================================
+   SUBMIT
+   ===================================================== */
+.submitBtn {
+  margin-top: 8px;
+  padding: 13px;
   background: #111;
   color: #fff;
-  font-size: 15px;
-  font-weight: 700;
-  letter-spacing: 0.3px;
+  border: none;
+  border-radius: 11px;
+  font-size: 0.94rem;
+  font-weight: 600;
   cursor: pointer;
-  transition:
-    transform 0.15s ease,
-    opacity 0.2s;
+  transition: all 0.18s;
+  font-family: inherit;
+  letter-spacing: 0.3px;
 }
 
-.submit:hover {
+.submitBtn:hover:not(:disabled) {
+  background: #000;
   transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
 }
 
-.submit:disabled {
-  opacity: 0.6;
+.submitBtn:disabled {
   cursor: not-allowed;
-  transform: none;
+  opacity: 0.7;
 }
 
-.forgotPassword {
-  margin-top: 14px;
-  text-align: center;
+.forgotRow {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: -6px;
 }
 
-.forgotPassword a {
-  font-size: 13px;
-  color: #666;
+.forgotLink {
+  color: #555;
+  font-size: 0.82rem;
   text-decoration: none;
+  transition: color 0.15s;
 }
 
-.forgotPassword a:hover {
+.forgotLink:hover {
   color: #111;
   text-decoration: underline;
 }
 
-/* Scrollbar polish for the modal */
-.modal::-webkit-scrollbar {
-  width: 6px;
+/* =====================================================
+   SWITCH LINK
+   ===================================================== */
+.switchRow {
+  text-align: center;
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid #f0f0f0;
+  font-size: 0.87rem;
+  color: #666;
 }
 
-.modal::-webkit-scrollbar-thumb {
-  background: #ddd;
-  border-radius: 10px;
+.switchRow p {
+  margin: 0;
+}
+
+.switchLink {
+  color: #111;
+  font-weight: 700;
+  text-decoration: none;
+  margin-left: 4px;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.15s;
+}
+
+.switchLink:hover {
+  border-bottom-color: #111;
+}
+
+/* =====================================================
+   RESPONSIVE
+   ===================================================== */
+@media (max-width: 560px) {
+  .overlay {
+    padding: 12px;
+    align-items: flex-end;
+  }
+
+  .modal {
+    max-width: 100%;
+    max-height: 92vh;
+    border-radius: 18px 18px 0 0;
+    animation: modalSlideUpMobile 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  @keyframes modalSlideUpMobile {
+    from { opacity: 0; transform: translateY(100%); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .modalHeader {
+    padding: 22px 20px 18px;
+  }
+
+  .headerTitle {
+    font-size: 1.2rem;
+  }
+
+  .modalBody {
+    padding: 20px 20px 24px;
+  }
+
+  .row {
+    grid-template-columns: 1fr;
+  }
+
+  .phoneRow {
+    grid-template-columns: 1fr;
+  }
+
+  .otpBtn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .otpBox {
+    max-width: none;
+  }
 }

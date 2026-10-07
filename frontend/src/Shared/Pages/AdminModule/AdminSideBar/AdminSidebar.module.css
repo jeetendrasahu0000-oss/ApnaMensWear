@@ -6,7 +6,7 @@
   padding: 22px 14px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
   position: fixed;
   top: 0;
   left: 0;
@@ -24,18 +24,26 @@
 }
 
 .navLink {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 10px;
   padding: 10px 14px;
   color: #cfcfcf;
   text-decoration: none;
   border-radius: 8px;
   font-size: 0.9rem;
+  font-weight: 500;
   transition: background 0.15s, color 0.15s;
 }
 
 .navLink:hover {
   background: #1f1f1f;
   color: #fff;
+}
+
+.navLink svg {
+  flex-shrink: 0;
+  opacity: 0.85;
 }
 
 .active {
@@ -47,6 +55,10 @@
 .active:hover {
   background: #f0f0f0;
   color: #111;
+}
+
+.active svg {
+  opacity: 1;
 }
 
 .overlay {

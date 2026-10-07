@@ -16,11 +16,11 @@ import styles from "./UserDashbord.module.css";
 import UserDetails from "./UserDetails";
 import UserUpdate from "./UserUpdate";
 
-const STAGGER_DELAY = 60; // rows ke beech gap (ms)
+const STAGGER_DELAY = 60;
 
 const UserDashbord = () => {
   const [visibleUsers, setVisibleUsers] = useState([]);
-  const [totalUsers, setTotalUsers] = useState([]); // stats ke liye poori list, turant available
+  const [totalUsers, setTotalUsers] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const [selectedUser, setSelectedUser] = useState(null);
@@ -208,7 +208,6 @@ const UserDashbord = () => {
 
       {loading ? (
         <>
-          {/* Desktop skeleton table */}
           <div className={styles.desktopTable}>
             <table>
               <thead>
@@ -230,7 +229,6 @@ const UserDashbord = () => {
             </table>
           </div>
 
-          {/* Mobile skeleton cards */}
           <div className={styles.mobileCards}>
             {Array.from({ length: 4 }).map((_, i) => (
               <SkeletonUserCard key={i} delay={i * 60} />
@@ -239,7 +237,6 @@ const UserDashbord = () => {
         </>
       ) : (
         <>
-          {/* Desktop Table */}
           <div className={styles.desktopTable}>
             <table>
               <thead>
@@ -318,7 +315,6 @@ const UserDashbord = () => {
             </table>
           </div>
 
-          {/* Mobile Cards */}
           <div className={styles.mobileCards}>
             {visibleUsers.map((user, index) => (
               <div
