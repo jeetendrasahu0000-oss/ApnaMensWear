@@ -1,37 +1,12 @@
 import mongoose from "mongoose";
 
-
-const ShippingSchema = new mongoose.Schema({
-  shiprocketOrderId: {
-    type: Number,
-    default: null
-  },
-
-  shipmentId: {
-    type: Number,
-    default: null
-  }
-}, { _id: false });
-
-
-const PackageSchema = new mongoose.Schema(
+const ShippingSchema = new mongoose.Schema(
   {
-    length: {
+    shiprocketOrderId: {
       type: Number,
       default: null,
     },
-
-    breadth: {
-      type: Number,
-      default: null,
-    },
-
-    height: {
-      type: Number,
-      default: null,
-    },
-
-    weight: {
+    shipmentId: {
       type: Number,
       default: null,
     },
@@ -39,13 +14,21 @@ const PackageSchema = new mongoose.Schema(
   { _id: false }
 );
 
-
+const PackageSchema = new mongoose.Schema(
+  {
+    length: { type: Number, default: null },
+    breadth: { type: Number, default: null },
+    height: { type: Number, default: null },
+    weight: { type: Number, default: null },
+  },
+  { _id: false }
+);
 
 const OrderItemSchema = new mongoose.Schema(
   {
     product: {
       type: mongoose.Schema.Types.ObjectId,
-    //   ref: "Product",
+      ref: "Product",                    // ✅ UNCOMMENTED — populate ke liye zaroori
       required: true,
     },
 
@@ -87,7 +70,7 @@ const OrderSchema = new mongoose.Schema(
   {
     user: {
       type: mongoose.Schema.Types.ObjectId,
-    //   ref: "User",
+      ref: "User",                       // ✅ UNCOMMENTED
       required: true,
     },
 
@@ -129,9 +112,10 @@ const OrderSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+
     paymentId: {
       type: String,
-      required:true,
+      required: true,
     },
 
     paymentMethod: {
@@ -173,21 +157,17 @@ const OrderSchema = new mongoose.Schema(
 
     shipping: {
       type: ShippingSchema,
-      default: () => ({})
+      default: () => ({}),
     },
 
     packageDimentionsDetails: {
       type: PackageSchema,
-      default: () => ({})
+      default: () => ({}),
     },
-    
   },
-
   {
     timestamps: true,
   }
 );
-
-
 
 export default mongoose.model("Order", OrderSchema);

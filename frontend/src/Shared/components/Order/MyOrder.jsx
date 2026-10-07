@@ -1,16 +1,13 @@
 // MyOrder.jsx
 import React, { useEffect, useState, useRef } from "react";
-import { FiPackage, FiEye } from "react-icons/fi";
-import { TbTruckDelivery } from "react-icons/tb";
-import { MdOutlineCancel } from "react-icons/md";
+import { FiPackage } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import api from "../../../Api/Axios";
 import styles from "./MyOrder.module.css";
 
-const STAGGER_DELAY = 150; // har order card ke beech gap (ms)
+const STAGGER_DELAY = 150;
 
 const MyOrder = () => {
-
   const navigate = useNavigate();
 
   const [visibleOrders, setVisibleOrders] = useState([]);
@@ -19,7 +16,7 @@ const MyOrder = () => {
   const [error, setError] = useState("");
 
   const staggerTimeouts = useRef([]);
-  const requestIdRef = useRef(0); // stale fetch calls ko ignore karne ke liye
+  const requestIdRef = useRef(0);
 
   const clearStaggerTimeouts = () => {
     staggerTimeouts.current.forEach(clearTimeout);
@@ -29,7 +26,6 @@ const MyOrder = () => {
   const revealStaggered = (batch, requestId) => {
     batch.forEach((order, i) => {
       const timeoutId = setTimeout(() => {
-        // agar iske beech mein koi naya fetch shuru ho chuka hai, to ye purana batch add na ho
         if (requestIdRef.current !== requestId) return;
         setVisibleOrders((prev) => [...prev, order]);
       }, i * STAGGER_DELAY);
@@ -40,14 +36,13 @@ const MyOrder = () => {
   useEffect(() => {
     GetOrders();
     return () => {
-      // is effect instance ko "cancel" kar do — StrictMode ke double-invoke se bachne ke liye
       requestIdRef.current += 1;
       clearStaggerTimeouts();
     };
   }, []);
 
   const GetOrders = async () => {
-    const currentRequestId = ++requestIdRef.current; // ye fetch ka unique id
+    const currentRequestId = ++requestIdRef.current;
 
     try {
       setLoading(true);
@@ -57,7 +52,6 @@ const MyOrder = () => {
 
       const { data } = await api.get("/v1/order");
 
-      // agar iske beech koi naya fetch (StrictMode remount ya refresh) shuru ho gaya, to ye result discard karo
       if (requestIdRef.current !== currentRequestId) return;
 
       if (data.success) {
@@ -69,9 +63,7 @@ const MyOrder = () => {
       }
     } catch (error) {
       if (requestIdRef.current !== currentRequestId) return;
-      setError(
-        error.response?.data?.message || "Failed to fetch orders"
-      );
+      setError(error.response?.data?.message || "Failed to fetch orders");
     } finally {
       if (requestIdRef.current === currentRequestId) {
         setLoading(false);
@@ -79,78 +71,77 @@ const MyOrder = () => {
     }
   };
 
-  const HandleTrackOrder = (order) => {
-    console.log("Track Order", order);
-    // navigate(`/track-order/${order._id}`)
-  };
+  // ======================================================
+  // PRODUCT CLICK — slug based, with debug logs
+  // ======================================================
+  const HandleProductClick = (item) => {
+    console.log("🖱️ Product clicked:", item);
 
-  const HandleViewDetails = (order) => {
-    console.log("View Details", order);
-    // navigate(`/order/${order._id}`)
-  };
+    const slug =
+      item?.slug ||
+      item?.productSlug ||
+      (typeof item?.product === "object" ? item.product?.slug : null);
 
-  const HandleCancelOrder = async (order) => {
-    try {
-      const confirmCancel = window.confirm(
-        `Cancel Order ${order.orderNumber}?`
-      );
+    console.log("📎 Extracted slug:", slug);
 
-      if (!confirmCancel) return;
-
-      // await api.patch(`/v1/order/cancel/${order._id}`);
-
-      alert("Cancel order API call here");
-    } catch (error) {
-      alert(
-        error.response?.data?.message ||
-          "Failed to cancel order"
-      );
+    if (!slug) {
+      console.warn("❌ No slug found for product item:", item);
+      alert("Product link not available. Please try again later.");
+      return;
     }
+
+    navigate(`/product/${slug}`);
   };
 
-  // ---------------- Skeleton order card ----------------
+  // ---------------- Skeleton ----------------
   const SkeletonOrderCard = ({ delay = 0 }) => (
     <div className={styles.orderCard} style={{ animationDelay: `${delay}ms` }}>
       <div className={styles.orderHeader}>
         <div>
-          <div className={`${styles.skeletonLine} ${styles.skeletonPulse}`} style={{ width: "100px", height: "13px" }} />
-          <div className={`${styles.skeletonLine} ${styles.skeletonPulse}`} style={{ width: "70px", height: "10px", marginTop: "6px" }} />
+          <div
+            className={`${styles.skeletonLine} ${styles.skeletonPulse}`}
+            style={{ width: "100px", height: "13px" }}
+          />
+          <div
+            className={`${styles.skeletonLine} ${styles.skeletonPulse}`}
+            style={{ width: "70px", height: "10px", marginTop: "6px" }}
+          />
         </div>
-        <div className={`${styles.skeletonBlock} ${styles.skeletonPulse}`} style={{ width: 70, height: 22, borderRadius: 999 }} />
+        <div
+          className={`${styles.skeletonBlock} ${styles.skeletonPulse}`}
+          style={{ width: 70, height: 22, borderRadius: 999 }}
+        />
       </div>
 
       <div className={styles.products}>
         {[1, 2].map((i) => (
           <div key={i} className={styles.productCard}>
-            <div className={`${styles.skeletonBlock} ${styles.skeletonPulse}`} style={{ width: 65, height: 80, borderRadius: 8 }} />
-            <div className={styles.productInfo} style={{ display: "flex", flexDirection: "column", gap: "6px", justifyContent: "center" }}>
-              <div className={`${styles.skeletonLine} ${styles.skeletonPulse}`} style={{ width: "70%", height: "12px" }} />
-              <div className={`${styles.skeletonLine} ${styles.skeletonPulse}`} style={{ width: "50%", height: "10px" }} />
-              <div className={`${styles.skeletonLine} ${styles.skeletonPulse}`} style={{ width: "40%", height: "10px" }} />
+            <div
+              className={`${styles.skeletonBlock} ${styles.skeletonPulse}`}
+              style={{ width: 65, height: 80, borderRadius: 8 }}
+            />
+            <div className={styles.productInfo}>
+              <div
+                className={`${styles.skeletonLine} ${styles.skeletonPulse}`}
+                style={{ width: "70%", height: "12px" }}
+              />
+              <div
+                className={`${styles.skeletonLine} ${styles.skeletonPulse}`}
+                style={{ width: "50%", height: "10px" }}
+              />
             </div>
-          </div>
-        ))}
-      </div>
-
-      <div className={styles.summary}>
-        {[1, 2, 3].map((i) => (
-          <div key={i}>
-            <div className={`${styles.skeletonLine} ${styles.skeletonPulse}`} style={{ width: "40px", height: "9px", margin: "0 auto" }} />
-            <div className={`${styles.skeletonLine} ${styles.skeletonPulse}`} style={{ width: "50px", height: "12px", marginTop: "5px", marginLeft: "auto", marginRight: "auto" }} />
           </div>
         ))}
       </div>
     </div>
   );
 
-  // ---------------- Loading (skeleton) ----------------
   if (loading) {
     return (
       <div className={styles.container}>
         <div className={styles.pageHeader}>
           <h2>My Orders</h2>
         </div>
-
         {Array.from({ length: 3 }).map((_, i) => (
           <SkeletonOrderCard key={i} delay={i * 100} />
         ))}
@@ -160,8 +151,8 @@ const MyOrder = () => {
 
   if (error) {
     return (
-      <div className={styles.error}>
-        {error}
+      <div className={styles.container}>
+        <div className={styles.error}>{error}</div>
       </div>
     );
   }
@@ -172,6 +163,13 @@ const MyOrder = () => {
         <FiPackage size={50} />
         <h3>No Orders Found</h3>
         <p>You haven't placed any orders yet.</p>
+        <button
+          className={styles.shopBtn}
+          onClick={() => navigate("/")}
+          type="button"
+        >
+          Start Shopping
+        </button>
       </div>
     );
   }
@@ -180,10 +178,8 @@ const MyOrder = () => {
     <div className={styles.container}>
       <div className={styles.pageHeader}>
         <h2>My Orders</h2>
-
         <span>
-          {totalCount} Order
-          {totalCount > 1 ? "s" : ""}
+          {totalCount} Order{totalCount > 1 ? "s" : ""}
         </span>
       </div>
 
@@ -193,7 +189,6 @@ const MyOrder = () => {
           className={`${styles.orderCard} ${styles.animatedCard}`}
           style={{ animationDelay: `${(index % 10) * 0.06}s` }}
         >
-          {/* Order Header */}
           <div className={styles.orderHeader}>
             <div>
               <h4>{order.orderNumber}</h4>
@@ -208,7 +203,6 @@ const MyOrder = () => {
               >
                 {order.orderStatus}
               </span>
-
               <span className={styles.paymentBadge}>
                 {order.paymentStatus}
               </span>
@@ -217,14 +211,15 @@ const MyOrder = () => {
 
           {/* Products */}
           <div className={styles.products}>
-            {order.items.map((item, index) => (
-              <div
-                key={index}
+            {order.items.map((item, itemIdx) => (
+              <button
+                key={itemIdx}
+                type="button"
                 className={styles.productCard}
-                onClick={() => navigate(`/product/${item.product}`)}
+                onClick={() => HandleProductClick(item)}
               >
                 <img
-                  src={item.coverImage.url}
+                  src={item.coverImage?.url || item.coverImage}
                   alt={item.productName}
                   className={styles.productImage}
                 />
@@ -242,7 +237,7 @@ const MyOrder = () => {
                     <strong>₹{item.priceAtPurchase}</strong>
                   </div>
                 </div>
-              </div>
+              </button>
             ))}
           </div>
 
@@ -252,12 +247,10 @@ const MyOrder = () => {
               <span>Total</span>
               <strong>₹{order.totalAmount}</strong>
             </div>
-
             <div>
               <span>Payment</span>
               <strong>{order.paymentMethod}</strong>
             </div>
-
             <div>
               <span>Items</span>
               <strong>{order.items.length}</strong>
@@ -269,26 +262,6 @@ const MyOrder = () => {
             Deliver to <strong>{order.shippingAddress.fullName}</strong> •{" "}
             {order.shippingAddress.city}, {order.shippingAddress.state}
           </div>
-
-          {/* Actions */}
-          {/* <div className={styles.actions}>
-            <button className={styles.trackBtn} onClick={() => HandleTrackOrder(order)}>
-              <TbTruckDelivery />
-              Track
-            </button>
-
-            <button className={styles.detailsBtn} onClick={() => HandleViewDetails(order)}>
-              <FiEye />
-              Details
-            </button>
-
-            {["Pending", "Processing"].includes(order.orderStatus) && (
-              <button className={styles.cancelBtn} onClick={() => HandleCancelOrder(order)}>
-                <MdOutlineCancel />
-                Cancel
-              </button>
-            )}
-          </div> */}
         </div>
       ))}
     </div>
