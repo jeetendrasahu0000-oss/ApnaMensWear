@@ -1,272 +1,593 @@
 <!doctype html>
 <html lang="en-IN">
   <head>
+    <!-- ============================================
+         CHARSET / VIEWPORT / COMPATIBILITY
+    ============================================ -->
     <meta charset="UTF-8" />
-
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta
       name="viewport"
-      content="width=device-width, initial-scale=1.0"
+      content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover"
     />
 
-    <!-- =========================
-         FAVICON
-    ========================== -->
-    <link
-      rel="icon"
-      type="image/png"
-      href="/favicon.png"
-    />
+    <!-- ============================================
+         FAVICON / TOUCH ICONS / MANIFEST
+    ============================================ -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
 
-    <link
-      rel="apple-touch-icon"
-      href="/favicon.png"
+    <!-- ============================================
+         THEME / MOBILE UX
+    ============================================ -->
+    <meta name="theme-color" content="#111827" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
     />
+    <meta name="apple-mobile-web-app-title" content="Apna Mens Wear" />
+    <meta name="format-detection" content="telephone=no" />
 
-    <!-- =========================
+    <!-- ============================================
          PRIMARY SEO
-    ========================== -->
-
+    ============================================ -->
     <title>
-      Apna Mens Wear | Men's Fashion & Clothing Store in Indore
+      Apna Mens Wear | Best Men's Fashion & Clothing Store in Indore
     </title>
 
     <meta
       name="description"
-      content="Apna Mens Wear is a men's fashion and clothing store in Indore. Shop stylish shirts, t-shirts, jeans, trousers, jackets and more at affordable prices."
+      content="Apna Mens Wear is Indore's trusted men's fashion and clothing store. Shop premium shirts, t-shirts, jeans, trousers, jackets, suits and ethnic wear at affordable prices with easy returns and fast delivery across India."
     />
 
     <meta
-      name="author"
-      content="Apna Mens Wear"
+      name="keywords"
+      content="mens wear Indore, men's clothing store Indore, shirts for men Indore, t-shirts online India, jeans for men, trousers online, jackets for men, formal shirts Indore, casual shirts Indore, men's fashion Indore, Apna Mens Wear, buy mens clothing online, affordable mens wear India, men's ethnic wear Indore, mens suits Indore, denim jeans India, cotton shirts men, party wear shirts men, wedding sherwani Indore"
     />
 
-    <meta
-      name="application-name"
-      content="Apna Mens Wear"
-    />
+    <meta name="author" content="Apna Mens Wear" />
+    <meta name="publisher" content="Apna Mens Wear" />
+    <meta name="language" content="English" />
+    <meta name="revisit-after" content="3 days" />
+    <meta name="rating" content="general" />
+    <meta name="distribution" content="global" />
 
+    <!-- ============================================
+         CRAWLER DIRECTIVES
+    ============================================ -->
     <meta
       name="robots"
       content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
     />
+    <meta name="googlebot" content="index, follow" />
+    <meta name="bingbot" content="index, follow" />
 
-    <!-- Canonical -->
-    <link
-      rel="canonical"
-      href="https://apnamenswear.shop/"
-    />
+    <link rel="canonical" href="https://apnamenswear.shop/" />
 
-    <!-- Language -->
-    <link
-      rel="alternate"
-      hreflang="en-IN"
-      href="https://apnamenswear.shop/"
-    />
-
+    <!-- ============================================
+         HREFLANG / LANGUAGE
+    ============================================ -->
+    <link rel="alternate" hreflang="en-IN" href="https://apnamenswear.shop/" />
     <link
       rel="alternate"
       hreflang="x-default"
       href="https://apnamenswear.shop/"
     />
 
-    <!-- Sitemap -->
+    <!-- ============================================
+         SITEMAP
+    ============================================ -->
     <link
       rel="sitemap"
       type="application/xml"
       href="https://apnamenswear.shop/sitemap.xml"
     />
 
-    <!-- =========================
-         THEME / MOBILE
-    ========================== -->
+    <!-- ============================================
+         GEO / LOCAL SEO
+    ============================================ -->
+    <meta name="geo.region" content="IN-MP" />
+    <meta name="geo.placename" content="Indore" />
+    <meta name="geo.position" content="22.7196;75.8577" />
+    <meta name="ICBM" content="22.7196,75.8577" />
 
-    <meta
-      name="theme-color"
-      content="#111827"
-    />
-
-    <meta
-      name="mobile-web-app-capable"
-      content="yes"
-    />
-
-    <meta
-      name="apple-mobile-web-app-capable"
-      content="yes"
-    />
-
-    <meta
-      name="apple-mobile-web-app-title"
-      content="Apna Mens Wear"
-    />
-
-    <!-- =========================
-         GOOGLE SITE NAME
-    ========================== -->
-
-    <script type="application/ld+json">
-      {
-        "@context": "https://schema.org",
-        "@type": "WebSite",
-        "@id": "https://apnamenswear.shop/#website",
-        "name": "Apna Mens Wear",
-        "alternateName": [
-          "AMW",
-          "Apna Mens Wear Indore"
-        ],
-        "url": "https://apnamenswear.shop/"
-      }
-    </script>
-
-    <!-- =========================
-         ORGANIZATION / ONLINE STORE
-    ========================== -->
-
-    <script type="application/ld+json">
-      {
-        "@context": "https://schema.org",
-        "@type": "OnlineStore",
-        "@id": "https://apnamenswear.shop/#organization",
-        "name": "Apna Mens Wear",
-        "alternateName": "AMW",
-        "url": "https://apnamenswear.shop/",
-        "logo": {
-          "@type": "ImageObject",
-          "url": "https://apnamenswear.shop/favicon.png"
-        },
-        "image": "https://apnamenswear.shop/og-image.png",
-        "description": "Apna Mens Wear is a men's fashion and clothing store offering shirts, t-shirts, jeans, trousers, jackets and more.",
-        "telephone": "+91-9630105490"
-      }
-    </script>
-
-    <!-- =========================
+    <!-- ============================================
          OPEN GRAPH
-    ========================== -->
-
-    <meta
-      property="og:type"
-      content="website"
-    />
-
-    <meta
-      property="og:locale"
-      content="en_IN"
-    />
-
-    <meta
-      property="og:site_name"
-      content="Apna Mens Wear"
-    />
-
+    ============================================ -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://apnamenswear.shop/" />
+    <meta property="og:site_name" content="Apna Mens Wear" />
+    <meta property="og:locale" content="en_IN" />
     <meta
       property="og:title"
-      content="Apna Mens Wear | Men's Fashion & Clothing Store in Indore"
+      content="Apna Mens Wear | Best Men's Fashion & Clothing Store in Indore"
     />
-
     <meta
       property="og:description"
-      content="Discover stylish men's clothing at Apna Mens Wear. Shop shirts, t-shirts, jeans, trousers, jackets and more."
+      content="Shop premium men's shirts, t-shirts, jeans, trousers, jackets and ethnic wear at Apna Mens Wear Indore. Affordable prices, fast delivery, easy returns."
     />
-
-    <meta
-      property="og:url"
-      content="https://apnamenswear.shop/"
-    />
-
-    <meta
-      property="og:image"
-      content="https://apnamenswear.shop/og-image.png"
-    />
-
-    <meta
-      property="og:image:width"
-      content="1200"
-    />
-
-    <meta
-      property="og:image:height"
-      content="630"
-    />
-
+    <meta property="og:image" content="https://apnamenswear.shop/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
     <meta
       property="og:image:alt"
-      content="Apna Mens Wear - Men's Fashion Store"
+      content="Apna Mens Wear - Men's Fashion Store Indore"
     />
 
-    <!-- =========================
-         TWITTER / X
-    ========================== -->
-
-    <meta
-      name="twitter:card"
-      content="summary_large_image"
-    />
-
+    <!-- ============================================
+         TWITTER CARDS
+    ============================================ -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@apnamenswear" />
     <meta
       name="twitter:title"
-      content="Apna Mens Wear | Men's Fashion & Clothing Store in Indore"
+      content="Apna Mens Wear | Best Men's Fashion & Clothing Store in Indore"
     />
-
     <meta
       name="twitter:description"
-      content="Shop trendy men's clothing including shirts, t-shirts, jeans, trousers and jackets at Apna Mens Wear."
+      content="Shop premium men's shirts, t-shirts, jeans, trousers, jackets and ethnic wear at Apna Mens Wear Indore."
     />
-
     <meta
       name="twitter:image"
       content="https://apnamenswear.shop/og-image.png"
     />
-
-    <!-- =========================
-         PRECONNECT
-    ========================== -->
-
-    <link
-      rel="preconnect"
-      href="https://fonts.googleapis.com"
+    <meta
+      name="twitter:image:alt"
+      content="Apna Mens Wear - Men's Fashion Store Indore"
     />
 
-    <link
-      rel="preconnect"
-      href="https://fonts.gstatic.com"
-      crossorigin
-    />
+    <!-- ============================================
+         PRECONNECT / PRELOAD
+    ============================================ -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <!-- ============================================
+         STRUCTURED DATA (JSON-LD) - FULL GRAPH
+    ============================================ -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@id": "https://apnamenswear.shop/#organization",
+            "@type": ["ClothingStore", "OnlineStore", "LocalBusiness"],
+            "name": "Apna Mens Wear",
+            "alternateName": ["AMW", "Apna Mens Wear Indore"],
+            "url": "https://apnamenswear.shop/",
+            "description": "Apna Mens Wear is a trusted men's fashion and clothing store in Indore offering shirts, t-shirts, jeans, trousers, jackets, suits and ethnic wear at affordable prices.",
+            "logo": {
+              "@type": "ImageObject",
+              "@id": "https://apnamenswear.shop/#logo",
+              "url": "https://apnamenswear.shop/favicon.png",
+              "contentUrl": "https://apnamenswear.shop/favicon.png",
+              "width": 512,
+              "height": 512,
+              "caption": "Apna Mens Wear Logo"
+            },
+            "image": { "@id": "https://apnamenswear.shop/#logo" },
+            "telephone": "+91-9630105490",
+            "email": "apnamenswear@gmail.com",
+            "priceRange": "₹₹",
+            "currenciesAccepted": "INR",
+            "paymentAccepted": "Cash, UPI, Credit Card, Debit Card, Net Banking, COD",
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Indore",
+              "addressLocality": "Indore",
+              "addressRegion": "Madhya Pradesh",
+              "postalCode": "452001",
+              "addressCountry": "IN"
+            },
+            "geo": {
+              "@type": "GeoCoordinates",
+              "latitude": 22.7196,
+              "longitude": 75.8577
+            },
+            "areaServed": [
+              { "@type": "City", "name": "Indore" },
+              { "@type": "State", "name": "Madhya Pradesh" },
+              { "@type": "Country", "name": "India" }
+            ],
+            "openingHoursSpecification": [
+              {
+                "@type": "OpeningHoursSpecification",
+                "dayOfWeek": [
+                  "Monday",
+                  "Tuesday",
+                  "Wednesday",
+                  "Thursday",
+                  "Friday",
+                  "Saturday",
+                  "Sunday"
+                ],
+                "opens": "10:00",
+                "closes": "21:00"
+              }
+            ],
+            "contactPoint": [
+              {
+                "@type": "ContactPoint",
+                "telephone": "+91-9630105490",
+                "contactType": "customer support",
+                "areaServed": "IN",
+                "availableLanguage": ["English", "Hindi"]
+              }
+            ],
+            "sameAs": [
+              "https://www.instagram.com/apnamenswear/",
+              "https://www.facebook.com/apnamenswear",
+              "https://www.youtube.com/@apnamenswear"
+            ],
+            "hasOfferCatalog": {
+              "@id": "https://apnamenswear.shop/#offercatalog"
+            }
+          },
+
+          {
+            "@id": "https://apnamenswear.shop/#website",
+            "@type": "WebSite",
+            "url": "https://apnamenswear.shop/",
+            "name": "Apna Mens Wear",
+            "alternateName": ["AMW", "Apna Mens Wear Indore"],
+            "publisher": {
+              "@id": "https://apnamenswear.shop/#organization"
+            },
+            "inLanguage": "en-IN",
+            "potentialAction": {
+              "@type": "SearchAction",
+              "target": {
+                "@type": "EntryPoint",
+                "urlTemplate": "https://apnamenswear.shop/search?q={search_term_string}"
+              },
+              "query-input": "required name=search_term_string"
+            }
+          },
+
+          {
+            "@id": "https://apnamenswear.shop/#webpage",
+            "@type": "WebPage",
+            "url": "https://apnamenswear.shop/",
+            "name": "Apna Mens Wear | Best Men's Fashion & Clothing Store in Indore",
+            "isPartOf": { "@id": "https://apnamenswear.shop/#website" },
+            "about": { "@id": "https://apnamenswear.shop/#organization" },
+            "primaryImageOfPage": {
+              "@id": "https://apnamenswear.shop/#logo"
+            },
+            "breadcrumb": {
+              "@id": "https://apnamenswear.shop/#breadcrumb"
+            },
+            "inLanguage": "en-IN",
+            "potentialAction": {
+              "@type": "ReadAction",
+              "target": ["https://apnamenswear.shop/"]
+            }
+          },
+
+          {
+            "@id": "https://apnamenswear.shop/#breadcrumb",
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home",
+                "item": "https://apnamenswear.shop/"
+              }
+            ]
+          },
+
+          {
+            "@id": "https://apnamenswear.shop/#sitenav",
+            "@type": "SiteNavigationElement",
+            "name": [
+              "Home",
+              "Shop",
+              "Shirts",
+              "T-Shirts",
+              "Jeans",
+              "Trousers",
+              "Jackets",
+              "Ethnic Wear",
+              "About",
+              "Contact"
+            ],
+            "url": [
+              "https://apnamenswear.shop/",
+              "https://apnamenswear.shop/shop",
+              "https://apnamenswear.shop/shirts",
+              "https://apnamenswear.shop/t-shirts",
+              "https://apnamenswear.shop/jeans",
+              "https://apnamenswear.shop/trousers",
+              "https://apnamenswear.shop/jackets",
+              "https://apnamenswear.shop/ethnic-wear",
+              "https://apnamenswear.shop/about",
+              "https://apnamenswear.shop/contact"
+            ]
+          },
+
+          {
+            "@id": "https://apnamenswear.shop/#offercatalog",
+            "@type": "OfferCatalog",
+            "name": "Men's Clothing Collection",
+            "itemListElement": [
+              {
+                "@type": "OfferCatalog",
+                "name": "Shirts",
+                "url": "https://apnamenswear.shop/shirts",
+                "itemListElement": [
+                  {
+                    "@type": "Offer",
+                    "itemOffered": {
+                      "@type": "Product",
+                      "name": "Formal Shirts for Men",
+                      "category": "Shirts",
+                      "url": "https://apnamenswear.shop/shirts/formal"
+                    }
+                  },
+                  {
+                    "@type": "Offer",
+                    "itemOffered": {
+                      "@type": "Product",
+                      "name": "Casual Shirts for Men",
+                      "category": "Shirts",
+                      "url": "https://apnamenswear.shop/shirts/casual"
+                    }
+                  },
+                  {
+                    "@type": "Offer",
+                    "itemOffered": {
+                      "@type": "Product",
+                      "name": "Party Wear Shirts for Men",
+                      "category": "Shirts",
+                      "url": "https://apnamenswear.shop/shirts/party"
+                    }
+                  }
+                ]
+              },
+              {
+                "@type": "OfferCatalog",
+                "name": "T-Shirts",
+                "url": "https://apnamenswear.shop/t-shirts",
+                "itemListElement": [
+                  {
+                    "@type": "Offer",
+                    "itemOffered": {
+                      "@type": "Product",
+                      "name": "Round Neck T-Shirts",
+                      "category": "T-Shirts",
+                      "url": "https://apnamenswear.shop/t-shirts/round-neck"
+                    }
+                  },
+                  {
+                    "@type": "Offer",
+                    "itemOffered": {
+                      "@type": "Product",
+                      "name": "Polo T-Shirts",
+                      "category": "T-Shirts",
+                      "url": "https://apnamenswear.shop/t-shirts/polo"
+                    }
+                  },
+                  {
+                    "@type": "Offer",
+                    "itemOffered": {
+                      "@type": "Product",
+                      "name": "Oversized T-Shirts",
+                      "category": "T-Shirts",
+                      "url": "https://apnamenswear.shop/t-shirts/oversized"
+                    }
+                  }
+                ]
+              },
+              {
+                "@type": "OfferCatalog",
+                "name": "Jeans",
+                "url": "https://apnamenswear.shop/jeans",
+                "itemListElement": [
+                  {
+                    "@type": "Offer",
+                    "itemOffered": {
+                      "@type": "Product",
+                      "name": "Slim Fit Jeans",
+                      "category": "Jeans",
+                      "url": "https://apnamenswear.shop/jeans/slim-fit"
+                    }
+                  },
+                  {
+                    "@type": "Offer",
+                    "itemOffered": {
+                      "@type": "Product",
+                      "name": "Regular Fit Jeans",
+                      "category": "Jeans",
+                      "url": "https://apnamenswear.shop/jeans/regular-fit"
+                    }
+                  },
+                  {
+                    "@type": "Offer",
+                    "itemOffered": {
+                      "@type": "Product",
+                      "name": "Distressed Jeans",
+                      "category": "Jeans",
+                      "url": "https://apnamenswear.shop/jeans/distressed"
+                    }
+                  }
+                ]
+              },
+              {
+                "@type": "OfferCatalog",
+                "name": "Trousers",
+                "url": "https://apnamenswear.shop/trousers",
+                "itemListElement": [
+                  {
+                    "@type": "Offer",
+                    "itemOffered": {
+                      "@type": "Product",
+                      "name": "Formal Trousers",
+                      "category": "Trousers",
+                      "url": "https://apnamenswear.shop/trousers/formal"
+                    }
+                  },
+                  {
+                    "@type": "Offer",
+                    "itemOffered": {
+                      "@type": "Product",
+                      "name": "Casual Trousers",
+                      "category": "Trousers",
+                      "url": "https://apnamenswear.shop/trousers/casual"
+                    }
+                  }
+                ]
+              },
+              {
+                "@type": "OfferCatalog",
+                "name": "Jackets",
+                "url": "https://apnamenswear.shop/jackets",
+                "itemListElement": [
+                  {
+                    "@type": "Offer",
+                    "itemOffered": {
+                      "@type": "Product",
+                      "name": "Denim Jackets",
+                      "category": "Jackets",
+                      "url": "https://apnamenswear.shop/jackets/denim"
+                    }
+                  },
+                  {
+                    "@type": "Offer",
+                    "itemOffered": {
+                      "@type": "Product",
+                      "name": "Bomber Jackets",
+                      "category": "Jackets",
+                      "url": "https://apnamenswear.shop/jackets/bomber"
+                    }
+                  }
+                ]
+              },
+              {
+                "@type": "OfferCatalog",
+                "name": "Ethnic Wear",
+                "url": "https://apnamenswear.shop/ethnic-wear",
+                "itemListElement": [
+                  {
+                    "@type": "Offer",
+                    "itemOffered": {
+                      "@type": "Product",
+                      "name": "Kurta Pyjama",
+                      "category": "Ethnic Wear",
+                      "url": "https://apnamenswear.shop/ethnic-wear/kurta-pyjama"
+                    }
+                  },
+                  {
+                    "@type": "Offer",
+                    "itemOffered": {
+                      "@type": "Product",
+                      "name": "Sherwani",
+                      "category": "Ethnic Wear",
+                      "url": "https://apnamenswear.shop/ethnic-wear/sherwani"
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+
+          {
+            "@id": "https://apnamenswear.shop/#faq",
+            "@type": "FAQPage",
+            "mainEntity": [
+              {
+                "@type": "Question",
+                "name": "What is Apna Mens Wear?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Apna Mens Wear is a men's fashion and clothing store based in Indore, Madhya Pradesh. We offer a wide range of shirts, t-shirts, jeans, trousers, jackets, suits and ethnic wear at affordable prices both online and offline."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Do you deliver across India?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Yes, Apna Mens Wear delivers men's clothing across India. Orders are usually dispatched within 24-48 hours and delivered within 3-7 business days depending on your location."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "What payment methods do you accept?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "We accept UPI, Credit Card, Debit Card, Net Banking and Cash on Delivery (COD) for eligible pin codes."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "What is your return and exchange policy?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Apna Mens Wear offers easy returns and exchanges within 7 days of delivery. Products must be unused, unwashed and in original packaging with tags intact."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Do you have a physical store in Indore?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Yes, Apna Mens Wear has a physical store in Indore, Madhya Pradesh. You can visit us to try on and purchase the latest men's fashion collection."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "How can I contact Apna Mens Wear?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "You can contact Apna Mens Wear by calling +91-9630105490 or by emailing apnamenswear@gmail.com. You can also reach us via Instagram and Facebook."
+                }
+              }
+            ]
+          }
+        ]
+      }
+    </script>
   </head>
 
   <body>
-
-    <!-- React Application -->
-    <div id="root"></div>
-
-    <!-- =========================
-         NOSCRIPT
-    ========================== -->
-
+    <!-- ============================================
+         NOSCRIPT FALLBACK
+    ============================================ -->
     <noscript>
       <div>
-        <h1>Apna Mens Wear</h1>
+        <h1>Apna Mens Wear — Men's Fashion & Clothing Store in Indore</h1>
 
         <p>
-          Apna Mens Wear is a men's fashion and clothing store in Indore.
-          Shop shirts, t-shirts, jeans, trousers, jackets and more.
+          Apna Mens Wear is a trusted men's fashion and clothing store in
+          Indore, Madhya Pradesh. Shop premium shirts, t-shirts, jeans,
+          trousers, jackets, suits and ethnic wear at affordable prices.
         </p>
 
         <p>
-          Please enable JavaScript to use the complete Apna Mens Wear
-          online shopping experience.
+          We deliver across India with easy returns and fast shipping. Contact
+          us at +91-9630105490 or email apnamenswear@gmail.com.
+        </p>
+
+        <p>
+          Please enable JavaScript to use the complete Apna Mens Wear online
+          shopping experience.
         </p>
       </div>
     </noscript>
 
-    <!-- =========================
+    <!-- ============================================
+         REACT APPLICATION ROOT
+    ============================================ -->
+    <div id="root"></div>
+
+    <!-- ============================================
          VITE / REACT ENTRY
-    ========================== -->
-
-    <script
-      type="module"
-      src="/src/main.jsx"
-    ></script>
-
+    ============================================ -->
+    <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
